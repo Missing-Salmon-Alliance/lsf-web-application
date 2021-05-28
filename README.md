@@ -5,4 +5,4 @@ Likely Suspects Framework Data Mobilisation Solution - Web Application to provid
 Development Branch Active - Code being imported from LSF_LPG_GUI_Prototyping repository which has now reached a point where our prototyping needs to move to a development version
 
 ## Coming Soon
-Production Branch - We'll move to a proper repo with Production and Development branches, maybe even a Staging branch like proper developers ;)
+Production Branch - We'll move to a repo with Production and Development branches, maybe even a Staging branch like proper developers ;)
