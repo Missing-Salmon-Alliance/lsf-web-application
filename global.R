@@ -1,0 +1,205 @@
+### Global Section
+
+require(shiny)
+require(shinydashboard) # css styles
+require(shinydashboardPlus) # advanced features
+#require(neo4r)# interact with neo4j graph db
+#require(visNetwork)# view and manipulate networks
+#require(shinyWidgets)# create different input styles
+#require(dplyr)
+#require(DT)
+#require(readr)
+#require(RPostgres)
+#require(DBI)#interact with database
+#require(leaflet)# create maps
+#require(rgdal)# map calcs
+#require(sf)
+#require(dataone)# interact with knb/dataone datasets
+#require(stringr)# used to interact with dataone/knb API
+require(shinyBS)# create modals
+#require(aws.s3)# s3 storage R api
+#require(uuid)
+#require(crosstalk)
+#require(shinyjs)
+require(tidyverse)
+#require(plotly)
+#require(xml2)
+#require(shinybusy)
+#require(data.table)
+#require(leaflet.extras)
+
+source("./src/secrets.R",local = TRUE)
+
+# DataONE settings
+# SET ENVIRONMENT
+# Production
+cn <- dataone::CNode("PROD")
+mn <- dataone::getMNode(cn, "urn:node:KNB")
+d1c <- dataone::D1Client(cn, mn)
+# Staging
+# cn <- CNode("STAGING2")
+# mn <- getMNode(cn, "urn:node:mnTestKNB") # note command 'unlist(lapply(listNodes(cn), function(x) x@subject))' from dataone-federation vignette
+# d1c <- D1Client(cn, mn)
+am <- dataone::AuthenticationManager()
+
+# Custom functions
+source("./src/gisOperations.R",local = TRUE)
+
+
+## Create NEO4J Connection object
+
+neo_con <- neo4r::neo4j_api$new(url = paste("http://",NEO4J_HOST,":",NEO4J_PORT,sep = ""),
+                         user = NEO4J_USER,
+                         password = NEO4J_PASSWD)  
+
+###################################################
+# Pull information from graph
+# TODO: This process adds a few seconds to the initial load time of the application. If the graph queries can be integrated in to the
+# filters rather than using an R tibble object this would slow the filters down a tiny bit but speed up the application as a whole
+
+metadataESV <- neo4r::call_neo4j("MATCH (:Metadata)-[r:HAS_ESV]->(:EssentialSalmonVariable) RETURN r;",neo_con,type='graph')
+esvDomain <- neo4r::call_neo4j("MATCH (:EssentialSalmonVariable)-[r:HAS_DOMAIN]->(:Domain) RETURN r;",neo_con,type='graph')
+hypothesisSubhypothesis <- neo4r::call_neo4j("MATCH (:Hypothesis)-[r:HAS_SUBHYPOTHESIS]->(:SubHypothesis) RETURN r;",neo_con,type='graph')
+subhypothesisESV <- neo4r::call_neo4j("MATCH (:SubHypothesis)-[r:REQUIRES_ESV]->(:EssentialSalmonVariable) RETURN r;",neo_con,type='graph')
+
+metadataESV$nodes <- metadataESV$nodes %>% neo4r::unnest_nodes('all')
+metadataESV$relationships <- metadataESV$relationships %>% neo4r::unnest_relationships()
+esvDomain$nodes <- esvDomain$nodes %>% neo4r::unnest_nodes('all')
+esvDomain$relationships <- esvDomain$relationships %>% neo4r::unnest_relationships()
+hypothesisSubhypothesis$nodes <- hypothesisSubhypothesis$nodes %>% neo4r::unnest_nodes('all')
+hypothesisSubhypothesis$relationships <- hypothesisSubhypothesis$relationships %>% neo4r::unnest_relationships()
+subhypothesisESV$nodes <- subhypothesisESV$nodes %>% neo4r::unnest_nodes('all')
+subhypothesisESV$relationships <- subhypothesisESV$relationships %>% neo4r::unnest_relationships()
+
+LSFDomainTibble <- esvDomain$nodes[esvDomain$nodes$value == "Domain",] %>% dplyr::select(matches("^(id|domain*)"))
+LSFEssentialSalmonVariableTibble <- esvDomain$nodes[esvDomain$nodes$value == "EssentialSalmonVariable",] %>% dplyr::select(matches("^(id|esv*)"))
+LSFMetadataTibble <- metadataESV$nodes[metadataESV$nodes$value == "Metadata",] %>% dplyr::select(matches("^(id|metadata*)"))
+LSFHypothesisTibble <- hypothesisSubhypothesis$nodes[hypothesisSubhypothesis$nodes$value == "Hypothesis",] %>% dplyr::select(matches("^(id|hypothesis*)"))
+LSFSubHypothesisTibble <- hypothesisSubhypothesis$nodes[hypothesisSubhypothesis$nodes$value == "SubHypothesis",] %>% dplyr::select(matches("^(id|subHypothesis*)"))
+
+
+metadataESVDomainRelationships <- dplyr::bind_rows(metadataESV$relationships,esvDomain$relationships)
+hypothesisSubHypothesisESVRelationships <- dplyr::bind_rows(hypothesisSubhypothesis$relationships,subhypothesisESV$relationships)
+#tidyup
+rm(metadataESV,esvDomain,hypothesisSubhypothesis,subhypothesisESV)
+
+# Convert some columns to numeric
+# TODO: These could be natively numeric in the graph rather than converting them here
+LSFMetadataTibble$metadataCoverageStartYear <- as.numeric(LSFMetadataTibble$metadataCoverageStartYear)
+LSFMetadataTibble$metadataCoverageEndYear <- as.numeric(LSFMetadataTibble$metadataCoverageEndYear)
+LSFMetadataTibble$metadataCoverageWest <- as.numeric(LSFMetadataTibble$metadataCoverageWest)
+LSFMetadataTibble$metadataCoverageNorth <- as.numeric(LSFMetadataTibble$metadataCoverageNorth)
+LSFMetadataTibble$metadataCoverageEast <- as.numeric(LSFMetadataTibble$metadataCoverageEast)
+LSFMetadataTibble$metadataCoverageSouth <- as.numeric(LSFMetadataTibble$metadataCoverageSouth)
+
+# Conversion to GIS enabled dataframe using pre-calculated centroids (see nightly intersection routine)
+LSFMetadataTibble <- sf::st_as_sf(LSFMetadataTibble, wkt = "metadataCoverageCentroid", crs = 4326, na.fail = FALSE)
+
+# Grabbing some counts for reporting purposes
+uniqueNAFODivisions <- unique(str_split(paste0(LSFMetadataTibble$metadataCoverageIntersectNAFODivision[LSFMetadataTibble$metadataCoverageIntersectNAFODivision != ""],collapse = ','),pattern = ",")[[1]])
+uniqueICESEcoRegions <- unique(str_split(paste0(LSFMetadataTibble$metadataCoverageIntersectICESEcoRegion[LSFMetadataTibble$metadataCoverageIntersectICESEcoRegion != ""],collapse = ','),pattern = ",")[[1]])
+uniqueMigrationRoutes <- unique(str_split(paste0(LSFMetadataTibble$metadataCoverageIntersectMigrationRoutes[LSFMetadataTibble$metadataCoverageIntersectMigrationRoutes != ""],collapse = ','),pattern = ",")[[1]])
+uniqueMonths <- unique(str_split(paste0(LSFMetadataTibble$metadataCoverageMonthsOfYear[LSFMetadataTibble$metadataCoverageMonthsOfYear != ""], collapse = ','),pattern = ",")[[1]])
+
+
+rivers <- read_csv("./src/Index_Rivers_DB.csv")
+rivers <- sf::st_as_sf(rivers, coords = c("Longitude_Decimal","Latitude_Decimal"), crs = 4326)
+riversSF <- rivers
+
+###############################################
+
+# Create standard map marker popup information
+# NOTE, CHANGES TO THE POPUP HERE SHOULD ALSO BE MADE TO THE INITIAL leaflet() CALL IN SEARCH TAB
+redrawFilteredMarkers <- function(filteredTibble,session){
+  leaflet::leafletProxy("map", session) %>%
+    leaflet::addMarkers(data = filteredTibble,
+               #label = ~metadataTitle,
+               layerId = ~id,
+               group = 'metadataMarkers',
+               popup = ~paste("<h3>More Information</h3>",
+                             "<b>Title:</b>",metadataTitle,"<br>","<br>",
+                             "<b>Abstract:</b>",metadataAbstract,"<br>","<br>",
+                             #"<b>Creator:</b>",metadataCreator,"<br>","<br>",
+                             "<b>Organisation:</b>", metadataOrganisation,"<br>","<br>",
+                             #"<b>Creator Email:</b>",metadataCreatorEmail,"<br>","<br>",
+                             "&nbsp;",actionButton("showmodal", "View more...", onclick = 'Shiny.onInputChange(\"button_click\",  Math.random())'),
+                             sep =" "),
+               # enable clustering for spiderfy, set freezeAtZoom so that actual clustering does not occur
+               clusterOptions = leaflet::markerClusterOptions(
+                 showCoverageOnHover = FALSE,
+                 zoomToBoundsOnClick = FALSE,
+                 spiderfyOnMaxZoom = TRUE,
+                 removeOutsideVisibleBounds = TRUE,
+                 spiderLegPolylineOptions = list(weight = 1.5, color = "#222", opacity = 0.5),
+                 freezeAtZoom = 10))
+}
+
+
+###########################
+# Misc functions
+# function used to create a csv formatted string from shiny multi-select inputs (converts R vector to single csv string)
+formatCheckboxGroupCategories <- function(categories){
+  x <- paste("'",paste(categories,collapse = "', '"),"'",sep = '')
+  return(x)
+}
+
+formatNumericList <- function(categories){
+  x <- paste(categories,collapse = ",")
+  return(x)
+}
+
+# Check box group button icon options
+checkboxGroupButtonsIcons <- list(yes = icon("ok",lib = "glyphicon"),no = icon("remove",lib = "glyphicon"))
+# Alternative design - Keep for an example
+#checkboxGroupButtonsIcons <- list(yes = tags$i(class = "fa fa-check-square",style = "color: steelblue"),no = tags$i(class = "fa fa-square-o",style = "color: steelblue"))
+
+
+##########################
+# COPY Section
+# Some text is duplicated across different parts of the application
+# This can be a central location for them so edits can be made in one place
+searchIntroCopyPara1 <- "This interface allows exploration through the various data we have collected and collated. Our system 
+categorises data regarding both its temporal and spatial extents but also how it may be applicable to Atlantic salmon. The 
+variable classes that we used for this are a range of biological, physical and salmon specific categories. By labelling our collected 
+data with these classes, we hope to improve your ability to efficiently find relevant data regarding various ecological factors 
+across a range of specific dates and geographical locations."
+
+searchIntroCopyPara2 <- "The interface contains a range of tools to help focus your data search on several levels. Filtering the 
+data will return descriptions of data (metadata) relevant to your search terms. This metadata will help you to discover relevant 
+knowledge sources and allow you to gain access via either primary sources or from within the Likely Suspects Framework data management 
+system."
+
+submitIntroCopyPara1 <- "This interface allows you to submit data along with a thorough description (metadata) into the Likely 
+Suspects Framework. This data will be used to provision both managers and researchers in their fight to reduce declining salmon 
+abundance. Our interface will also allow you to categorise your data into salmon domains and variable classes. The variable classes 
+are a range of biological, physical and salmon-specific categories. By labelling your data with these classes, we hope to improve the 
+ability for people to efficiently find relevant data regarding various ecological factors across a range of specific dates and 
+geographical locations. The domains refer to labelling your data regarding a specific habitat the salmon experience during their 
+lifecycle e.g. river or ocean."
+
+submitIntroCopyPara2 <- "This interface ensures the data submitted into the Likely Suspects Framework database is labelled to both 
+spatial and temporal extents and linked to how it may be applicable to Atlantic salmon. If the data is already within the KNB database 
+(The Knowledge Network for Biocomplexity) then you may load the meta information via the URN or DOI always tagged to KNB 
+metadata. This will automatically fill the fields of this page as long as the equivalent field is present on KNB."
+
+domainsDescriptionCopy <- "Domains refer to the various environments
+Atlantic salmon move through dependent on their
+life-cycle. These domains represent the transitional
+habitats such as rivers, estuaries, coasts and
+oceans where the salmon experience different
+environmental pressures at different stages in their
+lifecycle. The domains are further split to represent
+the life stages of the salmon."
+
+esvDescriptionCopy <- "The variable classes we use
+are a list of general categorical
+variables which salmon-related knowledge
+can be grouped by. These classes are grouped
+into three major categories including physical,
+biological and salmon-trait (specific to salmon)
+knowledge. Knowledge resources may originate from empirical (direct 
+measurement), derived (simulated outputs) or expert 
+(opinion) sources."
+
+
+### Global Section End

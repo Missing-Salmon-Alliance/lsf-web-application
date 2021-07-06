@@ -1,0 +1,51 @@
+---
+title: |
+  <center>\n![](../www/msa-logo.png){width=4in}  
+  <p>&nbsp;</p> 
+  Data Sharing Group Memorandum of Agreement  
+  <p>&nbsp;</p>  
+  </center>  
+output:
+  html_document: default
+---
+
+### Data Sharing Group 
+
+The Missing Salmon Alliance is developing its’ Likely Suspects Framework programme to coordinate efforts to collate and mobilise relevant datasets from around the North Atlantic to facilitate testing hypotheses relating to drivers of salmon mortality. We are building a unique data resource utilizing variable categories and search tools to help researchers explore and utilize data from a wide range of sources.  
+
+Parties can join the **Likely Suspect Framework’s Data Sharing Group** (hereafter the Data Sharing Group), in which there is a mutualistic relationship of data being shared and used. This document sets out the guiding principles as a memorandum of our agreement among all parties joining the Data Sharing Group.  
+
+### Data submission 
+Submission of knowledge is an expectation of membership of the Data Sharing Group. Descriptions of the data source (metadata) with information regarding its **spatial and temporal extents, and data owner contact information** are the minimum requirement to submit data/metadata. Primary data does not have to be submitted but is **recommended**. If metadata only is to be submitted, it is expected that the primary data is already freely available online or should be made available upon request from the database manager. If the data are subject to an embargo this can be indicated in the metadata along with an end date.
+
+Submissions will undergo a quality control process that ensures the metadata is consistent, however it is still the user’s responsibility to ensure that the data is fit for the intended use. The metadata should contain all the necessary information to make this judgement, clarification from the database manager should be sought if this is not the case.  
+
+### Using data resources
+Access to data resources will be via an online request form where the requester will supply information such as expected usage, expected duration of use and details of who will have access to the data. The request will be made in the name of the logged in person and access to the data resource will be granted to that same person. **The use of data resources for commercial purposes is not permitted.**  
+
+### Data Access Audit
+Access history and actions (e.g., submit resource, request resource) will be audited per user within the framework to keep a record of usage statistics and also assist users to keep track of historical activity.  
+
+### Secure Data
+Despite our goal to ensure the cohesion and mobilisation of salmon-specific data and information to those driving salmon conservation, it is both ours and your responsibility to ensure the security of the data. Data and metadata within our database are a mix of both public and private sourced information. Knowledge resources will be highlighted as ‘Members Only’ if they are not already available for public download via an existing online portal, and these should be treated as confidential data. Despite your access to use the data we provide **you cannot share these restricted data with third parties without permission from the database manager who will seek consent from the primary contact for that data.**  
+
+For our part, we will host the metadata and the associated data files themselves securely on Amazon Web Services platform. The tools we create to submit, view and access the data will be behind a secure login accessible only to those in the Data Sharing Group.  
+
+### Acknowledgment of Usage
+Parties joining the Data Sharing Group are expected to abide by academic norms for citation. Further information on Data Citation conventions can be found at https://www.force11.org/datacitationprinciples. Acknowledgment of the Likely Suspects Framework’s Database as a resource for data discovery (whether restricted or public), as well as the primary authors of the data resource themselves should be made in the form of a formal citation. Any novel outputs generated (e.g. scientific papers, reports, presentations) from data extracted from the database must also acknowledge this source, and also cite the relevant primary data source.  
+
+### Digital Object Identifier for Data
+Submitted data are assigned unique identifiers. These can be used to facilitate attribution when a Data Source is used in research material. Our framework also makes use of specifications that give us access to online repositories such as https://knb.ecoinformatics.org/ where we can leverage globally unique identifiers, generally referred to as Digital Object Identifiers (DOIs).
+
+
+### Rights over your Data and Information
+You may choose for **any data and personal information** you have provided to be removed from our database according to your right to be forgotten/erasure rights.
+
+### Agreement
+*By registering as a member of the Data Sharing Group:*
+
+*1.	You agree to keep data secure and not to share any data with third parties without permission from the database manager.*
+
+*2.	You agree that you will only provide data that you have authorisation over.*
+
+*3.	You agree that any novel outputs generated using data from the LSF database will be fully acknowledged in consultation with the database manager.*

@@ -1,0 +1,677 @@
+# NEW VERSION THAT LOADS KNB DATA VIA EML QUERY
+
+############################
+# submitDataSource_server.R START
+############################
+
+############
+# SIDEBAR Conditional UI
+output$uploadDataFileUI <- renderUI({
+  fileInput(
+    'uploadDataFile',
+    'File Drop',
+    multiple = FALSE,
+    accept = NULL,
+    width = NULL,
+    buttonLabel = "Browse...",
+    placeholder = "No file selected"
+  )
+})
+
+output$clearSubmitFormUI <- renderUI({
+  actionButton(inputId = 'clearSubmitForm',label = "Clear Form")
+})
+
+output$submitNewDataSourceUI <- renderUI({
+  actionButton(inputId = 'submitNewDataSource',label = "Submit New Data Source")
+})
+
+# KNB User Interface Inputs
+output$sourceKNBURIUI <- renderUI({
+  textInput(inputId = 'sourceKNBURI', label = "",placeholder = "Enter a KNB URN or DOI")
+})
+output$loadKNBUI <- renderUI({
+  actionButton(inputId = 'loadKNB',label = "Load...")
+})
+output$refreshKNBTokenUI <- renderUI({
+  actionButton('refreshKNBToken', "Enter a KNB Access Token")
+})
+output$expiryDatetimeKNBTokenUI <- renderUI({
+  textOutput('expiryDatetimeKNBToken')
+})
+############
+
+# function to reset all submit form fields
+# TODO: REMEMBER TO ADD ANY NEW INPUTS HERE!
+resetAll <- function(){
+  #sidebar
+  shinyjs::reset('uploadDataFile')
+  updateTextInput(session, inputId = 'sourceKNBURI',value = "")
+  
+  #reset Source Details Section
+  updateTextAreaInput(session,inputId = 'sourceTitle',value = "")
+  updateTextInput(session,inputId = 'sourceCreator',value = user_info()$user_info$fullname)
+  updateTextInput(session,inputId = 'sourceOrganisation',value = user_info()$user_info$affiliation)
+  
+  updateTextAreaInput(session,inputId = 'sourceAbstract',value = "")
+  updateTextInput(session,inputId = 'sourceCreatorEmail',value = user_info()$user_info$email)
+  updateTextInput(session,inputId = 'sourceURI',value = "") # KNB URL
+  updateTextInput(session, inputId = 'sourceALTURI', value = "")
+  
+  updateTextInput(session,inputId = 'sourceCreatorORCID',value = "")
+  updateSelectInput(session, inputId = 'sourceMaintenance', selected = "notPlanned")
+  updateCheckboxInput(session, inputId = 'sourceAvailableOnline', value = FALSE)
+  updateCheckboxInput(session, inputId = 'sourceMaintenanceToggle', value = FALSE)
+  updateCheckboxInput(session,inputId = 'embargoEndToggle',value = FALSE)
+  updateDateInput(session,inputId = 'embargoEnd',value = Sys.Date())
+  #reset Source Domain/ESV Section
+  shinyWidgets::updateCheckboxGroupButtons(session, inputId = 'domainNodeList',selected = character(0))
+  shinyWidgets::updateCheckboxGroupButtons(session, inputId = 'esvCategory',selected = character(0))
+  
+  #reset Source Temporal Section
+  updateSliderInput(session,inputId = 'sourceStartEndYear',value = c(2000,2020))
+  shinyWidgets::updateCheckboxGroupButtons(session, inputId = 'monthsOfYear',selected = character(0))
+  updateActionButton(session, 'monthsOfYearToggleAll', label = "Select All")
+  
+  #reset Source Geography Section
+  updateTextAreaInput(session, inputId = 'sourceGeographicDescription',value = "")
+  updateNumericInput(session, inputId = 'submitNorth', value = 61)
+  updateNumericInput(session, inputId = 'submitEast', value = -14)
+  updateNumericInput(session, inputId = 'submitSouth', value = 60)
+  updateNumericInput(session, inputId = 'submitWest', value = -15)
+  
+
+  # clear session UUID to avoid potential reuse (shouldn't be possible but just in case)
+  sessionUUID(NULL)
+  # clear session XML to avoid potential reuse (shouldn't be possible but just in case)
+  sessionXML(NULL)
+  # clear session FILE to avoid potential reuse (shouldn't be possible but just in case)
+  sessionFile(NULL)
+}
+
+# define all EML nodes relevant to our metadata
+emlNodes <- list(title = "/eml:eml/dataset/title",
+                 altURL = "/eml:eml/dataset/alternateIdentifier",
+                 abstract = "/eml:eml/dataset/abstract/para",
+                 pubDate = "/eml:eml/dataset/pubDate",
+                 rights = "/eml:eml/dataset/intellectualRights/para",
+                 metaProviderGivenName = "/eml:eml/dataset/metadataProvider/individualName/givenName",
+                 metaProviderSurName = "/eml:eml/dataset/metadataProvider/individualName/surName",
+                 metaProvidereMail = "/eml:eml/dataset/metadataProvider/electronicMailAddress",
+                 metaProviderUserID = "/eml:eml/dataset/metadataProvider/userId",
+                 metaProviderOrg = "/eml:eml/dataset/metadataProvider/organizationName",
+                 creatorGivenName = "/eml:eml/dataset/creator/individualName/givenName",
+                 creatorSurName = "/eml:eml/dataset/creator/individualName/surName",
+                 creatoreMail = "/eml:eml/dataset/creator/electronicMailAddress",
+                 creatorUserID = "/eml:eml/dataset/creator/userId",
+                 creatorOrg = "/eml:eml/dataset/creator/organizationName",
+                 geogDescription = "/eml:eml/dataset/coverage/geographicCoverage/geographicDescription",
+                 geogWest = "/eml:eml/dataset/coverage/geographicCoverage/boundingCoordinates/westBoundingCoordinate",
+                 geogEast = "/eml:eml/dataset/coverage/geographicCoverage/boundingCoordinates/eastBoundingCoordinate",
+                 geogNorth = "/eml:eml/dataset/coverage/geographicCoverage/boundingCoordinates/northBoundingCoordinate",
+                 geogSouth = "/eml:eml/dataset/coverage/geographicCoverage/boundingCoordinates/southBoundingCoordinate",
+                 dateStart = "/eml:eml/dataset/coverage/temporalCoverage/rangeOfDates/beginDate/calendarDate",
+                 dateEnd = "/eml:eml/dataset/coverage/temporalCoverage/rangeOfDates/endDate/calendarDate",
+                 taxonDescription = "/eml:eml/dataset/coverage/taxonomicCoverage/generalTaxonomicCoverage",
+                 taxonRankName = "/eml:eml/dataset/coverage/taxonomicCoverage/taxonomicClassification/taxonRankName",
+                 taxonRankValue = "/eml:eml/dataset/coverage/taxonomicCoverage/taxonomicClassification/taxonRankValue",
+                 maintDescription = "/eml:eml/dataset/maintenance/description",
+                 maintFrequency = "/eml:eml/dataset/maintenance/maintenanceUpdateFrequency",
+                 contactID = "/eml:eml/dataset/contact/references",
+                 keywordSet = "/eml:eml/dataset/keywordSet/keyword")
+##
+## Observe event refreshKNBToken actionButton
+## pop-up to capture user input new KNB token
+## updates token_info reactiveVal
+observeEvent(input$refreshKNBToken,
+             {
+               showModal(modalDialog(title = "Refresh KNB Token",
+                                     textInput('KNBTokenValue', "Token"),
+                                     easyClose = FALSE, footer = tagList(
+                                       modalButton("Cancel"),
+                                       actionButton('submitKNBToken', "Submit"))
+               ))
+               
+               
+             })
+
+observeEvent(input$submitKNBToken, {
+
+  options(dataone_token = input$KNBTokenValue)
+  # if no token available, create dummy info data.frame
+  tryCatch(token_info(dataone::getTokenInfo(am)),error = function(e){token_info(data.frame(expired=TRUE))})
+  removeModal()
+})
+##
+##
+
+# Display KNB Token
+output$expiryDatetimeKNBToken <- renderText({
+  req(token_info())
+  if(token_info()$expired){
+    infoOut <- 'Token Expired or Not Valid'
+    
+  }else{
+    infoOut <- 'Token Validated!'
+  }
+  infoOut
+})
+
+#output$expiryDatetimeKNBToken <- DT::renderDT(token_info())
+
+# Observer for actionButton Load From KNB
+observeEvent(input$loadKNB,{
+  
+  # Load information from KNB based on UUID
+  # Pull data via xml
+  # Check for: EMPTY STRING (bad) - ELSE modal invalid UUID
+  if(input$sourceKNBURI != ""){
+    # Check for: getObject error (bad) - Set sessionXML(NULL)
+    tryCatch(sessionXML(dataone::getObject(d1c@mn,input$sourceKNBURI)),error = function(e){sessionXML(NULL)})
+    # Check for: sessionXML(NULL) (bad) - ELSE modal invalid UUID OR invalid KNB Token
+    if(!is.null(sessionXML())){
+      xml_doc <- xml2::read_xml(sessionXML())
+      
+      # Update the text areas with results
+      updateTextAreaInput(session,inputId = 'sourceTitle',value = xml_text(xml2::xml_find_first(xml_doc, emlNodes$title)))
+      updateTextInput(session,inputId = 'sourceCreator',value = xml_text(xml2::xml_find_first(xml_doc, emlNodes$creatorSurName)))
+      updateTextInput(session,inputId = 'sourceOrganisation',value = xml_text(xml2::xml_find_first(xml_doc, emlNodes$creatorOrg)))
+      updateTextAreaInput(session,inputId = 'sourceAbstract',value = xml_text(xml2::xml_find_first(xml_doc, emlNodes$abstract)))
+      updateTextInput(session,inputId = 'sourceCreatorEmail',value = xml_text(xml2::xml_find_first(xml_doc, emlNodes$creatoreMail)))
+      updateTextInput(session,inputId = 'sourceURI',value = paste0("https://knb.ecoinformatics.org/view/",input$sourceKNBURI)) #TODO Improve this population
+      updateTextInput(session,inputId = 'sourceCreatorORCID',value = xml_text(xml2::xml_find_first(xml_doc, emlNodes$creatorUserID)))
+      updateTextInput(session,inputId = 'sourceALTURI',value = xml_text(xml2::xml_find_first(xml_doc, emlNodes$altURL)))
+      
+      
+      updateSliderInput(session,inputId = 'sourceStartEndYear',value = c(as.integer(format(xml_text(xml2::xml_find_first(xml_doc, emlNodes$dateStart)), format = "%Y")),
+                                                                         as.integer(format(xml_text(xml2::xml_find_first(xml_doc, emlNodes$dateEnd)), format = "%Y"))))
+      
+      updateTextAreaInput(session,inputId = 'sourceGeographicDescription',value = xml_text(xml2::xml_find_first(xml_doc, emlNodes$geogDescription)))
+      updateNumericInput(session,inputId = 'submitNorth',value = xml_text(xml2::xml_find_first(xml_doc, emlNodes$geogNorth)))
+      updateNumericInput(session,inputId = 'submitEast',value = xml_text(xml2::xml_find_first(xml_doc, emlNodes$geogEast)))
+      updateNumericInput(session,inputId = 'submitSouth',value = xml_text(xml2::xml_find_first(xml_doc, emlNodes$geogSouth)))
+      updateNumericInput(session,inputId = 'submitWest',value = xml_text(xml2::xml_find_first(xml_doc, emlNodes$geogWest)))
+      
+      
+      # set session UUID to match the KNB URI/DOI
+      # TODO: This will create a mismatch between non-KNB and KNB sourced metadata as the ID will start with DOI: or URN:UUID:
+      # TODO: How to stop this being overwritten at the start of the actionButton submitNewDataSource process
+      sessionUUID(input$sourceKNBURI)
+      # set sessionXML to NULL to avoid spill over to new load
+      sessionXML(NULL)
+    }else{
+      #TODO: regex to detect correct UUID or DOI
+      showModal(modalDialog(
+        title = "Please check KNB ID or KNB Token expiry, the supplied ID returned no KNB object.",
+        sessionUUID(),
+        easyClose = TRUE,
+        footer = NULL
+      ))
+    }
+  }else{
+    showModal(modalDialog(
+      title = "Invalid URI or Blank string",
+      easyClose = TRUE,
+      footer = NULL
+    ))
+  }
+
+})
+
+# Clear/reset form actionButton observer
+observeEvent(input$clearSubmitForm,{
+  resetAll() # reset all function
+})
+
+
+# User feedback - if no domain is selected
+output$domainSelectionCheck <- renderText('Please Select a Domain...')
+
+# User feedback - if no ESV Category is selected
+output$esvCategorySelectionCheck <- renderText('Please Select a Variable Category...')
+
+# ESV Check Boxes - Controlled by domainNodeList and esvCategory inputs
+output$esvPerDomain <- renderUI({
+  if(length(input$domainNodeList) == 0){
+    textOutput('domainSelectionCheck')
+  }else if(length(input$esvCategory) == 0){
+    textOutput('esvCategorySelectionCheck')
+  }else{
+    lapply(1:length(input$domainNodeList), function(i) {
+      domainName <- input$domainNodeList[i]
+      esvNodeListResult <- neo4r::call_neo4j(paste("MATCH (n:EssentialSalmonVariable)-[:HAS_DOMAIN]-(m:Domain{domainTitle:'",domainName,"'}) WHERE n.esvCategory IN [",formatCheckboxGroupCategories(input$esvCategory),"] RETURN n.esvTitle;",sep = ''),neo_con, type = 'row')
+      shinyWidgets::checkboxGroupButtons(domainName,domainName,choices = sort(esvNodeListResult$n.esvTitle$value),
+                           justified = F,
+                           individual = T,
+                           status = "default",
+                           checkIcon = checkboxGroupButtonsIcons)
+    })}
+})
+
+# observers for checkbox enable/disable inputs
+observeEvent(input$embargoEndToggle,{
+  if(input$embargoEndToggle){
+    updateDateInput(session, 'embargoEnd', value = Sys.Date())
+    shinyjs::enable('embargoEnd')
+  }else{
+    updateDateInput(session, 'embargoEnd', value = Sys.Date())
+    shinyjs::disable('embargoEnd')
+  }
+})
+observeEvent(input$sourceAvailableOnline,{
+  if(input$sourceAvailableOnline){
+    shinyjs::enable('sourceALTURI')
+  }else{
+    updateTextInput(session, 'sourceALTURI', value = "")
+    shinyjs::disable('sourceALTURI')
+  }
+})
+observeEvent(input$sourceMaintenanceToggle,{
+  if(input$sourceMaintenanceToggle){
+    shinyjs::enable('sourceMaintenance')
+  }else{
+    updateSelectInput(session, inputId = 'sourceMaintenance', selected = "notPlanned")
+    shinyjs::disable('sourceMaintenance')
+  }
+})
+
+# Temporal Detail Server
+observeEvent(input$monthsOfYearToggleAll,{
+  if(input$monthsOfYearToggleAll %% 2 == 0){
+    shinyWidgets::updateCheckboxGroupButtons(session, 'monthsOfYear', selected = character(0))
+    updateActionButton(session, 'monthsOfYearToggleAll', label = "Select All")
+  }else{
+    shinyWidgets::updateCheckboxGroupButtons(session, 'monthsOfYear', selected = month.abb)
+    updateActionButton(session, 'monthsOfYearToggleAll', label = "Deselect All")
+  }
+})
+
+
+# Geographic Detail Server
+# TODO: Convert all this to use a single reactiveValues, might reduce the line count significantly
+output$submitMap <- leaflet::renderLeaflet({
+  leaflet::leaflet(options = leaflet::leafletOptions(maxZoom = 5)) %>% # maxZoom set so that user can always see their rectangle in context of a coastline
+    #addPolygons(data = neContinentsSF, stroke = FALSE) %>%
+    #addProviderTiles("Stamen.TerrainBackground") %>%
+    leaflet::addProviderTiles(leaflet::providers$Esri.OceanBasemap) %>%
+    leaflet::addRectangles(-15,61,-14,60,group = 'userRectangle') %>% 
+    leaflet::fitBounds(-15,61,-14,60)
+})
+
+observeEvent(input$submitEast,{
+  req(input$submitEast && input$submitWest && input$submitNorth && input$submitSouth) # catch empty value, prevent crash?
+  leaflet::leafletProxy('submitMap') %>%
+    leaflet::clearGroup(group = 'userRectangle') %>%
+    leaflet::addRectangles(input$submitWest,input$submitNorth,input$submitEast,input$submitSouth,group = 'userRectangle') %>%
+    leaflet::fitBounds(input$submitWest,input$submitNorth,input$submitEast,input$submitSouth)
+})
+
+observeEvent(input$submitWest,{
+  req(input$submitEast && input$submitWest && input$submitNorth && input$submitSouth)
+  leaflet::leafletProxy('submitMap') %>%
+    leaflet::clearGroup(group = 'userRectangle') %>%
+    leaflet::addRectangles(input$submitWest,input$submitNorth,input$submitEast,input$submitSouth,group = 'userRectangle') %>%
+    leaflet::fitBounds(input$submitWest,input$submitNorth,input$submitEast,input$submitSouth)
+})
+
+observeEvent(input$submitNorth,{
+  req(input$submitEast && input$submitWest && input$submitNorth && input$submitSouth)
+  leaflet::leafletProxy('submitMap') %>%
+    leaflet::clearGroup(group = 'userRectangle') %>%
+    leaflet::addRectangles(input$submitWest,input$submitNorth,input$submitEast,input$submitSouth,group = 'userRectangle') %>%
+    leaflet::fitBounds(input$submitWest,input$submitNorth,input$submitEast,input$submitSouth)
+})
+
+observeEvent(input$submitSouth,{
+  req(input$submitEast && input$submitWest && input$submitNorth && input$submitSouth)
+  leaflet::leafletProxy('submitMap') %>%
+    leaflet::clearGroup(group = 'userRectangle') %>%
+    leaflet::addRectangles(input$submitWest,input$submitNorth,input$submitEast,input$submitSouth,group = 'userRectangle') %>%
+    leaflet::fitBounds(input$submitWest,input$submitNorth,input$submitEast,input$submitSouth)
+})
+
+
+# Observer to pass file upload details to sessionFile reactive value
+# This is passed to a reactiveVal so that it can be cleared out once user has submitted the form.
+observeEvent(input$uploadDataFile,{
+  sessionFile(input$uploadDataFile)
+})
+
+# Reactive process to tell shiny what to do with the users file. Activated by submitNewDataSource
+# uses UUID generated during actionButton click to submit datasource
+# if no file has been uploaded sessionFile reactiveVal will be NULL and so no upload is triggered
+uploadReactive <- reactive({
+  if(!is.null(sessionFile())){
+    fileName <- paste0(sessionUUID(),"_",sessionFile()$name)
+    aws.s3::put_object(file = sessionFile()$datapath,object = fileName,bucket = "likelysuspects-datastore/data")
+  }
+  
+})
+
+# Source Submit Button Actions
+# TODO: Build a confirmation modal window - In progress
+# TODO: Build a Submission Result modal window - In progress
+
+# Create feedback information table - IN DEVELOPMENT
+# reactive table creation Works but fails when all the below information is included
+submitSourceConfirmDataTable <- reactive({
+  data.frame(Title=input$sourceTitle,
+             Creator=input$sourceCreator,
+             Organisation=input$sourceOrganisation,
+             Abstract=input$sourceAbstract,
+             GeographicDescription=input$sourceGeographicDescription,
+             # KNBURI=input$sourceURI,
+             # metadataAlternateURI=input$sourceALTURI,
+             # metadataCreatorEmail=input$sourceCreatorEmail,
+             # metadataCreatorORCID=input$sourceCreatorORCID,
+             # metadataCoverageStartYear=input$sourceStartEndYear[1],
+             # metadataCoverageEndYear=input$sourceStartEndYear[2],
+             # metadataCoverageMonthsOfYear=paste(input$monthsOfYear,collapse = ","),#collapse months of year into csv string
+             # metadataCoverageNorth=input$submitNorth,
+             # metadataCoverageSouth=input$submitSouth,
+             # metadataCoverageEast=input$submitEast,
+             # metadataCoverageWest=input$submitWest,
+             # metadataMaintenance=input$sourceMaintenance,
+             # metadataQCCheck="FALSE",
+             # metadataUUID=sessionUUID(),
+             stringsAsFactors = FALSE)
+})
+
+submitSourceConfirmESVDomains <- reactive({
+  # DEVELOPMENT - Build a table of Domains and Variable Classes chosen by user
+  tibble(Domains = c(
+      "River Rearing",
+      "River Migration Smolt",
+      "River Migration Adult",
+      "Estuary Migration Post-Smolt",
+      "Coastal Migration Post-Smolt",
+      "Ocean Migration",
+      "Coastal Migration Adult",
+      "Estuary Migration Adult"),
+      `Selected Variable Classes` = c(
+        formatCheckboxGroupCategories(input$`River Rearing`),
+        formatCheckboxGroupCategories(input$`River Migration Smolt`),
+        formatCheckboxGroupCategories(input$`River Migration Adult`),
+        formatCheckboxGroupCategories(input$`Estuary Migration Post-Smolt`),
+        formatCheckboxGroupCategories(input$`Coastal Migration Post-Smolt`),
+        formatCheckboxGroupCategories(input$`Ocean Migration`),
+        formatCheckboxGroupCategories(input$`Coastal Migration Adult`),
+        formatCheckboxGroupCategories(input$`Estuary Migration Adult`))
+      )
+})
+
+# render confirmation table as Table
+output$submitSourceConfirmModalDataFrame <- shiny::renderTable({t(submitSourceConfirmDataTable())}, rownames = TRUE, colnames = FALSE)
+output$submitSourceConfirmESVDomainsDataframe <- shiny::renderTable(submitSourceConfirmESVDomains()[submitSourceConfirmESVDomains()$Domains %in% input$domainNodeList,])
+#output$submitSourceConfirmESVDomainsDataframe <- shiny::renderText(submitSourceConfirmESVDomains())
+# Map to be rendered within confirmation modal
+output$submitSourceConfirmMap <- leaflet::renderLeaflet({
+  leaflet::leaflet(options = leaflet::leafletOptions(maxZoom = 5)) %>% # maxZoom set so that user can always see their rectangle in context of a coastline
+    #leaflet::addPolygons(data = neContinentsSF, stroke = FALSE) %>%
+    #leaflet::addProviderTiles("Stamen.TerrainBackground") %>%
+    leaflet::addProviderTiles(leaflet::providers$Esri.OceanBasemap) %>%
+    leaflet::addRectangles(input$submitWest,input$submitNorth,input$submitEast,input$submitSouth) %>%
+    leaflet::fitBounds(input$submitWest,input$submitNorth,input$submitEast,input$submitSouth)
+  })
+
+# create confirm modal as function to be called during submit button push event
+submitSourceConfirmModal <- function() {
+  modalDialog(size = "l",title = "Please review the details and confirm to save, or cancel to go back and edit.",
+              fluidRow(
+                column(
+                  width = 6,
+                  shiny::tableOutput('submitSourceConfirmModalDataFrame'),
+                  shiny::tableOutput('submitSourceConfirmESVDomainsDataframe')
+                ),
+                column(
+                  width = 6,
+                  leaflet::leafletOutput('submitSourceConfirmMap')
+                )
+              ),
+              
+              footer = tagList(
+                modalButton("Cancel"),
+                actionButton("confirmSubmitNewDataSource", "Confirm", class = "btn-success")
+              )
+  )
+}
+
+######################
+# create results modal as function to be called at the end of submit button push event
+# Graph Submission Results following confirmation
+createNewSourceResult <- reactiveVal(NULL)
+#
+output$createNewSourceResultTable <- DT::renderDT(createNewSourceResult())
+
+submitSourceResultModal <- function() {
+  modalDialog(size = "l",title = "Thank you for your submission!",
+              h4("The table below shows updates to the graph database"),
+              #createNewSourceResult(),
+              DT::DTOutput('createNewSourceResultTable'),
+              footer = tagList(
+                modalButton("OK")
+              )
+  )
+}
+######################
+
+
+observeEvent(input$submitNewDataSource, {
+  if(is.null(sessionUUID())){
+    sessionUUID(uuid::UUIDgenerate())
+  }
+  results <- neo4r::call_neo4j(paste("MATCH (n:Metadata{metadataUUID:'",sessionUUID(),"'}) RETURN n;",sep = ""),neo_con,type = 'row',include_stats = T,include_meta = T)
+  if(is.null(results$stats)){
+    # If the DOI/URN entered does not exist in the framework already, show confirmation modal
+    showModal(submitSourceConfirmModal())
+  }else{ # otherwise show some detail for the user
+    showModal(modalDialog(
+      title = "This DOI/URN Already Exists",
+      sessionUUID(),
+      p("This DOI/URN matches an object that already exists in the framework database."),
+      p("Data returned from LSF:"),
+      results$n$metadataTitle,
+      results$n$metadataAbstract,
+      easyClose = TRUE,
+      footer = NULL
+    ))
+  }
+
+})
+
+# TODO Some duplication occurs between these two (above and below) observeEvents that could be trimmed down
+observeEvent(input$confirmSubmitNewDataSource, {
+  # Generate a unique Identifier for this data source UNLESS it already exists (expected condition if user has loaded KNB metadata)
+  # TODO: Confirm that this logic works, is there a condition where sessionUUID is not NULL but also not loaded from KNB?
+  if(is.null(sessionUUID())){
+    sessionUUID(uuid::UUIDgenerate())
+  }
+  
+  #Create template results tibble for reporting (creates a standard results tibble with 0 values)
+  # also doubles as test for existing metadata with same UUID
+  #TODO: this is duplicate of test above.. just sayin'
+  #TODO: this is too simple a test meaning that duplicates are quite likely to occur
+  results <- neo4r::call_neo4j(paste("MATCH (n:Metadata{metadataUUID:'",sessionUUID(),"'}) RETURN n;",sep = ""),neo_con,type = 'row',include_stats = T,include_meta = T)
+  if(is.null(results$stats)){
+    # Create metadata node based on user input
+    # Quick center point calcs
+    lngCenter <- (input$submitWest+input$submitEast)/2
+    latCenter <- (input$submitSouth+input$submitNorth)/2
+
+    # Create query that creates a metadata node with all the properties supplied in the form
+    # Also creates a relationship to the logged on user
+    metadataNodeCreateQuery <- paste("MATCH (p:Person{personEmail:'",user_info()$user_info$email,
+                                     "'}) CREATE (p)-[:HAS_SUBMITTED{created:'",Sys.time(),
+                                     "',lastModified:'",Sys.time(),
+                                     "',status:'pendingQC'}]->(:Metadata{metadataTitle:'",input$sourceTitle,
+                                     "',metadataCreator:'",input$sourceCreator,
+                                     "',metadataKNBURI:'",input$sourceURI,
+                                     "',metadataAlternateURI:'",input$sourceALTURI,
+                                     "',metadataOrganisation:'",input$sourceOrganisation,
+                                     "',metadataAbstract:'",input$sourceAbstract,
+                                     "',metadataAvailableOnline:",input$sourceAvailableOnline,
+                                     ",metadataEmbargoed:",input$embargoEndToggle,
+                                     ",metadataEmbargoEnd:'",input$embargoEnd,
+                                     "',metadataGeographicDescription:'",input$sourceGeographicDescription,
+                                     "',metadataCreatorEmail:'",input$sourceCreatorEmail,
+                                     "',metadataCreatorORCID:'",input$sourceCreatorORCID,
+                                     "',metadataCoverageStartYear:'",input$sourceStartEndYear[1],
+                                     "',metadataCoverageEndYear:'",input$sourceStartEndYear[2],
+                                     "',metadataCoverageMonthsOfYear:'",paste(input$monthsOfYear,collapse = ","),#collapse months of year into csv string
+                                     "',metadataCoverageNorth:'",input$submitNorth,
+                                     "',metadataCoverageSouth:'",input$submitSouth,
+                                     "',metadataCoverageEast:'",input$submitEast,
+                                     "',metadataCoverageWest:'",input$submitWest,
+                                     "',metadataMaintenance:'",input$sourceMaintenance,
+                                     "',metadataQCCheck:",FALSE,
+                                     ",metadataCoverageCentroid:'",paste0("POINT (",lngCenter," ",latCenter,")"),
+                                     "',metadataCoverageIntersectICESEcoRegion:'","",
+                                     "',metadataCoverageIntersectNAFODivision:'","",
+                                     "',metadataCoverageIntersectMigrationRoutes:'","",
+                                     "',metadataUUID:'",sessionUUID(),
+                                     "',metadataTimestamp:'",Sys.time(),
+                                     "'});",sep = "")
+    
+    resultCreateMetadataNode <- neo4r::call_neo4j(metadataNodeCreateQuery,neo_con,type = 'row',include_stats = T,include_meta = T)
+    #results$value <- results$value + resultCreateMetadataNode$value
+    
+
+    
+    #####################
+    # Create relationships to ESV/Variable Class using DOMAIN SPECIFIC RELATIONSHIPS
+    #####################
+    # initiate a vector to capture the queries
+    queryMasterList <- c()
+    
+    # define a base query, common elements that all the queries will share
+    queryBase <- c("MATCH (esv:EssentialSalmonVariable{esvTitle:'","'}),(md:Metadata{metadataUUID:'","'}) CREATE (esv)<-[:HAS_ESV{domain:'","'}]-(md);")
+    # cycle through all the selected ESV for each domain IS THIS EFFICIENT?
+    
+    for(domain in input$domainNodeList){
+      # create basic relationship between metadata and domain
+      neo4r::call_neo4j(paste0("MATCH (d:Domain{domainTitle:'",domain,"'}),(md:Metadata{metadataUUID:'",sessionUUID(),"'}) CREATE (md)-[:HAS_DOMAIN]->(d);"),neo_con,type = 'row',include_stats = F,include_meta = F)
+      for(esv in input[[domain]]){
+        # create sub query for single esv-metadata
+        querySubMaster <- paste(queryBase[1],esv,queryBase[2],sessionUUID(),queryBase[3],domain,queryBase[4],sep = "")
+        # add sub query to master query list
+        queryMasterList <- append(queryMasterList,querySubMaster)
+      }
+    }
+    
+    #####################^^^^^^^^
+    # Create relationships to ESV/Variable Class using DOMAIN SPECIFIC RELATIONSHIPS
+    #####################
+    
+    for(query in queryMasterList){
+      resultCreateESVRelationships <- neo4r::call_neo4j(query,neo_con,type = 'row',include_stats = T,include_meta = T)
+      resultCreateMetadataNode$value <- resultCreateMetadataNode$value + resultCreateESVRelationships$value
+    }
+    
+    
+    
+  }else{
+    # Else no action taken, empty results tibble required
+    # create a dummy results with 0 values for display only
+    resultCreateMetadataNode <- neo4r::call_neo4j("MATCH (n:Metadata{metadataUUID:'DummyDummy'}) RETURN n;",neo_con,type = 'row',include_stats = T,include_meta = T)
+    
+  }
+  
+  # Trigger File Upload
+  uploadReactive()
+  
+  
+  ##############
+  # Clear INPUTS
+  ##############
+  resetAll()
+  
+  #Close confirm modal
+  removeModal()
+  ##############
+  # Clear INPUTS
+  ##############
+
+  # Show user feedback on success/failure of graph update
+  createNewSourceResult(resultCreateMetadataNode)
+  
+  showModal(submitSourceResultModal())
+  
+})
+
+
+
+
+################
+# DEBUGGING VIEW
+################
+output$generalTesting <- reactive({
+  paste0("MATCH (p:Person) WHERE id(p) = ",user_info()$user_info$id," SET p.liveBasket = '",formatNumericList(sessionUserBasket()),"';")
+  #paste0("MATCH (p:Person{personEmail:'",user_info()$user_info$email,"'}),(m:Metadata) WHERE id(m) IN [",formatNumericList(sessionUserBasket()),"] CREATE (p)-[:HAS_REQUESTED{created:'",Sys.time(),"',lastModified:'",Sys.time(),"',status:'pendingReview'}]->(m);")
+})
+### CREATE Queries to insert metadata nodes with relevant relationships
+### At the moment just outputting as text to view/verify the resulting queries
+output$CreateMetadataNodeQueryBuilder <- renderText({
+  # define a list to capture the queries
+  queryMasterList <- c()
+  # define a base query, common elements that all the queries will share
+  
+  #####################
+  # Create relationships using DOMAIN SPECIFIC RELATIONSHIPS
+  #####################
+  # create base query elements
+  queryBase <- c("MATCH (esv:EssentialSalmonVariable{esvTitle:'","'}),(md:Metadata{metadataUUID:'","'}) CREATE (esv)<-[:HAS_ESV{domain:'","'}]-(md);")
+  # cycle through all the selected ESV for each domain IS THIS EFFICIENT?
+  
+  for(domain in input$domainNodeList){
+    
+    for(esv in input[[domain]]){
+      # create sub query for single esv-metadata
+      querySubMaster <- paste(queryBase[1],esv,queryBase[2],sessionUUID(),queryBase[3],domain,queryBase[4],sep = "")
+      # add sub query to master query list
+      queryMasterList <- append(queryMasterList,querySubMaster)
+    }
+  }
+  
+  #####################^^^^^^^^
+  # Create relationships using DOMAIN SPECIFIC RELATIONSHIPS
+  #####################
+  
+  # collapse queries into a string to view
+  paste(queryMasterList,collapse = "")
+})
+
+
+
+output$showCurrentSelection <- DT::renderDT(tibble(inputID = c(#"icesStockUnit:",
+  #"icesStatAreas:",
+  #"river:",
+  "domainNodeList:",
+  "esvCategory:",
+  "River Rearing:",
+  "River Migration Smolt:",
+  "River Migration Adult:",
+  "Estuary Migration Post-Smolt:",
+  "Coastal Migration Post-Smolt:",
+  "Ocean Migration:",
+  "Coastal Migration Adult:",
+  "Estuary Migration Adult:"),
+  inputValue = c(#formatCheckboxGroupCategories(input$icesStockUnit),
+    #formatCheckboxGroupCategories(input$icesStatAreas),
+    #input$river,
+    formatCheckboxGroupCategories(input$domainNodeList),
+    formatCheckboxGroupCategories(input$esvCategory),
+    formatCheckboxGroupCategories(input$`River Rearing`),
+    formatCheckboxGroupCategories(input$`River Migration Smolt`),
+    formatCheckboxGroupCategories(input$`River Migration Adult`),
+    formatCheckboxGroupCategories(input$`Estuary Migration Post-Smolt`),
+    formatCheckboxGroupCategories(input$`Coastal Migration Post-Smolt`),
+    formatCheckboxGroupCategories(input$`Ocean Migration`),
+    formatCheckboxGroupCategories(input$`Coastal Migration Adult`),
+    formatCheckboxGroupCategories(input$`Estuary Migration Adult`))))
+
+output$filesPendingUpload <- DT::renderDT(sessionFile())
+
+output$sessionUUIDPrint <- renderText(sessionUUID())
+############################
+# submitDataSource_server.R END
+############################
