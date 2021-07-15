@@ -22,23 +22,27 @@ output$clearSubmitFormUI <- renderUI({
   actionButton(inputId = 'clearSubmitForm',label = "Clear Form")
 })
 
-output$submitNewDataSourceUI <- renderUI({
-  actionButton(inputId = 'submitNewDataSource',label = "Submit New Data Source")
+# two submit buttons that do the same thing but one is located on the sidebar the other at the bottom of the main submit page
+output$submitNewDataSourceBodyUI <- renderUI({
+  actionButton(inputId = 'submitNewDataSourceBody',label = "Submit New Data Source", class = 'btn-success', style='float:right;')
+})
+output$submitNewDataSourceSidebarUI <- renderUI({
+  actionButton(inputId = 'submitNewDataSourceSidebar',label = "Submit New Data Source", class = 'btn-success')
 })
 
 # KNB User Interface Inputs
-output$sourceKNBURIUI <- renderUI({
-  textInput(inputId = 'sourceKNBURI', label = "",placeholder = "Enter a KNB URN or DOI")
-})
-output$loadKNBUI <- renderUI({
-  actionButton(inputId = 'loadKNB',label = "Load...")
-})
-output$refreshKNBTokenUI <- renderUI({
-  actionButton('refreshKNBToken', "Enter a KNB Access Token")
-})
-output$expiryDatetimeKNBTokenUI <- renderUI({
-  textOutput('expiryDatetimeKNBToken')
-})
+# output$sourceKNBURIUI <- renderUI({
+#   textInput(inputId = 'sourceKNBURI', label = "",placeholder = "Enter a KNB URN or DOI")
+# })
+# output$loadKNBUI <- renderUI({
+#   actionButton(inputId = 'loadKNB',label = "Load...")
+# })
+# output$refreshKNBTokenUI <- renderUI({
+#   actionButton('refreshKNBToken', "Enter a KNB Access Token")
+# })
+# output$expiryDatetimeKNBTokenUI <- renderUI({
+#   textOutput('expiryDatetimeKNBToken')
+# })
 ############
 
 # function to reset all submit form fields
@@ -63,7 +67,7 @@ resetAll <- function(){
   updateCheckboxInput(session, inputId = 'sourceAvailableOnline', value = FALSE)
   updateCheckboxInput(session, inputId = 'sourceMaintenanceToggle', value = FALSE)
   updateCheckboxInput(session,inputId = 'embargoEndToggle',value = FALSE)
-  updateDateInput(session,inputId = 'embargoEnd',value = Sys.Date())
+  updateTextInput(session,inputId = 'embargoEnd',value = "")
   #reset Source Domain/ESV Section
   shinyWidgets::updateCheckboxGroupButtons(session, inputId = 'domainNodeList',selected = character(0))
   shinyWidgets::updateCheckboxGroupButtons(session, inputId = 'esvCategory',selected = character(0))
@@ -251,10 +255,10 @@ output$esvPerDomain <- renderUI({
 # observers for checkbox enable/disable inputs
 observeEvent(input$embargoEndToggle,{
   if(input$embargoEndToggle){
-    updateDateInput(session, 'embargoEnd', value = Sys.Date())
+    updateTextInput(session, 'embargoEnd', value = "")
     shinyjs::enable('embargoEnd')
   }else{
-    updateDateInput(session, 'embargoEnd', value = Sys.Date())
+    updateTextInput(session, 'embargoEnd', value = "")
     shinyjs::disable('embargoEnd')
   }
 })
@@ -268,9 +272,17 @@ observeEvent(input$sourceAvailableOnline,{
 })
 observeEvent(input$sourceMaintenanceToggle,{
   if(input$sourceMaintenanceToggle){
+    updateSelectInput(session, inputId = 'sourceMaintenance', choices = c("continually",
+                                                                          "daily",
+                                                                          "weekly",
+                                                                          "monthly",
+                                                                          "annually",
+                                                                          "irregular",
+                                                                          "unknown"),
+                      selected = "unknown")
     shinyjs::enable('sourceMaintenance')
   }else{
-    updateSelectInput(session, inputId = 'sourceMaintenance', selected = "notPlanned")
+    updateSelectInput(session, inputId = 'sourceMaintenance', choices = c("notPlanned"), selected = "notPlanned")
     shinyjs::disable('sourceMaintenance')
   }
 })
@@ -357,12 +369,12 @@ uploadReactive <- reactive({
 submitSourceConfirmDataTable <- reactive({
   data.frame(Title=input$sourceTitle,
              Creator=input$sourceCreator,
+             Email=input$sourceCreatorEmail,
              Organisation=input$sourceOrganisation,
              Abstract=input$sourceAbstract,
              GeographicDescription=input$sourceGeographicDescription,
              # KNBURI=input$sourceURI,
              # metadataAlternateURI=input$sourceALTURI,
-             # metadataCreatorEmail=input$sourceCreatorEmail,
              # metadataCreatorORCID=input$sourceCreatorORCID,
              # metadataCoverageStartYear=input$sourceStartEndYear[1],
              # metadataCoverageEndYear=input$sourceStartEndYear[2],
@@ -455,15 +467,42 @@ submitSourceResultModal <- function() {
 }
 ######################
 
+######################
+# The following observers are to change the background colour of required fields back to white once the user starts to fill them in
+# The fields are initially white on load, but will turn red if the user tries to submit data with missing required fields
+# see observer for submitNewDataSourceBody/submitNewDataSourceSidebar for lines that turn the background red
+observeEvent(input$sourceTitle,{shinyjs::runjs('document.getElementById("sourceTitle").style.backgroundColor = "white";')})
+observeEvent(input$sourceAbstract,{shinyjs::runjs('document.getElementById("sourceAbstract").style.backgroundColor = "white";')})
+observeEvent(input$sourceCreator,{shinyjs::runjs('document.getElementById("sourceCreator").style.backgroundColor = "white";')})
+observeEvent(input$sourceCreatorEmail,{shinyjs::runjs('document.getElementById("sourceCreatorEmail").style.backgroundColor = "white";')})
+observeEvent(input$sourceOrganisation,{shinyjs::runjs('document.getElementById("sourceOrganisation").style.backgroundColor = "white";')})
 
-observeEvent(input$submitNewDataSource, {
+
+
+
+observeEvent(input$submitNewDataSourceBody | input$submitNewDataSourceSidebar, {
+  # note two submit buttons exist that invoke the routine here, the req line is needed so that it doesn't trigger when app loads initially
+  req(input$submitNewDataSourceBody!=0 | input$submitNewDataSourceSidebar!=0)
   if(is.null(sessionUUID())){
     sessionUUID(uuid::UUIDgenerate())
   }
+  # check if UUID already exists or not
   results <- neo4r::call_neo4j(paste("MATCH (n:Metadata{metadataUUID:'",sessionUUID(),"'}) RETURN n;",sep = ""),neo_con,type = 'row',include_stats = T,include_meta = T)
-  if(is.null(results$stats)){
-    # If the DOI/URN entered does not exist in the framework already, show confirmation modal
-    showModal(submitSourceConfirmModal())
+  if(is.null(results$stats)){ # case UUID does not already exist
+    # confirm all required fields have information in them
+    if(input$sourceTitle == "" || input$sourceAbstract == "" || input$sourceCreator == "" || input$sourceCreatorEmail == "" || input$sourceOrganisation == ""){
+      showModal(modalDialog(title = "Required Information Missing",p("Please ensure that none of the following fields are blank before submitting:"),
+                            p("Title"),p("Abstract"),p("Primary Contact Name"),p("Primary Contact Email"),p("Organisation"),
+                            easyClose = TRUE, footer = NULL))
+      if(input$sourceTitle == ""){shinyjs::runjs('document.getElementById("sourceTitle").style.backgroundColor = "red";')}
+      if(input$sourceAbstract == ""){shinyjs::runjs('document.getElementById("sourceAbstract").style.backgroundColor = "red";')}
+      if(input$sourceCreator == ""){shinyjs::runjs('document.getElementById("sourceCreator").style.backgroundColor = "red";')}
+      if(input$sourceCreatorEmail == ""){shinyjs::runjs('document.getElementById("sourceCreatorEmail").style.backgroundColor = "red";')}
+      if(input$sourceOrganisation == ""){shinyjs::runjs('document.getElementById("sourceOrganisation").style.backgroundColor = "red";')}
+    }else{
+      # If the DOI/URN entered does not exist in the framework already, show confirmation modal
+      showModal(submitSourceConfirmModal())
+    }
   }else{ # otherwise show some detail for the user
     showModal(modalDialog(
       title = "This DOI/URN Already Exists",

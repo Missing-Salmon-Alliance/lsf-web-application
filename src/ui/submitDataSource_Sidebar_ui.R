@@ -10,15 +10,16 @@ conditionalPanel(
     # Sidebar file drop area
     # using uiOutput/renderUI here to prevent the inputs appearing for a moment on application reload 
     uiOutput('uploadDataFileUI'),
-    uiOutput('clearSubmitFormUI'),
     # sidepanel action button - submit data source
-    uiOutput('submitNewDataSourceUI'),
+    uiOutput('submitNewDataSourceSidebarUI'),
     hr(),
-    h4("Load from KNB"),
-    uiOutput('sourceKNBURIUI'),
-    uiOutput('loadKNBUI'),
-    uiOutput('refreshKNBTokenUI'),
-    uiOutput('expiryDatetimeKNBToken')
+    uiOutput('clearSubmitFormUI')
+    
+    # h4("Load from KNB"),
+    # uiOutput('sourceKNBURIUI'),
+    # uiOutput('loadKNBUI'),
+    # uiOutput('refreshKNBTokenUI'),
+    # uiOutput('expiryDatetimeKNBToken')
   )
 )
 ##############################################
