@@ -39,14 +39,6 @@ observeEvent(input$esvFields,{
   
 })
 
-shinyBS::addPopover(session, id = 'domainNodeList',title = "Domains and Variable Classes",
-                    content = HTML(paste0(strong("Domains"),em(paste0(" - ",domainsDescriptionCopy)),p(),
-                                          strong("Variable Classes"),em(paste0(" - ",esvDescriptionCopy)))),
-                    placement = 'top',
-                    options = list(container = "body")
-)
-
-
 
 observeEvent(input$metadataFields,{
   showModal(
