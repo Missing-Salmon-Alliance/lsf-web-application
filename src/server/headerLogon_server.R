@@ -88,7 +88,7 @@ observeEvent(input$logoutModal, {
   # goodbye message
   showModal(
     modalDialog(title = "Logged Out",
-                p("Thank you for visiting the Likely Suspects Framework for Atlantic Salmon"),
+                p("Thank you for visiting the Likely Suspects Framework for Atlantic Salmon Central Data Resource"),
                 p("We hope you found this interface useful and will return soon"),
                 p("All feedback welcome via either registering an issue/bug or feature request at our",
                   a(href="https://github.com/Missing-Salmon-Alliance/lsf-web-application","github repository"),

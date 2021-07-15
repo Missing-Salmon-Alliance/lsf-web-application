@@ -33,14 +33,14 @@ source("./src/secrets.R",local = TRUE)
 # DataONE settings
 # SET ENVIRONMENT
 # Production
-cn <- dataone::CNode("PROD")
-mn <- dataone::getMNode(cn, "urn:node:KNB")
-d1c <- dataone::D1Client(cn, mn)
+# cn <- dataone::CNode("PROD")
+# mn <- dataone::getMNode(cn, "urn:node:KNB")
+# d1c <- dataone::D1Client(cn, mn)
 # Staging
-# cn <- CNode("STAGING2")
-# mn <- getMNode(cn, "urn:node:mnTestKNB") # note command 'unlist(lapply(listNodes(cn), function(x) x@subject))' from dataone-federation vignette
-# d1c <- D1Client(cn, mn)
-am <- dataone::AuthenticationManager()
+# cn <- dataone::CNode("STAGING2")
+# mn <- dataone::getMNode(cn, "urn:node:mnTestKNB") # note command 'unlist(lapply(listNodes(cn), function(x) x@subject))' from dataone-federation vignette
+# d1c <- dataone::D1Client(cn, mn)
+#am <- dataone::AuthenticationManager()
 
 # Custom functions
 source("./src/gisOperations.R",local = TRUE)
@@ -166,21 +166,23 @@ across a range of specific dates and geographical locations."
 
 searchIntroCopyPara2 <- "The interface contains a range of tools to help focus your data search on several levels. Filtering the 
 data will return descriptions of data (metadata) relevant to your search terms. This metadata will help you to discover relevant 
-knowledge sources and allow you to gain access via either primary sources or from within the Likely Suspects Framework data management 
-system."
+knowledge sources and allow you to gain access via either primary sources or from within the Central Data Resource."
 
-submitIntroCopyPara1 <- "This interface allows you to submit data along with a thorough description (metadata) into the Likely 
-Suspects Framework. This data will be used to provision both managers and researchers in their fight to reduce declining salmon 
+submitIntroCopyPara1 <- "This interface allows you to submit data along with a thorough description (metadata) into the Central Data 
+Resource. This data will be used to provision both managers and researchers in their fight to reduce declining salmon 
 abundance. Our interface will also allow you to categorise your data into salmon domains and variable classes. The variable classes 
 are a range of biological, physical and salmon-specific categories. By labelling your data with these classes, we hope to improve the 
 ability for people to efficiently find relevant data regarding various ecological factors across a range of specific dates and 
 geographical locations. The domains refer to labelling your data regarding a specific habitat the salmon experience during their 
 lifecycle e.g. river or ocean."
 
-submitIntroCopyPara2 <- "This interface ensures the data submitted into the Likely Suspects Framework database is labelled to both 
+submitIntroCopyPara2_OLDKNB <- "This interface ensures the data submitted into the Likely Suspects Framework database is labelled to both 
 spatial and temporal extents and linked to how it may be applicable to Atlantic salmon. If the data is already within the KNB database 
 (The Knowledge Network for Biocomplexity) then you may load the meta information via the URN or DOI always tagged to KNB 
 metadata. This will automatically fill the fields of this page as long as the equivalent field is present on KNB."
+
+submitIntroCopyPara2 <- "This interface ensures the data submitted into the Central Data Resource is labelled to both 
+spatial and temporal extents and linked to how it may be applicable to Atlantic salmon."
 
 domainsDescriptionCopy <- "Domains refer to the various environments
 Atlantic salmon move through dependent on their

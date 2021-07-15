@@ -50,7 +50,7 @@ tabItem( # tabItem 3
   ),
   conditionalPanel(
     condition = "!output.logonTrue",
-    h1("Framework Knowledge Submit Area"),
+    h1("Central Data Resource Knowledge Submit Area"),
     h3("Please authenticate to access this area")
   )
 ) # tabItem 3 close

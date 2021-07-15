@@ -302,12 +302,12 @@ observeEvent(input$monthsOfYearToggleAll,{
 # Geographic Detail Server
 # TODO: Convert all this to use a single reactiveValues, might reduce the line count significantly
 output$submitMap <- leaflet::renderLeaflet({
-  leaflet::leaflet(options = leaflet::leafletOptions(maxZoom = 5)) %>% # maxZoom set so that user can always see their rectangle in context of a coastline
+  leaflet::leaflet(options = leaflet::leafletOptions(maxZoom = 10)) %>% # maxZoom set so that user can always see their rectangle in context of a coastline
     #addPolygons(data = neContinentsSF, stroke = FALSE) %>%
     #addProviderTiles("Stamen.TerrainBackground") %>%
     leaflet::addProviderTiles(leaflet::providers$Esri.OceanBasemap) %>%
     leaflet::addRectangles(-15,61,-14,60,group = 'userRectangle') %>% 
-    leaflet::fitBounds(-15,61,-14,60)
+    leaflet::fitBounds(-15,61,-14,60,options = leaflet::leafletOptions(maxZoom = 5))
 })
 
 observeEvent(input$submitEast,{
@@ -342,6 +342,13 @@ observeEvent(input$submitSouth,{
     leaflet::fitBounds(input$submitWest,input$submitNorth,input$submitEast,input$submitSouth)
 })
 
+# observe user click on map and set coordinates
+observeEvent(input$submitMap_click,{
+  updateNumericInput(session,inputId = 'submitNorth',value = round(input$submitMap_click$lat,digits = 4))
+  updateNumericInput(session,inputId = 'submitEast',value = round(input$submitMap_click$lng,digits = 4))
+  updateNumericInput(session,inputId = 'submitSouth',value = round(input$submitMap_click$lat,digits = 4))
+  updateNumericInput(session,inputId = 'submitWest',value = round(input$submitMap_click$lng,digits = 4))
+})
 
 # Observer to pass file upload details to sessionFile reactive value
 # This is passed to a reactiveVal so that it can be cleared out once user has submitted the form.
@@ -507,8 +514,8 @@ observeEvent(input$submitNewDataSourceBody | input$submitNewDataSourceSidebar, {
     showModal(modalDialog(
       title = "This DOI/URN Already Exists",
       sessionUUID(),
-      p("This DOI/URN matches an object that already exists in the framework database."),
-      p("Data returned from LSF:"),
+      p("This DOI/URN matches an object that already exists in the database."),
+      p("Data returned from the database:"),
       results$n$metadataTitle,
       results$n$metadataAbstract,
       easyClose = TRUE,

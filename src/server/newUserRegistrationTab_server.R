@@ -29,7 +29,7 @@ observeEvent(input$newUserRegisterSubmit, {
     # modal window to thank for new registration
     showModal(
       modalDialog(title = "Thank You!",
-                  p("You're information has been sent to the LSF administrator and we will be in touch soon with your logon details"),
+                  p("You're information has been sent to the Central Data Resource administrator and we will be in touch soon with your logon details"),
                   easyClose = TRUE
       )
     )

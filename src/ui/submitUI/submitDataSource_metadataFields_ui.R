@@ -1,7 +1,8 @@
 #shinyBS::bsCollapsePanel(title = "Data Source Details",style = 'primary',
-box(title = "Data Source Details (* required field)",status = 'primary',solidHeader = TRUE, collapsible = TRUE, width = 12,
-                         div(style="float:right",actionLink(inputId = 'metadataFields', label = "Help", icon = icon("question-circle"))),
-                         br(),
+box(title = p("Data Source Details (* required field)",actionLink(inputId = 'metadataFields', label = "", icon = icon("question-circle"))),
+    status = 'primary',solidHeader = TRUE, collapsible = TRUE, width = 12,
+                         #div(style="float:right",actionLink(inputId = 'metadataFields', label = "Help", icon = icon("question-circle"))),
+                         #br(),
                          column(
                            width = 4,
                            textAreaInput(inputId = 'sourceTitle', label = "Title*",value = "", width = '100%'),

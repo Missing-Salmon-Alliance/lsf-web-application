@@ -41,20 +41,13 @@ shinyBS::addPopover(session, id = 'sourceKNBURIUI',title = "Enter a KNB URN or D
            options = list(container = "body")
 )
 
-shinyBS::addPopover(session, id = 'domainNodeList',title = "Domains and Variable Classes",
-           content = HTML(paste0(strong("Domains"),em(paste0(" - ",domainsDescriptionCopy)),p(),
-                                 strong("Variable Classes"),em(paste0(" - ",esvDescriptionCopy)))),
-           placement = 'top',
-           options = list(container = "body")
-)
+# shinyBS::addPopover(session, id = 'domainNodeList',title = "Domains and Variable Classes",
+#            content = HTML(paste0(strong("Domains"),em(paste0(" - ",domainsDescriptionCopy)),p(),
+#                                  strong("Variable Classes"),em(paste0(" - ",esvDescriptionCopy)))),
+#            placement = 'top',
+#            options = list(container = "body")
+# )
 
-shinyBS::addPopover(session, id = 'sourceAccessLevel',title = "Access Level",
-           content = HTML(paste0(strong("Members Only"),em(paste0(" - ","Access is limited to members of the framework Data Sharing Group.")),p(),
-                                 strong("Open"),em(paste0(" - ","Access is open, data can be downloaded directly from the framework or via the URL provided.")))),
-           placement = 'top',
-           options = list(container = "body")
-           
-)
 
 shinyBS::addPopover(session, id = 'sourceMaintenance',title = "Update Frequency",
            content = "Indicate how often the dataset is expected to be updated.",
@@ -72,7 +65,7 @@ shinyBS::addPopover(session, id = 'sourceCreatorORCID',title = "ORCID URL",
 )
 
 shinyBS::addPopover(session, id = 'embargoEnd',title = "Embargo End Date",
-           content = "If the primary data being described is under an embargo please enter the END date here.",
+           content = "If the primary data being described is under an embargo please enter the expected end date or more information here.",
            placement = 'top',
            options = list(container = "body")
            

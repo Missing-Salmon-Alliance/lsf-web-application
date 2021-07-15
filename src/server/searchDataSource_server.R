@@ -33,7 +33,7 @@ observeEvent(input$basket,{
                               #selectInput("basketPosition", "Position/Occupation:", choices = c("Researcher","Database Manager","Government Official", "Conservationist", "Student", "Lecturer", "Other")),
                               #selectInput("basketDataUse", "What will the data be used for?", choices = c("Independent Research", "Conservation", "Guidance to Managers", "Other")),
                               #textInput("basketOther","Please describe what is meant, if you selected other"),
-                              #selectInput("basketProvision", "Do you intend to provide data to the LSF database?", choices = c("Yes", "No", "In the Future")),
+                              #selectInput("basketProvision", "Do you intend to provide data to the Central Data Resource?", choices = c("Yes", "No", "In the Future")),
                               textAreaInput('basketIntention', "Please describe the intended use for the data. Please include information on the project, time scale of usage and expected number of users.", width = "1000px", height = "50px"),
                               actionButton('sendRequest', "Send Data Request")
                               
@@ -477,7 +477,7 @@ output$No_Data <- renderInfoBox({
 
 output$NAFO_Div <- renderInfoBox({
   infoBox(title = "NAFO Division Data",
-          subtitle = "NAFO Divisions across the North Atlantic are represented by data sources recognised by the LSF",
+          subtitle = "NAFO Divisions across the North Atlantic are represented by data sources registered in the Central Data Resource",
           value = length(uniqueNAFODivisions),
           fill = T, color = "purple")
 })
@@ -485,7 +485,7 @@ output$NAFO_Div <- renderInfoBox({
 output$No_Eco <- renderInfoBox({
   infoBox(title = "ICES Eco Regions",
           icon = icon("globe-europe"),
-          subtitle = "ICES ecoregions across the North Atlantic are represented by data sources recognised by the LSF",
+          subtitle = "ICES ecoregions across the North Atlantic are represented by data sources registered in the Central Data Resource",
           value = length(uniqueICESEcoRegions),
           fill = T, color = "green")
 })

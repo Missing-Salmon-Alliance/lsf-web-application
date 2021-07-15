@@ -1,10 +1,8 @@
 #shinyBS::bsCollapsePanel(title = "Domain and Variable Class",style = 'primary',
-box(title = "Domain and Variable Class",status = 'primary',solidHeader = TRUE, collapsible = TRUE, width = 12,
-                         div(style="float:right",actionLink(inputId = "esvFields", label = "Help", icon = icon("question-circle"))),
-                         br(),
+box(title = p("Domain and Variable Class",actionLink(inputId = "esvFields", label = "", icon = icon("question-circle"))),
+    status = 'primary',solidHeader = TRUE, collapsible = TRUE, width = 12,
                          column(
                            width = 5,
-                           p("LSF Domain"),
                            shinyWidgets::checkboxGroupButtons('domainNodeList',
                                                               'Domain',
                                                               choices = LSFDomainTibble$domainTitle,
@@ -18,7 +16,6 @@ box(title = "Domain and Variable Class",status = 'primary',solidHeader = TRUE, c
                          ),
                          column(
                            width = 7,
-                           p("LSF Variable Class"),
                            uiOutput('esvPerDomain')
                          )
 )

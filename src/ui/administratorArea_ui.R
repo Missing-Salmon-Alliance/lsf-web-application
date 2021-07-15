@@ -85,12 +85,12 @@ tabsetPanel(id = "useradmin",
                                                                 textAreaInput(inputId = "QCGeographicDescription", label = "Short Geographic Description",value = ""),
                                                                 hr(),
                                                                 h4("Longitudinal Boundaries"),
-                                                                numericInput(inputId = 'QCWest', label = "Western Boundary",min=-180,max=180,value = -15,step = 0.1),
-                                                                numericInput(inputId = 'QCEast', label = "Eastern Boundary",min=-180,max=180,value = -14,step = 0.1),
+                                                                numericInput(inputId = 'QCWest', label = "Western Boundary",min=-180,max=180,value = -15,step = 0.0001),
+                                                                numericInput(inputId = 'QCEast', label = "Eastern Boundary",min=-180,max=180,value = -14,step = 0.0001),
                                                                 hr(),
                                                                 h4("Latitudinal Boundaries"),
-                                                                numericInput(inputId = 'QCNorth', label = "Northern Boundary",min=-90,max=90,value = 61,step = 0.1),
-                                                                numericInput(inputId = 'QCSouth', label = "Southern Boundary",min=-90,max=90,value = 60,step = 0.1)
+                                                                numericInput(inputId = 'QCNorth', label = "Northern Boundary",min=-90,max=90,value = 61,step = 0.0001),
+                                                                numericInput(inputId = 'QCSouth', label = "Southern Boundary",min=-90,max=90,value = 60,step = 0.0001)
                                                               ),
                                                               column(
                                                                 width = 6,
@@ -110,7 +110,6 @@ tabsetPanel(id = "useradmin",
                                               shinyBS::bsCollapsePanel(title = "Domain and Variable Classes",
                                                               column(
                                                                 width = 5,
-                                                                p("LSF Domain"),
                                                                 shinyWidgets::checkboxGroupButtons('QCdomainNodeList',
                                                                                      'Domain',
                                                                                      choices = LSFDomainTibble$domainTitle,
@@ -124,7 +123,6 @@ tabsetPanel(id = "useradmin",
                                                               ),
                                                               column(
                                                                 width = 7,
-                                                                p("Variable Class"),
                                                                 uiOutput('QCesvPerDomain')
                                                               )
                                               )
