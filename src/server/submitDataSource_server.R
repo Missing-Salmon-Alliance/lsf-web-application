@@ -501,11 +501,11 @@ observeEvent(input$submitNewDataSourceBody | input$submitNewDataSourceSidebar, {
       showModal(modalDialog(title = "Required Information Missing",p("Please ensure that none of the following fields are blank before submitting:"),
                             p("Title"),p("Abstract"),p("Primary Contact Name"),p("Primary Contact Email"),p("Organisation"),
                             easyClose = TRUE, footer = NULL))
-      if(input$sourceTitle == ""){shinyjs::runjs('document.getElementById("sourceTitle").style.backgroundColor = "red";')}
-      if(input$sourceAbstract == ""){shinyjs::runjs('document.getElementById("sourceAbstract").style.backgroundColor = "red";')}
-      if(input$sourceCreator == ""){shinyjs::runjs('document.getElementById("sourceCreator").style.backgroundColor = "red";')}
-      if(input$sourceCreatorEmail == ""){shinyjs::runjs('document.getElementById("sourceCreatorEmail").style.backgroundColor = "red";')}
-      if(input$sourceOrganisation == ""){shinyjs::runjs('document.getElementById("sourceOrganisation").style.backgroundColor = "red";')}
+      if(input$sourceTitle == ""){shinyjs::runjs('document.getElementById("sourceTitle").style.backgroundColor = "OrangeRed";')}
+      if(input$sourceAbstract == ""){shinyjs::runjs('document.getElementById("sourceAbstract").style.backgroundColor = "OrangeRed";')}
+      if(input$sourceCreator == ""){shinyjs::runjs('document.getElementById("sourceCreator").style.backgroundColor = "OrangeRed";')}
+      if(input$sourceCreatorEmail == ""){shinyjs::runjs('document.getElementById("sourceCreatorEmail").style.backgroundColor = "OrangeRed";')}
+      if(input$sourceOrganisation == ""){shinyjs::runjs('document.getElementById("sourceOrganisation").style.backgroundColor = "OrangeRed";')}
     }else{
       # If the DOI/URN entered does not exist in the framework already, show confirmation modal
       showModal(submitSourceConfirmModal())
