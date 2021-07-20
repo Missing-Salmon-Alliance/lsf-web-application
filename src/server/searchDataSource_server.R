@@ -329,22 +329,22 @@ source("./src/server/searchDataSource_frameworkFilters_server.R",local = TRUE)$v
 ##############################################
 # Polygon Mouse Over
 
-observe(
-  {click = input$map_marker_click
-  if(is.null(click))
-    leaflet::leafletProxy("map") %>%
-    leaflet::clearGroup(group = 'markerRectangle')
-  else
+observeEvent(input$map_marker_click,{
     leaflet::leafletProxy("map") %>%
     leaflet::clearGroup(group = 'markerRectangle') %>%
-    leaflet::addRectangles(LSFMetadataTibble[LSFMetadataTibble$id == click[1],]$metadataCoverageWest,
-                  LSFMetadataTibble[LSFMetadataTibble$id == click[1],]$metadataCoverageNorth,
-                  LSFMetadataTibble[LSFMetadataTibble$id == click[1],]$metadataCoverageEast,
-                  LSFMetadataTibble[LSFMetadataTibble$id == click[1],]$metadataCoverageSouth
+    leaflet::addRectangles(LSFMetadataTibble[LSFMetadataTibble$id == input$map_marker_click[1],]$metadataCoverageWest,
+                  LSFMetadataTibble[LSFMetadataTibble$id == input$map_marker_click[1],]$metadataCoverageNorth,
+                  LSFMetadataTibble[LSFMetadataTibble$id == input$map_marker_click[1],]$metadataCoverageEast,
+                  LSFMetadataTibble[LSFMetadataTibble$id == input$map_marker_click[1],]$metadataCoverageSouth
                   ,group = 'markerRectangle', color = "blue", weight = 1, stroke = TRUE)
   }
 )
 
+# clear rectangle on background click
+observeEvent(input$map_click,{
+  leaflet::leafletProxy("map") %>%
+    leaflet::clearGroup(group = 'markerRectangle')
+})
 ############################################## 
 # Modal pop-up on each marker_click
 
