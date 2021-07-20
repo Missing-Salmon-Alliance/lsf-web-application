@@ -10,10 +10,11 @@ observeEvent(input$temporalSlider,{
 observeEvent(input$monthsSelect,{
   leaflet::leafletProxy("map", session) %>%
     leaflet::clearGroup(group = 'Data Source')
-  if(input$monthsSelect == "All"){
+  if(is.null(input$monthsSelect)){
     metadataFilterReactive(LSFMetadataTibble)
   }else{
-    metadataFilterReactive(LSFMetadataTibble[str_detect(LSFMetadataTibble$metadataCoverageMonthsOfYear,input$monthsSelect),])
+    targets <- paste0("[(",paste0(input$monthsSelect,collapse = ")|("),")]")
+    metadataFilterReactive(LSFMetadataTibble[str_detect(LSFMetadataTibble$metadataCoverageMonthsOfYear,targets),])
   }
   redrawFilteredMarkers(metadataFilterReactive(),session)
-})
+},ignoreNULL = FALSE)
