@@ -158,21 +158,20 @@ NASCO_rivers <- sf::st_as_sf(NASCO_rivers, coords = c("Longitude_Decimal","Latit
 ###################################################
 # Write a HTML Legend (As have used HTML ICONS and no gradient)
 
-html_legend <- "<h4>Markers</h4>
-<img src='https://img.icons8.com/ios-filled/50/4a90e2/marker.png'style = 'width:30px;height:30px;'/> <b>Data Sources<br>
-<img src='https://img.icons8.com/cotton/64/000000/salmon--v1.png'style = 'width:30px;height:30px;'/> <b>Index Rivers<br>
-&nbsp; <img src='https://img.icons8.com/emoji/48/000000/black-circle-emoji.png'style = 'width:15px;height:15px;'/> &nbsp; <b> NASCO Rivers<br>
-<br>
-<h4>Polygon Overlays</h4> 
-<img src='https://img.icons8.com/emoji/48/26e07f/green-circle-emoji.png'style = 'width:30px;height:30px;'/> <b>ICES Ecoregions<br>
-<img src='https://img.icons8.com/emoji/48/26e07f/purple-circle-emoji.png'style = 'width:30px;height:30px;'/> <b> NAFO Divisions<br>
-<img src='https://img.icons8.com/emoji/48/4a90e2/blue-square-emoji.png'style = 'width:30px;height:30px;'/> <b> Areas of Migration <br/>
-"
+html_legend <- "<img src='https://img.icons8.com/ios-filled/50/4a90e2/marker.png'style = 'width:30px;height:30px;'>Data Sources</img><br>
+<img src='https://img.icons8.com/cotton/64/000000/salmon--v1.png'style = 'width:30px;height:30px;'>Index Rivers</img><br>
+<img src='https://img.icons8.com/emoji/48/000000/black-circle-emoji.png'style = 'width:15px;height:15px;'>NASCO Rivers</img>"
+# <br>
+# <h4>Polygon Overlays</h4> 
+# <img src='https://img.icons8.com/emoji/48/26e07f/green-circle-emoji.png'style = 'width:30px;height:30px;'/> <b>ICES Ecoregions<br>
+# <img src='https://img.icons8.com/emoji/48/26e07f/purple-circle-emoji.png'style = 'width:30px;height:30px;'/> <b>NAFO Divisions<br>
+# <img src='https://img.icons8.com/emoji/48/4a90e2/blue-square-emoji.png'style = 'width:30px;height:30px;'/> <b>Areas of Migration<br/>
+# "
 
 # TODO: improve visual information in markers, colour index rivers or use river icon, check out the IYS icons
 output$map <- leaflet::renderLeaflet({ 
   leaflet::leaflet (options = leaflet::leafletOptions(minZoom = 3,maxZoom = 10))%>%
-    leaflet::setView(lng = 35,lat = 60,zoom = 3) %>% 
+    leaflet::setView(lng = 10,lat = 60,zoom = 3) %>% 
     leaflet::setMaxBounds( lng1 = -130
                   , lat1 = -20
                   , lng2 = 210
@@ -182,7 +181,7 @@ output$map <- leaflet::renderLeaflet({
     leaflet::addMarkers(data = LSFMetadataTibble,
                label = ~metadataTitle,
                layerId = ~id,
-               group = 'metadataMarkers',
+               group = 'Data Source',
                popup = ~paste("<h3>More Information</h3>",
                               "<b>Title:</b>",metadataTitle,"<br>","<br>",
                               "<b>Abstract:</b>",metadataAbstract,"<br>","<br>",
@@ -201,7 +200,7 @@ output$map <- leaflet::renderLeaflet({
                  freezeAtZoom = 10)) %>%
     
     leaflet.extras::addSearchFeatures(
-      targetGroups = 'metadataMarkers',
+      targetGroups = 'Data Source',
       options = leaflet.extras::searchFeaturesOptions(zoom=12, openPopup = FALSE, firstTipSubmit = TRUE,
         autoCollapse = TRUE, hideMarkerOnCollapse = TRUE
       )
@@ -246,13 +245,19 @@ output$map <- leaflet::renderLeaflet({
     #             highlightOptions = leaflet::highlightOptions(color = "yellow", weight = 3,
     #                                                 bringToFront = TRUE)) %>%
     # 
-    leaflet::addLayersControl(position = 'topleft',overlayGroups = c("Ecoregions", "NAFO Divisions","Migration Routes","NASCO River DB","ICES Index Rivers"),#,"Statistical Squares","Migration Routes"),
+    leaflet::addLayersControl(position = 'topleft',overlayGroups = c("Data Source","ICES Index Rivers","Ecoregions", "NAFO Divisions","Migration Routes","NASCO River DB"),
                      options = leaflet::layersControlOptions(collapsed = FALSE)) %>%
     leaflet::hideGroup(c("Ecoregions", "NAFO Divisions","Migration Routes", "NASCO River DB")) %>%
-    leaflet::addControl(position = "bottomleft", html = html_legend )
+    
+    htmlwidgets::onRender("
+        function() {
+            $('.leaflet-control-layers-overlays').prepend('<label style=\"text-align:left; font-size:16px;\">Layer Control</label>');
+        }
+    ")
+    # commenting out legend for now, the layer control in a way works as a legend and the screen was a bit cluttered with both
+    #leaflet::addControl(position = "bottomright", html = html_legend)
 })
 
-#output$table <- DT::renderDT({metadataFilterReactive()})
 
 output$table <- DT::renderDT({
   sf::st_set_geometry(metadataFilterReactive()[,c('metadataTitle','metadataAbstract','metadataKeywords')],NULL)
@@ -276,7 +281,7 @@ output$table <- DT::renderDT({
 # Eco regions based on pre-calculated intersects
 observeEvent(input$ecoregionFilter,{
   leaflet::leafletProxy("map", session) %>%
-    leaflet::clearGroup(group = 'metadataMarkers')
+    leaflet::clearGroup(group = 'Data Source')
   if(input$ecoregionFilter == "All"){
     metadataFilterReactive(LSFMetadataTibble)
   }else{
@@ -289,7 +294,7 @@ observeEvent(input$ecoregionFilter,{
 # NAFO divisions based on pre-calculated intersects
 observeEvent(input$nafodivisionFilter,{
   leaflet::leafletProxy("map", session) %>%
-    leaflet::clearGroup(group = 'metadataMarkers')
+    leaflet::clearGroup(group = 'Data Source')
   if(input$nafodivisionFilter == "All"){
     metadataFilterReactive(LSFMetadataTibble)
   }else{
@@ -301,7 +306,7 @@ observeEvent(input$nafodivisionFilter,{
 # migration routes based on pre-calculated intersects
 observeEvent(input$migrationRouteFilter,{
   leaflet::leafletProxy("map", session) %>%
-    leaflet::clearGroup(group = 'metadataMarkers')
+    leaflet::clearGroup(group = 'Data Source')
   if(input$migrationRouteFilter == "All"){
     metadataFilterReactive(LSFMetadataTibble)
   }else{

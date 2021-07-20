@@ -115,7 +115,7 @@ redrawFilteredMarkers <- function(filteredTibble,session){
     leaflet::addMarkers(data = filteredTibble,
                #label = ~metadataTitle,
                layerId = ~id,
-               group = 'metadataMarkers',
+               group = 'Data Source',
                popup = ~paste("<h3>More Information</h3>",
                              "<b>Title:</b>",metadataTitle,"<br>","<br>",
                              "<b>Abstract:</b>",metadataAbstract,"<br>","<br>",

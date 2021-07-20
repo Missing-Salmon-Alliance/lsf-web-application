@@ -1,13 +1,17 @@
+######
+# Using a renderUI element to create a dynamic set of sidebar items based on logged on user
+######
 output$menu <- renderUI(
   if(!is.null(user_info()) && user_info()$admin){
     sidebarMenu(id="menu1",
                 
                 # Admin Menu items
-                # DEBUG - Tick box to show input raw outputs, to be commented out in production
-                checkboxInput('debug',"Debug Info"),
+                checkboxInput('debug',"Debug Info"),# DEBUG - Tick box to show input raw outputs
                 menuItem("Introduction", tabName = 'introduction', icon = icon('info')),
                 shinyjs::hidden(menuItem("New Member Registration",tabName = 'newMemberRegistration',icon = icon('user-plus'))),
-                menuItem("Search The LSF", tabName = 'searchlsf', icon = icon('searchengin')),
+                menuItem("Search The Resource", tabName = 'searchlsf', icon = icon('searchengin')),
+                menuItem("Explore Hypotheses", tabName = 'hypothesisExplore', icon = icon('question')),
+                menuItem("Explore Domains", tabName = 'domainExplore', icon = icon('globe-europe')),
                 menuItem("Submit Data Source", tabName = 'newsource', icon = icon('project-diagram')),
                 menuItem("Metadata Node Report", tabName = 'metadataNodeReport', icon = icon('flag-checkered')),
                 menuItem("Submit Research Project", tabName = 'newproject', icon = icon('project-diagram')),
@@ -21,7 +25,9 @@ output$menu <- renderUI(
                 # Basic Menu items
                 menuItem("Introduction", tabName = 'introduction', icon = icon('info')),
                 shinyjs::hidden(menuItem("New Member Registration",tabName = 'newMemberRegistration',icon = icon('user-plus'))),
-                menuItem("Search The LSF", tabName = 'searchlsf', icon = icon('searchengin')),
+                menuItem("Search The Resource", tabName = 'searchlsf', icon = icon('searchengin')),
+                menuItem("Explore Hypotheses", tabName = 'hypothesisExplore', icon = icon('question')),
+                menuItem("Explore Domains", tabName = 'domainExplore', icon = icon('globe-europe')),
                 menuItem("Submit Data Source", tabName = 'newsource', icon = icon('project-diagram'))
     )
   }

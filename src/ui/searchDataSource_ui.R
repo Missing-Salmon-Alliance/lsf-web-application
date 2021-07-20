@@ -13,8 +13,8 @@ tabItem( # tabItem 1
                   width = "35%",
                   style="z-index:1000;",
                   shinyBS::bsCollapse(id = "mapSearchFilters", open = NULL,
-                             source("./src/ui/searchDataSource_frameworkFilters_ui.R",local = TRUE)$value,
-                             source("./src/ui/searchDataSource_geographicFilters_ui.R",local = TRUE)$value,
+                             #source("./src/ui/searchDataSource_frameworkFilters_ui.R",local = TRUE)$value,
+                             #source("./src/ui/searchDataSource_geographicFilters_ui.R",local = TRUE)$value,
                              source("./src/ui/searchDataSource_temporalFilters_ui.R",local = TRUE)$value
                   )
     ),

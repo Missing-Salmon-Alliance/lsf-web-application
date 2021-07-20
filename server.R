@@ -69,6 +69,26 @@ server <- function(input, output, session) {
   ############################
   
   ############################
+  # hypothesisExplore_server.R START
+  ############################
+  
+  source("./src/server/hypothesisExplore_server.R", local = TRUE)$value
+  
+  ############################
+  # hypothesisExplore_server.R END
+  ############################
+  
+  ############################
+  # domainExplore_server.R START
+  ############################
+  
+  source("./src/server/domainExplore_server.R", local = TRUE)$value
+  
+  ############################
+  # domainExplore_server.R END
+  ############################
+  
+  ############################
   # submitDataSource_server.R START
   ############################
   

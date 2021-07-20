@@ -23,6 +23,7 @@ ui <- dashboardPage(skin = "blue",
                       br(),
                       
                       # Build sidebar menu
+                      # Conditional sidebar menu items controlled from server file sidebar_server.R
                       uiOutput('menu'),
 
                       ##############################################
@@ -67,7 +68,11 @@ ui <- dashboardPage(skin = "blue",
                         
                         source("./src/ui/newUserRegistrationTab_ui.R", local = TRUE)$value, # HIDDEN TAB ITEM
 
-                        source("./src/ui/searchDataSource_ui.R", local = TRUE)$value, # tabItem search
+                        source("./src/ui/searchDataSource_ui.R", local = TRUE)$value, # tabItem general search view
+                        
+                        source("./src/ui/hypothesisUI/hypothesisExplore_ui.R", local = TRUE)$value, #tabItem hypothesis explore
+                        
+                        source("./src/ui/domainExploreUI/domainExplore_ui.R", local = TRUE)$value, # tabItem domain explore
                         
                         source("./src/ui/submitDataSource_ui.R",local = TRUE)$value, # tabItem submit data
                         

@@ -41,13 +41,39 @@ shinyBS::addPopover(session, id = 'sourceKNBURIUI',title = "Enter a KNB URN or D
            options = list(container = "body")
 )
 
-# shinyBS::addPopover(session, id = 'domainNodeList',title = "Domains and Variable Classes",
-#            content = HTML(paste0(strong("Domains"),em(paste0(" - ",domainsDescriptionCopy)),p(),
-#                                  strong("Variable Classes"),em(paste0(" - ",esvDescriptionCopy)))),
+
+# shinyBS::addPopover(session, id = 'domainNodeList',title = "Domains",
+#                     content = HTML(paste0(strong("Domains"),em(paste0(" - ",domainsDescriptionCopy)))),
+#                     placement = 'top',
+#                     options = list(container = "body")
+# )
+# 
+# shinyBS::addPopover(session, id = 'esvCategory',title = "Variable Classes",
+#            content = HTML(paste0(strong("Variable Classes"),em(paste0(" - ",esvDescriptionCopy)))),
 #            placement = 'top',
 #            options = list(container = "body")
 # )
 
+shinyBS::addPopover(session, id = 'metadataFields', title = "Help Topic",
+                    content = "Click here to get more information on Data Source Details",
+                    placement = 'top',
+                    options = list(container = "body")
+                    
+)
+
+shinyBS::addPopover(session, id = 'geogTimeFields', title = "Help Topic",
+                    content = "Click here to get more information on Geographic Coverage and Temporal Coverage",
+                    placement = 'top',
+                    options = list(container = "body")
+                    
+)
+
+shinyBS::addPopover(session, id = 'esvFields', title = "Help Topic",
+                    content = "Click here to get more information on Domains and Variable Classes",
+                    placement = 'top',
+                    options = list(container = "body")
+                    
+)
 
 shinyBS::addPopover(session, id = 'sourceMaintenance',title = "Update Frequency",
            content = "Indicate how often the dataset is expected to be updated.",
@@ -72,7 +98,14 @@ shinyBS::addPopover(session, id = 'embargoEnd',title = "Embargo End Date",
 )
 
 shinyBS::addPopover(session, id = 'uploadDataFileUI',title = "File Drop",
-                    content = "Maximum File Size 25Mb. To upload a larger file please contact the Data Manager: data.admin@missingsalmonalliance.org",
+                    content = "Single file only and Maximum Size 25Mb. You may place multiple files into a zipped archive to upload, alternatively or for larger files please contact the Data Manager for assistance: data.admin@missingsalmonalliance.org",
+                    placement = 'top',
+                    options = list(container = "body")
+                    
+)
+
+shinyBS::addPopover(session, id = 'temporalSlider',title = "Date Range",
+                    content = "Select a date range with the sliders, results on the map show all resources that cover this full date range (inclusive of selected years)",
                     placement = 'top',
                     options = list(container = "body")
                     
