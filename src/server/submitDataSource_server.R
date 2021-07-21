@@ -229,7 +229,7 @@ observeEvent(input$clearSubmitForm,{
 
 
 # User feedback - if no domain is selected
-output$domainSelectionCheck <- renderText('Please Select a Domain...')
+output$domainSelectionCheck <- renderText('Please Select a Life-Stage Domain...')
 
 # User feedback - if no ESV Category is selected
 output$esvCategorySelectionCheck <- renderText('Please Select a Variable Category...')
@@ -397,7 +397,7 @@ submitSourceConfirmDataTable <- reactive({
 })
 
 submitSourceConfirmESVDomains <- reactive({
-  # DEVELOPMENT - Build a table of Domains and Variable Classes chosen by user
+  # DEVELOPMENT - Build a table of Life-Stage Domains and Variable Classes chosen by user
   tibble(Domains = c(
       "River Rearing",
       "River Migration Smolt",

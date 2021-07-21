@@ -5,28 +5,17 @@
 tabItem('introduction',
         fluidPage(
           fluidRow(
-            h1("Welcome to the Central Data Resource")
+            h1("Welcome to the Central Data Resource for Atlantic Salmon"),
+            br(),
+            h4("Brought to you by the ",
+               a(href="https://missingsalmonalliance.org/","Missing Salmon Alliance",target="_blank"),
+               "as part of the",
+               a(href="https://missingsalmonalliance.org/likely-suspects-framework","Likely Suspects Framework,",target="_blank"),
+               "this resource intends to guide researchers to the data required to address 
+                                       hypotheses that will inform Atlantic salmon management activities aimed at improving salmon populations around the Atlantic Ocean.")
           ),
           fluidRow(
-            column(
-              width = 6,
-              box(
-                width = 12,
-                title = "Introduction",
-                status = 'primary',
-                solidHeader = FALSE,
-                h4("In response to the dramatic declines of Atlantic salmon populations, the Missing Salmon Alliance has developed the Likely Suspects Framework. This programme hopes to improve our understanding of the factors driving salmon population trends to help provision salmon managers with new tools to support their future decisions to help stabilise or reverse these declines in salmon."),
-                p(),
-                h4("Salmon management is frequently impeded by poor access to data that may support changing their approaches. The Likely Suspects Framework is working to mobilise biological, physical and salmon specific information from freshwater and marine environments located around the North Atlantic.")
-              )
-            ),
-            column(
-              width = 6,
-              #box(
-                #width = 12,
-                #img(src = 'images/screenshot_searchmap.PNG')
-              #)
-            )
+            hr()
           ),
           fluidRow(
             
@@ -34,7 +23,7 @@ tabItem('introduction',
               width = 4,
               #box(
               #  width = 12,
-                #img(src = 'images/screenshot_searchmap.PNG')
+              #img(src = 'images/screenshot_searchmap.PNG')
               #)
             ),
             column(
@@ -42,21 +31,6 @@ tabItem('introduction',
               carousel(
                 id = "mycarousel",
                 width = 12,
-                carouselItem(
-                  box(
-                    width = 12,
-                    title = "Search The Central Data Resource",
-                    status = 'warning',
-                    solidHeader = FALSE,
-                    h4(searchIntroCopyPara1),
-                    br(),
-                    h4(searchIntroCopyPara2),
-                    br(),
-                    br(),
-                    br(),
-                    br()
-                  )
-                ), # carousel item end
                 carouselItem(
                   box(
                     width = 12,
@@ -152,7 +126,7 @@ tabItem('introduction',
             )
           )
         )
-)
+),
 
 ############################
 #introductionTab_ui END

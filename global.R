@@ -158,10 +158,20 @@ checkboxGroupButtonsIcons <- list(yes = icon("ok",lib = "glyphicon"),no = icon("
 # COPY Section
 # Some text is duplicated across different parts of the application
 # This can be a central location for them so edits can be made in one place
-searchIntroCopyPara1 <- "This interface allows exploration through the various data we have collected and collated. Our system 
-categorises data regarding both its temporal and spatial extents but also how it may be applicable to Atlantic salmon. The 
-variable classes that we used for this are a range of biological, physical and salmon specific categories. By labelling our collected 
-data with these classes, we hope to improve your ability to efficiently find relevant data regarding various ecological factors 
+
+generalIntroCopyPara1 <- "In response to the dramatic declines of Atlantic salmon populations, the 
+Missing Salmon Alliance has developed the Likely Suspects Framework. This programme hopes to improve 
+our understanding of the factors driving salmon population trends to help provision salmon managers 
+with new tools to support their future decisions to help stabilise or reverse these declines in salmon."
+
+generalIntroCopyPara2 <- "Salmon management is frequently impeded by poor access to data that may support 
+changing their approaches. The Likely Suspects Framework is working to mobilise biological, physical and 
+salmon specific information from freshwater and marine environments located around the North Atlantic."
+
+searchIntroCopyPara1 <- "This interface allows exploration of the knowledge resources we have registered. Our system 
+categorises data regarding both its temporal and spatial extents and additionally how it may be applicable to Atlantic salmon. 
+We use sets of biological, physical and salmon specific variable classes to index observations. By tagging the collection 
+with these classes, we hope to improve your ability to efficiently find relevant data regarding many ecological factors 
 across a range of specific dates and geographical locations."
 
 searchIntroCopyPara2 <- "The interface contains a range of tools to help focus your data search on several levels. Filtering the 
@@ -170,10 +180,10 @@ knowledge sources and allow you to gain access via either primary sources or fro
 
 submitIntroCopyPara1 <- "This interface allows you to submit data along with a thorough description (metadata) into the Central Data 
 Resource. This data will be used to provision both managers and researchers in their fight to reduce declining salmon 
-abundance. Our interface will also allow you to categorise your data into salmon domains and variable classes. The variable classes 
+abundance. Our interface will also allow you to categorise your data into salmon life-stage domains and variable classes. The variable classes 
 are a range of biological, physical and salmon-specific categories. By labelling your data with these classes, we hope to improve the 
 ability for people to efficiently find relevant data regarding various ecological factors across a range of specific dates and 
-geographical locations. The domains refer to labelling your data regarding a specific habitat the salmon experience during their 
+geographical locations. The life-stage domains refer to labelling your data regarding a specific habitat the salmon experience during their 
 lifecycle e.g. river or ocean."
 
 submitIntroCopyPara2_OLDKNB <- "This interface ensures the data submitted into the Likely Suspects Framework database is labelled to both 
@@ -184,21 +194,21 @@ metadata. This will automatically fill the fields of this page as long as the eq
 submitIntroCopyPara2 <- "This interface ensures the data submitted into the Central Data Resource is labelled to both 
 spatial and temporal extents and linked to how it may be applicable to Atlantic salmon."
 
-domainsDescriptionCopy <- "Domains refer to the various environments
-Atlantic salmon move through dependent on their
+domainsDescriptionCopy <- "Life-Stage Domains refer to the various environments
+Atlantic salmon move through during their
 life-cycle. These domains represent the transitional
 habitats such as rivers, estuaries, coasts and
 oceans where the salmon experience different
 environmental pressures at different stages in their
 lifecycle. The domains are further split to represent
-the life stages of the salmon."
+the life-stages of the salmon."
 
 esvDescriptionCopy <- "The variable classes we use
-are a list of general categorical
-variables which salmon-related knowledge
-can be grouped by. These classes are grouped
-into three major categories including physical,
-biological and salmon-trait (specific to salmon)
+are a list of general groupings and specific
+variables into which salmon related knowledge
+can be classified. These classes are themselves grouped
+into three primary categories including physical,
+biological and salmon-trait (observations specific to salmon)
 knowledge. Knowledge resources may originate from empirical (direct 
 measurement), derived (simulated outputs) or expert 
 (opinion) sources."

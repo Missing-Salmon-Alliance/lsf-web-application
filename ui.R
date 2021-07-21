@@ -14,7 +14,7 @@ ui <- dashboardPage(skin = "blue",
                     ),
                     sidebar = dashboardSidebar(
                       disable = FALSE,
-                      minified = FALSE, # shinydashboardPlus feature
+                      minified = TRUE, # shinydashboardPlus feature
                       collapsed = FALSE,
                       
                       # three breaks needed to bring buttons lower than enlarged header bar height

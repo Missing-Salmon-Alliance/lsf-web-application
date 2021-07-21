@@ -42,8 +42,8 @@ shinyBS::addPopover(session, id = 'sourceKNBURIUI',title = "Enter a KNB URN or D
 )
 
 
-# shinyBS::addPopover(session, id = 'domainNodeList',title = "Domains",
-#                     content = HTML(paste0(strong("Domains"),em(paste0(" - ",domainsDescriptionCopy)))),
+# shinyBS::addPopover(session, id = 'domainNodeList',title = "Life-Stage Domains",
+#                     content = HTML(paste0(strong("Life-Stage Domains"),em(paste0(" - ",domainsDescriptionCopy)))),
 #                     placement = 'top',
 #                     options = list(container = "body")
 # )
@@ -69,7 +69,7 @@ shinyBS::addPopover(session, id = 'geogTimeFields', title = "Help Topic",
 )
 
 shinyBS::addPopover(session, id = 'esvFields', title = "Help Topic",
-                    content = "Click here to get more information on Domains and Variable Classes",
+                    content = "Click here to get more information on Life-Stage Domains and Variable Classes",
                     placement = 'top',
                     options = list(container = "body")
                     

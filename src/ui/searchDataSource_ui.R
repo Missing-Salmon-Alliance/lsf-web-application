@@ -34,7 +34,7 @@ tabItem( # tabItem 1
   ),
   conditionalPanel(
     condition = "!output.logonTrue",
-    h1("Central Data Resource Knowledge Search Area"),
+    h1("Map Explore Area"),
     h3("Please authenticate to access this area")
 
   )

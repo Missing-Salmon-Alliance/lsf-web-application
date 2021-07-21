@@ -6,13 +6,13 @@ tabItem( # tabItem
   tabName = "domainExplore",
   conditionalPanel(
     condition = "output.logonTrue",
-    h4("Explore available data resources based on salmon domains."),
-    p("The domains represent a combination of salmon life stage and the environments in which they reside and transit."),
+    h4("Explore available data resources based on salmon life-stage domains."),
+    p("The life-stage domains represent a combination of salmon life stage and the environments in which they reside and transit."),
     box(
       width = 5,
       status = 'primary',
-      title = "Step 1 - Filter by Domain (multi-select available)",
-      shinyWidgets::checkboxGroupButtons('domainFilter',"Select a Salmon Domain",choices = LSFDomainTibble$domainTitle,
+      title = "Step 1 - Filter by Life-Stage Domain (multi-select available)",
+      shinyWidgets::checkboxGroupButtons('domainFilter',"Select a Salmon Life-Stage Domain",choices = LSFDomainTibble$domainTitle,
                                          checkIcon = checkboxGroupButtonsIcons)
     ),
     box(
@@ -33,7 +33,7 @@ tabItem( # tabItem
   ),
   conditionalPanel(
     condition = "!output.logonTrue",
-    h1("Domain Explore Area"),
+    h1("Life-Stage Domain Explore Area"),
     h3("Please authenticate to access this area")
   )
 ) # tabItem close
