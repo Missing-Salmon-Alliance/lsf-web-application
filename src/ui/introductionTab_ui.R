@@ -126,7 +126,7 @@ tabItem('introduction',
             )
           )
         )
-),
+)
 
 ############################
 #introductionTab_ui END
