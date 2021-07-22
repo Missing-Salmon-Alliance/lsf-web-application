@@ -1,14 +1,13 @@
 ### User Interface created using shinydashboard package
-
 ui <- dashboardPage(skin = "blue",
                     title = "Missing Salmon Alliance", # This is the title that appears in the browser tab name
                     header = dashboardHeader(
                       # Set MSA logo as title and clickable link to MSA website
                       # https://stackoverflow.com/questions/31440564/adding-a-company-logo-to-shinydashboard-header
                       title = tags$a(href='https://missingsalmonalliance.org',
-                                     tags$img(src='msa-logo-small_whitebg.png'), # note, logo stored in www folder
+                                     tags$img(src='The_missing_salmon_type-394x100.png'), # note, logo stored in www folder
                                      target="_blank"), # opens the link in a new tab/window
-                      titleWidth = 295,
+                      titleWidth = 394,
                       # tag$li for header based user logon, logout and profile buttons
                       source("./src/ui/headerItems_ui.R",local = TRUE)$value
                     ),
@@ -45,11 +44,21 @@ ui <- dashboardPage(skin = "blue",
                     ),
                     body = dashboardBody(
                       shinyjs::useShinyjs(),
-                      tags$style(".popover{max-width: 50%;}"),
+                      tags$head(
+                        tags$link(rel = "stylesheet", type = "text/css", href = "custom.css")
+                      ),
+                      
+                      # The following styles have been moved to custom.css in the www folder
+                      
+                      #tags$style(".popover{max-width: 50%;}"),
                       # styling for search page filter collapse panels
                       # makes them slightly faded until mouse over
-                      tags$style("#searchFiltersAbsPanel {opacity:0.65;}"),
-                      tags$style("#searchFiltersAbsPanel:hover{opacity:1;}"),
+                      # tags$style("#searchFiltersAbsPanel {opacity:0.65;}"),
+                      # tags$style("#searchFiltersAbsPanel:hover{opacity:1;}"),
+                      # tags$style(".wrapper .main-header .logo {
+                      #   padding: 0px 0px;
+                      # }"),
+                      
                       
                       # EXPERIMENTAL changing background colours and picture - don't work too well!
                       #setBackgroundImage(src="https://www.transparenttextures.com/patterns/dark-mosaic.png", shinydashboard = TRUE),
@@ -65,7 +74,7 @@ ui <- dashboardPage(skin = "blue",
                       # tabItems open
                       tabItems(
                         source("./src/ui/introductionTab_ui.R", local = TRUE)$value, # tabItem intro
-                        
+     
                         source("./src/ui/newUserRegistrationTab_ui.R", local = TRUE)$value, # HIDDEN TAB ITEM
 
                         source("./src/ui/searchDataSource_ui.R", local = TRUE)$value, # tabItem general search view

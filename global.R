@@ -168,6 +168,17 @@ generalIntroCopyPara2 <- "Salmon management is frequently impeded by poor access
 changing their approaches. The Likely Suspects Framework is working to mobilise biological, physical and 
 salmon specific information from freshwater and marine environments located around the North Atlantic."
 
+carouselGeneralIntro1 <- "The Central Data Resource is designed to collate salmon knowledge and index it 
+in a way that will guide researchers to the data they need to test hypotheses. All knowledge in the 
+resource will have been included because it is relevant to Atlantic salmon ecology, including but not 
+restricted to:"
+
+carouselGeneralIntro2 <- ""
+
+searchIntroCopy <- "Search tabs allow exploration of the knowledge sources that have been registered. 
+These searches are presented in different ways to facilitate different use cases, from a location based map search, 
+free text based tabular search, to predefined filters based on mortality questions and Atlantic salmon life stages."
+
 searchIntroCopyPara1 <- "This interface allows exploration of the knowledge resources we have registered. Our system 
 categorises data regarding both its temporal and spatial extents and additionally how it may be applicable to Atlantic salmon. 
 We use sets of biological, physical and salmon specific variable classes to index observations. By tagging the collection 
@@ -177,6 +188,12 @@ across a range of specific dates and geographical locations."
 searchIntroCopyPara2 <- "The interface contains a range of tools to help focus your data search on several levels. Filtering the 
 data will return descriptions of data (metadata) relevant to your search terms. This metadata will help you to discover relevant 
 knowledge sources and allow you to gain access via either primary sources or from within the Central Data Resource."
+
+
+submitIntroCopy <- "Through this portal you may submit knowledge sources via an easy to follow metadata collection form. Our metadata form 
+ties in to existing metadata standards to ensure the descriptions have longevity and portability across other data repositories. We also ask 
+that the source is tagged with labels that highlight the relevance to Atlantic salmon by life-stage, environment and measurement or observation type."
+
 
 submitIntroCopyPara1 <- "This interface allows you to submit data along with a thorough description (metadata) into the Central Data 
 Resource. This data will be used to provision both managers and researchers in their fight to reduce declining salmon 

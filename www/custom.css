@@ -1,0 +1,19 @@
+/*
+styling for search page filter collapse panels
+makes them slightly faded until mouse over
+*/
+#searchFiltersAbsPanel {opacity:0.65;}
+#searchFiltersAbsPanel:hover{opacity:1;}
+
+/*
+adjust padding around header logo
+*/
+.wrapper .main-header .logo {
+  padding: 0 0;
+}
+
+/*
+adjust popover size
+*/
+
+.popover{max-width: 50%;}
