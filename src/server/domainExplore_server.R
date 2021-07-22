@@ -40,7 +40,7 @@ observeEvent(input$domainFilter,{
 observeEvent(input$esvFilterBioDom,{
   req(input$esvFilterBioDom)
   
-  if(input$esvFilterBioDom == "Please select a Domain"){
+  if("Please select a Domain" %in% input$esvFilterBioDom){
     # Update table - clear results and do nothing else
     domainExploreReactive(NULL)
   }else{
@@ -65,7 +65,7 @@ observeEvent(input$esvFilterBioDom,{
 observeEvent(input$esvFilterPhysDom,{
   req(input$esvFilterPhysDom)
   
-  if(input$esvFilterPhysDom == "Please select a Domain"){
+  if("Please select a Domain" %in% input$esvFilterPhysDom){
     # Update table - clear results and do nothing else
     domainExploreReactive(NULL)
   }else{
@@ -90,7 +90,7 @@ observeEvent(input$esvFilterPhysDom,{
 observeEvent(input$esvFilterTraitDom,{
   req(input$esvFilterTraitDom)
   
-  if(input$esvFilterTraitDom == "Please select a Domain"){
+  if("Please select a Domain" %in% input$esvFilterTraitDom){
     # Update table - clear results and do nothing else
     domainExploreReactive(NULL)
   }else{
