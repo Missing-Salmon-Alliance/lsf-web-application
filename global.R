@@ -168,12 +168,10 @@ generalIntroCopyPara2 <- "Salmon management is frequently impeded by poor access
 changing their approaches. The Likely Suspects Framework is working to mobilise biological, physical and 
 salmon specific information from freshwater and marine environments located around the North Atlantic."
 
-carouselGeneralIntro1 <- "The Central Data Resource is designed to collate salmon knowledge and index it 
+carouselGeneralIntro <- "The Central Data Resource is designed to collate salmon knowledge and index it 
 in a way that will guide researchers to the data they need to test hypotheses. All knowledge in the 
 resource will have been included because it is relevant to Atlantic salmon ecology, including but not 
 restricted to:"
-
-carouselGeneralIntro2 <- ""
 
 searchIntroCopy <- "Search tabs allow exploration of the knowledge sources that have been registered. 
 These searches are presented in different ways to facilitate different use cases, from a location based map search, 
