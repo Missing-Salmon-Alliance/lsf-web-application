@@ -14,9 +14,8 @@ tabItem('introduction',
                "this portal aims to guide researchers to data sources for addressing hypotheses, 
                                         informing management activities, and ultimately improving salmon populations around 
                                         the Atlantic Ocean."),
-            em("Access to the Central Data Resource is restricted to those who can provide data sources and those who can make 
-                                        use of the data. To sign up to this group click",actionLink('introRegisterLink',"here."),"You will be asked to abide 
-                                        by the Data Sharing Group terms and guiding principles, download a copy of these terms",a(href='MemorandumofAgreement.pdf',"here.",target="_blank"))
+            em("Access to the Central Data Resource is restricted to persons providing and/or making direct use of data sources for research. To sign up to this group click",actionLink('introRegisterLink',"here."),"You will be asked to abide 
+                                        by the Data Sharing Group terms and guiding principles. To view and download a copy of these terms click",a(href='MemorandumofAgreement.pdf',"here.",target="_blank"))
           ),
           fluidRow(
             hr(style="border-color: purple")
