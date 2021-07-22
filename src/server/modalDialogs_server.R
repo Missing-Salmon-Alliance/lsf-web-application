@@ -25,7 +25,7 @@ observeEvent(input$esvFields,{
       size = 'l',
       column(12,
              h3("Life-Stage Domains and Variable Classes"),
-             em("Here the data being submitted can be tagged regarding how it may be relevant to the differing habitats across the Atlantic salmon’s life-cycle."),
+             em("Here the data being submitted can be tagged regarding how it may be relevant to the differing habitats across the Atlantic salmon’s lifecycle."),
              br(),
              h4("Life-Stage Domain"),
              em(domainsDescriptionCopy),

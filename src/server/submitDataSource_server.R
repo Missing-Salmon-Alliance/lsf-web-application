@@ -300,42 +300,15 @@ observeEvent(input$monthsOfYearToggleAll,{
 
 
 # Geographic Detail Server
-# TODO: Convert all this to use a single reactiveValues, might reduce the line count significantly
 output$submitMap <- leaflet::renderLeaflet({
   leaflet::leaflet(options = leaflet::leafletOptions(maxZoom = 10)) %>% # maxZoom set so that user can always see their rectangle in context of a coastline
-    #addPolygons(data = neContinentsSF, stroke = FALSE) %>%
-    #addProviderTiles("Stamen.TerrainBackground") %>%
     leaflet::addProviderTiles(leaflet::providers$Esri.OceanBasemap) %>%
     leaflet::addRectangles(-15,61,-14,60,group = 'userRectangle') %>% 
     leaflet::fitBounds(-15,61,-14,60,options = leaflet::leafletOptions(maxZoom = 5))
 })
-
-observeEvent(input$submitEast,{
+# observer for 4 numeric inputs lat/lon - action update userRectangle on submitMap, change zoom and centre
+observeEvent(input$submitEast | input$submitWest | input$submitNorth | input$submitSouth,{
   req(input$submitEast && input$submitWest && input$submitNorth && input$submitSouth) # catch empty value, prevent crash?
-  leaflet::leafletProxy('submitMap') %>%
-    leaflet::clearGroup(group = 'userRectangle') %>%
-    leaflet::addRectangles(input$submitWest,input$submitNorth,input$submitEast,input$submitSouth,group = 'userRectangle') %>%
-    leaflet::fitBounds(input$submitWest,input$submitNorth,input$submitEast,input$submitSouth)
-})
-
-observeEvent(input$submitWest,{
-  req(input$submitEast && input$submitWest && input$submitNorth && input$submitSouth)
-  leaflet::leafletProxy('submitMap') %>%
-    leaflet::clearGroup(group = 'userRectangle') %>%
-    leaflet::addRectangles(input$submitWest,input$submitNorth,input$submitEast,input$submitSouth,group = 'userRectangle') %>%
-    leaflet::fitBounds(input$submitWest,input$submitNorth,input$submitEast,input$submitSouth)
-})
-
-observeEvent(input$submitNorth,{
-  req(input$submitEast && input$submitWest && input$submitNorth && input$submitSouth)
-  leaflet::leafletProxy('submitMap') %>%
-    leaflet::clearGroup(group = 'userRectangle') %>%
-    leaflet::addRectangles(input$submitWest,input$submitNorth,input$submitEast,input$submitSouth,group = 'userRectangle') %>%
-    leaflet::fitBounds(input$submitWest,input$submitNorth,input$submitEast,input$submitSouth)
-})
-
-observeEvent(input$submitSouth,{
-  req(input$submitEast && input$submitWest && input$submitNorth && input$submitSouth)
   leaflet::leafletProxy('submitMap') %>%
     leaflet::clearGroup(group = 'userRectangle') %>%
     leaflet::addRectangles(input$submitWest,input$submitNorth,input$submitEast,input$submitSouth,group = 'userRectangle') %>%

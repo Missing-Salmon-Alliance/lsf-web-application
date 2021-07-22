@@ -71,7 +71,7 @@ hypothesisSubhypothesis$relationships <- hypothesisSubhypothesis$relationships %
 subhypothesisESV$nodes <- subhypothesisESV$nodes %>% neo4r::unnest_nodes('all')
 subhypothesisESV$relationships <- subhypothesisESV$relationships %>% neo4r::unnest_relationships()
 
-LSFDomainTibble <- esvDomain$nodes[esvDomain$nodes$value == "Domain",] %>% dplyr::select(matches("^(id|domain*)"))
+LSFDomainTibble <- esvDomain$nodes[esvDomain$nodes$value == "Domain",] %>% dplyr::select(matches("^(id|domain*)")) %>% dplyr::arrange(id)
 LSFEssentialSalmonVariableTibble <- esvDomain$nodes[esvDomain$nodes$value == "EssentialSalmonVariable",] %>% dplyr::select(matches("^(id|esv*)"))
 LSFMetadataTibble <- metadataESV$nodes[metadataESV$nodes$value == "Metadata",] %>% dplyr::select(matches("^(id|metadata*)"))
 LSFHypothesisTibble <- hypothesisSubhypothesis$nodes[hypothesisSubhypothesis$nodes$value == "Hypothesis",] %>% dplyr::select(matches("^(id|hypothesis*)"))
@@ -175,7 +175,7 @@ restricted to:"
 
 searchIntroCopy <- "Search tabs allow exploration of the knowledge sources that have been registered. 
 These searches are presented in different ways to facilitate different use cases, from a location based map search, 
-free text based tabular search, to predefined filters based on mortality questions and Atlantic salmon life stages."
+free text based tabular search, to predefined filters based on mortality questions and Atlantic salmon life-stages."
 
 searchIntroCopyPara1 <- "This interface allows exploration of the knowledge resources we have registered. Our system 
 categorises data regarding both its temporal and spatial extents and additionally how it may be applicable to Atlantic salmon. 
@@ -211,7 +211,7 @@ spatial and temporal extents and linked to how it may be applicable to Atlantic 
 
 domainsDescriptionCopy <- "Life-Stage Domains refer to the various environments
 Atlantic salmon move through during their
-life-cycle. These domains represent the transitional
+lifecycle. These domains represent the transitional
 habitats such as rivers, estuaries, coasts and
 oceans where the salmon experience different
 environmental pressures at different stages in their

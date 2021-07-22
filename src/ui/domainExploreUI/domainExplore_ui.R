@@ -7,7 +7,7 @@ tabItem( # tabItem
   conditionalPanel(
     condition = "output.logonTrue",
     h4("Explore available data resources based on salmon life-stage domains."),
-    p("The life-stage domains represent a combination of salmon life stage and the environments in which they reside and transit."),
+    p("The life-stage domains represent a combination of salmon lifecycle and the environments within which they reside and transit."),
     box(
       width = 5,
       status = 'primary',

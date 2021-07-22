@@ -91,7 +91,19 @@ observeEvent(input$searchRefresh,{
   LSFMetadataTibble <- sf::st_as_sf(LSFMetadataTibble, wkt = "metadataCoverageCentroid", crs = 4326, na.fail = FALSE)
   
   metadataFilterReactive(LSFMetadataTibble)
-  
+  # clear existing markers
+  leaflet::leafletProxy("map", session) %>%
+    leaflet::clearGroup(group = 'Data Source')
+  # and redraw
+  redrawFilteredMarkers(metadataFilterReactive(),session)
+})
+
+observeEvent(input$searchFilterReset,{
+  metadataFilterReactive(LSFMetadataTibble)
+  # clear existing markers
+  leaflet::leafletProxy("map", session) %>%
+    leaflet::clearGroup(group = 'Data Source')
+  # and redraw
   redrawFilteredMarkers(metadataFilterReactive(),session)
 })
 
@@ -146,7 +158,8 @@ rm(nafoDivisions,nafoDivisionsGeoJSON)
 # feedingSF <- sf::read_sf(feedingGeoJSON)
 # rm(feeding,feedingGeoJSON)
 
-migrationSF <- sf::read_sf("./src/Migration_as_ICES_Squares.shp")
+# MOVE TO SQL SERVER!!!!
+migrationSF <- sf::read_sf("./src/Migration_as_ICES_Squares.shp") %>% dplyr::rename(id = ID) # snappy rename to bring in line with the other layers
 
 feedingSF <- sf::read_sf("./src/Feeding_Zones.shp")
 
@@ -210,6 +223,8 @@ output$map <- leaflet::renderLeaflet({
       iconSize = c(35, 35))) %>%
     leaflet::addCircleMarkers(data = NASCO_rivers, label = ~RiverName, group = "NASCO River DB", color = "black", radius = 3,
                      stroke = FALSE, fillOpacity = 1) %>%
+    
+    # Demonstration - Add WMS Tiles
     # leaflet::addWMSTiles(
     #   "https://gis.ices.dk/gis/services/Mapping_layers/ICES_Statrec_mapto_Ecoregions/MapServer/WMSServer",
     #   layers = "0",
@@ -219,6 +234,7 @@ output$map <- leaflet::renderLeaflet({
     
     leaflet::addPolygons(data = ICES_Ecoregions,
                 label = ICES_Ecoregions$name,
+                layerId = ~id,
                 color = "green", group = "Ecoregions", weight = 1,
                 highlightOptions = leaflet::highlightOptions(color = "yellow", weight = 3,
                                                     bringToFront = TRUE))  %>%
@@ -230,11 +246,13 @@ output$map <- leaflet::renderLeaflet({
     
     leaflet::addPolygons(data = nafoDivisionsSF,
                 label = nafoDivisionsSF$name,
+                layerId = ~id,
                 color = "purple", group = "NAFO Divisions", weight = 1,
                 highlightOptions = leaflet::highlightOptions(color = "yellow", weight = 3,
                                                     bringToFront = TRUE)) %>%
     leaflet::addPolygons(data = migrationSF,
                 label = migrationSF$name,
+                layerId = ~id,
                 color = "blue", group = "Migration Routes", weight = 1,
                 highlightOptions = leaflet::highlightOptions(color = "yellow", weight = 3,
                                                     bringToFront = TRUE)) %>%
@@ -278,44 +296,9 @@ output$table <- DT::renderDT({
 # Map metadata node marker filter OBSERVERS
 ###########################################
 
-# Eco regions based on pre-calculated intersects
-observeEvent(input$ecoregionFilter,{
-  leaflet::leafletProxy("map", session) %>%
-    leaflet::clearGroup(group = 'Data Source')
-  if(input$ecoregionFilter == "All"){
-    metadataFilterReactive(LSFMetadataTibble)
-  }else{
-    metadataFilterReactive(LSFMetadataTibble[str_detect(LSFMetadataTibble$metadataCoverageIntersectICESEcoRegion,input$ecoregionFilter),])
-  }
-  redrawFilteredMarkers(metadataFilterReactive(),session)
-})
-
-
-# NAFO divisions based on pre-calculated intersects
-observeEvent(input$nafodivisionFilter,{
-  leaflet::leafletProxy("map", session) %>%
-    leaflet::clearGroup(group = 'Data Source')
-  if(input$nafodivisionFilter == "All"){
-    metadataFilterReactive(LSFMetadataTibble)
-  }else{
-    metadataFilterReactive(LSFMetadataTibble[str_detect(LSFMetadataTibble$metadataCoverageIntersectNAFODivision,input$nafodivisionFilter),])
-  }
-  redrawFilteredMarkers(metadataFilterReactive(),session)
-})
-
-# migration routes based on pre-calculated intersects
-observeEvent(input$migrationRouteFilter,{
-  leaflet::leafletProxy("map", session) %>%
-    leaflet::clearGroup(group = 'Data Source')
-  if(input$migrationRouteFilter == "All"){
-    metadataFilterReactive(LSFMetadataTibble)
-  }else{
-    # apply regex escape
-    filterValue <- str_replace_all(str_replace_all(input$migrationRouteFilter,"\\(","\\\\("),"\\)","\\\\)")
-    metadataFilterReactive(LSFMetadataTibble[str_detect(LSFMetadataTibble$metadataCoverageIntersectMigrationRoutes,filterValue),])
-  }
-  redrawFilteredMarkers(metadataFilterReactive(),session)
-})
+###############################################
+# Geograpic Filters
+source("./src/server/searchDataSource_GeographicFilters_server.R",local = TRUE)$value
 
 ###############################################
 # Temporal Filters
@@ -324,10 +307,10 @@ source("./src/server/searchDataSource_temporalFilters_server.R",local = TRUE)$va
 
 ###############################################
 # Framework Filters
-source("./src/server/searchDataSource_frameworkFilters_server.R",local = TRUE)$value
+#source("./src/server/searchDataSource_frameworkFilters_server.R",local = TRUE)$value
 
 ##############################################
-# Polygon Mouse Over
+
 
 observeEvent(input$map_marker_click,{
     leaflet::leafletProxy("map") %>%

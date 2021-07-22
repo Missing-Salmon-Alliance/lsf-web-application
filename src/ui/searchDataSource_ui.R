@@ -8,12 +8,12 @@ tabItem( # tabItem 1
     #div(style="float:left",actionLink(inputId = "searchDescript", label = "Help", icon = icon("question-circle"))),
     #br(),
     absolutePanel(id = 'searchFiltersAbsPanel',
-                  top = "170px",
+                  top = "110px",
                   right = "10px",
                   width = "35%",
                   style="z-index:1000;",
                   shinyBS::bsCollapse(id = "mapSearchFilters", open = NULL,
-                             #source("./src/ui/searchDataSource_frameworkFilters_ui.R",local = TRUE)$value,
+                                      # new location to be determined for geographic filters
                              #source("./src/ui/searchDataSource_geographicFilters_ui.R",local = TRUE)$value,
                              source("./src/ui/searchDataSource_temporalFilters_ui.R",local = TRUE)$value
                   )
