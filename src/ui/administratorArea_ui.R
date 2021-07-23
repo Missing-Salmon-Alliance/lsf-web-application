@@ -12,7 +12,9 @@ tabsetPanel(id = "useradmin",
                          textInput('useradminEmail',label = "Email"),
                          textInput('useradminAffiliation',label = "Affiliation"),
                          passwordInput('useradminPassword',label = "Password"),
-                         checkboxInput('useradminAdmin',label = "Administrator?")
+                         checkboxInput('useradminAcceptDSA',label = "DSA Accepted?",value = FALSE),
+                         checkboxInput('useradminPromoteOrg',label = "Promote Organisation as DSG Member?",value = FALSE),
+                         checkboxInput('useradminAdmin',label = "Administrator?",value = FALSE)
                          ),
                      actionButton('addNewUser',"Add New User", icon = icon('user-check'))
                     ),

@@ -1,16 +1,18 @@
 # One observer for map_shape_click, search based on layer id
 observeEvent(input$map_shape_click,{
   # first detect shape layer name and ignore if not one of the searchable layers
-  if(input$map_shape_click[3] %in% c("Ecoregions","NAFO Divisions")){
+  if(input$map_shape_click[3] %in% c("ICES Ecoregions","NAFO Divisions")){
     # if TRUE, next step clear all Data Source markers
     leaflet::leafletProxy("map", session) %>%
       leaflet::clearGroup(group = 'Data Source')
     # get name of area clicked using id and pass to filter metadata
-    if(input$map_shape_click[3] == "Ecoregions"){
-      layerIDname <- ICES_Ecoregions[ICES_Ecoregions$id == input$map_shape_click[1],]$name
+    if(input$map_shape_click[3] == "ICES Ecoregions"){
+      layerID <- stringr::str_split(input$map_shape_click[1],"_",simplify = T)[,2]
+      layerIDname <- ICES_Ecoregions[ICES_Ecoregions$id == layerID,]$name
       metadataFilterReactive(LSFMetadataTibble[str_detect(LSFMetadataTibble$metadataCoverageIntersectICESEcoRegion,layerIDname),])
     }else{
-      layerIDname <- nafoDivisionsSF[nafoDivisionsSF$id == input$map_shape_click[1],]$name
+      layerID <- stringr::str_split(input$map_shape_click[1],"_",simplify = T)[,2]
+      layerIDname <- nafoDivisionsSF[nafoDivisionsSF$id == layerID,]$name
       metadataFilterReactive(LSFMetadataTibble[str_detect(LSFMetadataTibble$metadataCoverageIntersectNAFODivision,layerIDname),])
     }
     # redraw new filtered data

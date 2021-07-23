@@ -173,9 +173,10 @@ in a way that will guide researchers to the data they need to test hypotheses. A
 resource will have been included because it is relevant to Atlantic salmon ecology, including but not 
 restricted to:"
 
-searchIntroCopy <- "Search tabs allow exploration of the knowledge sources that have been registered. 
-These searches are presented in different ways to facilitate different use cases, from a location based map search, 
-free text based tabular search, to predefined filters based on mortality questions and Atlantic salmon life-stages."
+searchIntroCopy <- "Search tabs allow exploration of the knowledge sources that have been registered.
+These searches are presented in different ways to facilitate different use cases, from a location
+based map search, free text based tabular search, to predefined filters based on mortality questions
+and Atlantic salmon life-stages."
 
 searchIntroCopyPara1 <- "This interface allows exploration of the knowledge resources we have registered. Our system 
 categorises data regarding both its temporal and spatial extents and additionally how it may be applicable to Atlantic salmon. 
@@ -189,8 +190,7 @@ knowledge sources and allow you to gain access via either primary sources or fro
 
 
 submitIntroCopy <- "Through this portal you may submit knowledge sources via an easy to follow metadata collection form. Our metadata form 
-ties in to existing metadata standards to ensure the descriptions have longevity and portability across other data repositories. We also ask 
-that the source is tagged with labels that highlight the relevance to Atlantic salmon by life-stage, environment and measurement or observation type."
+ties in to existing metadata standards to ensure the descriptions have longevity and portability across other data repositories."
 
 
 submitIntroCopyPara1 <- "This interface allows you to submit data along with a thorough description (metadata) into the Central Data 

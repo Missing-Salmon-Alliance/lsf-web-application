@@ -21,7 +21,12 @@ tabItem( # tabItem 1
     fluidRow(
       shiny::tabsetPanel(id = "maptable",selected = "Map View",
                          tabPanel(title = "Map View",
-                                  leaflet::leafletOutput("map", height = "85vh")
+                                  leaflet::leafletOutput("map", height = "85vh"),
+                                  textOutput('clickOutput'),
+                                  textOutput('clickMarkerOutput'),
+                                  textOutput('clickShapeOutput'),
+                                  textOutput('clickBoundsOutput')
+                                  
                          ),
                          tabPanel(title = "Table View",
                                   column(

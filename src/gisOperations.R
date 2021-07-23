@@ -124,7 +124,7 @@ checkUserCredentials <- function(user,pw){
 }
 
 # Admin area create new user function
-adminCreateNewUser <- function(fullname,pw,email,affiliation,admin){
+adminCreateNewUser <- function(fullname,pw,email,affiliation,acceptDSA,promoteORG,admin){
   # Create a new user in the database
   # TODO: work out how to get rid of workaroundnode, this is used because check credentials function requires a node returned with at least 1 relationship
   # TODO: user feedback success/failure
@@ -132,7 +132,9 @@ adminCreateNewUser <- function(fullname,pw,email,affiliation,admin){
                     "',personPassword:'",pw,
                     "',personEmail:'",email,
                     "',personAffiliation:'",affiliation,
-                    "',personAdmin:",admin,
+                    "',personAcceptDSA:",acceptDSA,
+                    ",personPromoteOrg:",promoteORG,
+                    ",personAdmin:",admin,
                     "})-[:NEWUSER]->(w)"),
                     neo_con,
                     type = 'row')

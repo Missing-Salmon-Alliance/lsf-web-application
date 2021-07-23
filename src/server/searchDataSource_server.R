@@ -141,10 +141,10 @@ nafoDivisionsSF <- sf::read_sf(nafoDivisionsGeoJSON)
 rm(nafoDivisions,nafoDivisionsGeoJSON)
 
 
-# icesStatEco <- loadgeoJSONData("ices_stat_rect_eco","icesname")
-# icesStatEcoGeoJSON <- convertToGeojsonFeatureCollection(icesStatEco,"icesname")
-# icesStatEcoSF <- sf::read_sf(icesStatEcoGeoJSON)
-# rm(icesStatEco,icesStatEcoGeoJSON)
+icesStatEco <- loadgeoJSONData("ices_stat_rect_eco","icesname")
+icesStatEcoGeoJSON <- convertToGeojsonFeatureCollection(icesStatEco,"icesname")
+icesStatEcoSF <- sf::read_sf(icesStatEcoGeoJSON)
+rm(icesStatEco,icesStatEcoGeoJSON)
 
 
 # migration <- loadgeoJSONData("buffered_seasalar_migration","current")
@@ -218,11 +218,21 @@ output$map <- leaflet::renderLeaflet({
         autoCollapse = TRUE, hideMarkerOnCollapse = TRUE
       )
     ) %>%
-    leaflet::addMarkers(data = rivers,label = ~paste("Salmon Index River: ",RiverName), group = "ICES Index Rivers", icon = list(
-      iconUrl = "https://img.icons8.com/cotton/64/000000/salmon--v1.png",
-      iconSize = c(35, 35))) %>%
-    leaflet::addCircleMarkers(data = NASCO_rivers, label = ~RiverName, group = "NASCO River DB", color = "black", radius = 3,
-                     stroke = FALSE, fillOpacity = 1) %>%
+    
+    leaflet::addMarkers(data = rivers,
+                        label = ~paste("Salmon Index River: ",RiverName),
+                        group = "ICES Index Rivers",
+                        icon = list(
+                          iconUrl = "https://img.icons8.com/cotton/64/000000/salmon--v1.png",
+                          iconSize = c(35, 35))) %>%
+    
+    leaflet::addCircleMarkers(data = NASCO_rivers,
+                              label = ~RiverName,
+                              group = "NASCO River DB",
+                              color = "black",
+                              radius = 3,
+                              stroke = FALSE,
+                              fillOpacity = 1) %>%
     
     # Demonstration - Add WMS Tiles
     # leaflet::addWMSTiles(
@@ -233,27 +243,29 @@ output$map <- leaflet::renderLeaflet({
     # ) %>%
     
     leaflet::addPolygons(data = ICES_Ecoregions,
-                label = ICES_Ecoregions$name,
-                layerId = ~id,
-                color = "green", group = "Ecoregions", weight = 1,
+                label = ~name,
+                layerId = paste0("eco_",ICES_Ecoregions$id),
+                color = "green", group = "ICES Ecoregions", weight = 1,
                 highlightOptions = leaflet::highlightOptions(color = "yellow", weight = 3,
                                                     bringToFront = TRUE))  %>%
-    # leaflet::addPolygons(data = icesStatEcoSF,
-    #             label = icesStatEcoSF$name,
-    #             layerId = ~name, color = "blue", group = "Statistical Squares", weight = 1,
-    #             highlightOptions = leaflet::highlightOptions(color = "yellow", weight = 3,
-    #                                                 bringToFront = TRUE))  %>%
     
+    leaflet::addPolygons(data = icesStatEcoSF,
+                label = ~name,
+                layerId = paste0("sta_",icesStatEcoSF$id),
+                color = "blue", group = "ICES Stat Squares", weight = 1,
+                highlightOptions = leaflet::highlightOptions(color = "yellow", weight = 3,
+                                                    bringToFront = TRUE))  %>%
+     
     leaflet::addPolygons(data = nafoDivisionsSF,
-                label = nafoDivisionsSF$name,
-                layerId = ~id,
+                label = ~name,
+                layerId = paste0("div_",nafoDivisionsSF$id),
                 color = "purple", group = "NAFO Divisions", weight = 1,
                 highlightOptions = leaflet::highlightOptions(color = "yellow", weight = 3,
                                                     bringToFront = TRUE)) %>%
     leaflet::addPolygons(data = migrationSF,
-                label = migrationSF$name,
-                layerId = ~id,
-                color = "blue", group = "Migration Routes", weight = 1,
+                label = ~ICESNAME,
+                layerId = paste0("mig_",migrationSF$id),
+                color = "blue", group = "Proposed Outward Migration", weight = 1,
                 highlightOptions = leaflet::highlightOptions(color = "yellow", weight = 3,
                                                     bringToFront = TRUE)) %>%
     
@@ -262,10 +274,20 @@ output$map <- leaflet::renderLeaflet({
     #             color = "black", group = "Migration Routes", weight = 1,
     #             highlightOptions = leaflet::highlightOptions(color = "yellow", weight = 3,
     #                                                 bringToFront = TRUE)) %>%
-    # 
-    leaflet::addLayersControl(position = 'topleft',overlayGroups = c("Data Source","ICES Index Rivers","Ecoregions", "NAFO Divisions","Migration Routes","NASCO River DB"),
+    
+    leaflet::addLayersControl(position = 'topleft',overlayGroups = c("Data Source",
+                                                                     "ICES Index Rivers",
+                                                                     "ICES Ecoregions",
+                                                                     "NAFO Divisions",
+                                                                     "ICES Stat Squares",
+                                                                     "Proposed Outward Migration",
+                                                                     "NASCO River DB"),
                      options = leaflet::layersControlOptions(collapsed = FALSE)) %>%
-    leaflet::hideGroup(c("Ecoregions", "NAFO Divisions","Migration Routes", "NASCO River DB")) %>%
+    leaflet::hideGroup(c("ICES Ecoregions",
+                         "NAFO Divisions",
+                         "ICES Stat Squares",
+                         "Proposed Outward Migration",
+                         "NASCO River DB")) %>%
     
     htmlwidgets::onRender("
         function() {
@@ -478,6 +500,11 @@ output$No_Eco <- renderInfoBox({
           fill = T, color = "green")
 })
 
+# Debugging Information
+output$clickMarkerOutput <- renderText({paste0("Marker: ",input$map_marker_click,collapse = ",")})
+output$clickOutput <- renderText({paste0("Click: ",input$map_click,collapse = ",")})
+output$clickShapeOutput <- renderText({paste0("Shape: ",input$map_shape_click,collapse = ",")})
+output$clickBoundsOutput <- renderText({paste0("Bounds: ",input$map_bounds,collapse = ",")})
 ############################
 # DataSearch_server.R END
 ############################

@@ -11,11 +11,12 @@ tabItem('introduction',
                a(href="https://missingsalmonalliance.org/","Missing Salmon Alliance",target="_blank"),
                "as part of the",
                a(href="https://missingsalmonalliance.org/likely-suspects-framework","Likely Suspects Framework,",target="_blank"),
-               "this portal aims to guide researchers to data sources for addressing hypotheses, 
-                                        informing management activities, and ultimately improving salmon populations around 
-                                        the Atlantic Ocean."),
-            em("Access to the Central Data Resource is restricted to persons providing and/or making direct use of data sources for research. To sign up to this group click",actionLink('introRegisterLink',"here."),"You will be asked to abide 
-                                        by the Data Sharing Group terms and guiding principles. To view and download a copy of these terms click",a(href='MemorandumofAgreement.pdf',"here.",target="_blank"))
+               "this portal aims to guide researchers to data sources for testing hypotheses, 
+                                        informing management activities, and ultimately improving Atlantic salmon populations."),
+            p("Access to the Central Data Resource is currently limited to members of a Data Sharing Group. To sign up to this group click",actionLink('introRegisterLink',"here."),
+              "You will be asked to abide by terms and guiding principles. To view and download a copy of these terms click",a(href='MemorandumofAgreement.pdf',"here.",target="_blank")),
+            tags$b("This resource is ready for use but may change in appearance and functionality as our user base and knowledge base grows. 
+                                    Development suggestions are always welcome and can be directed to the team via",a(href="mailto: data.admin@missingsalmonalliance.org","email."),"It is best viewed in a modern browser, at a zoom level of 100% or less and is not designed to be viewed on a mobile device.")
           ),
           fluidRow(
             hr(style="border-color: purple")
@@ -26,8 +27,14 @@ tabItem('introduction',
               width = 12,
               carouselItem(
                 column(
-                  width = 12,
+                  width = 7,
                   img(src = 'msa-logo.png', height = '350vh')
+                ),
+                box(
+                  width = 5,
+                  title = "The Missing Salmon Alliance",
+                  status = 'primary',
+                  em("A group of conservation focused organisations working together to drive action and save our wild Atlantic salmon from extinction by combining expertise, coordinating activities and advocating effective management solutions.")
                 )
               ),
               carouselItem(
@@ -87,7 +94,7 @@ tabItem('introduction',
                   title = "The Metadata",
                   status = 'danger',
                   solidHeader = FALSE,
-                  em("The data source descriptions are grounded in a common language (Ecological Metadata Language -",a(href="https://www.dcc.ac.uk/resources/metadata-standards/eml-ecological-metadata-language","EML",target="_blank"),"), all effort put in to describing the data thoroughly via this interface is interoperable with popular online data portals such as:"),
+                  em("The data source descriptions are grounded in a common language,",a(href="https://www.dcc.ac.uk/resources/metadata-standards/eml-ecological-metadata-language","Ecological Metadata Language (EML).",target="_blank"),"All efforts put in to describing the data thoroughly via this interface are interoperable with popular online metadata catalogues such as:"),
                   br(),
                   column(
                     2
@@ -105,20 +112,28 @@ tabItem('introduction',
                   width = 5,
                   img(src = 'images/screenshot_searchmap.PNG', height = '350vh')
                 )
+              ), # carousel item end
+              carouselItem(
+                column(
+                  width = 5,
+                  img(src = 'images/screenshot_searchmap.PNG', height = '350vh')
+                ),
+                box(
+                  width = 7,
+                  title = "Data Citation",
+                  status = 'success',
+                  solidHeader = FALSE,
+                  em("The creation of static and citable data sources with an associated Digital Object
+                                             Identifier (DOI) promotes more open and reproducible research,
+                                             as well as adding provenance to new syntheses that can otherwise
+                                             be difficult to trace. Data citation also provides a way for data owners to leverage more
+                                             value from their used data resources. The Central Data Resource assigns unique
+                                             DOI's to all submissions and members are expected to abide by
+                                             academic norms for citation. Data Citation conventions have been
+                                             developed by the FORCE11 community and can be found",
+                     a(href="https://www.force11.org/datacitationprinciples","here",target="_blank"))
+                )
               ) # carousel item end
-              # carouselItem(
-              #   column(
-              #     width = 5,
-              #     img(src = 'images/screenshot_searchmap.PNG', height = '350vh')
-              #   ),
-              #   box(
-              #     width = 7,
-              #     title = "Blank Item 1",
-              #     status = 'danger',
-              #     solidHeader = FALSE,
-              #     em("Holding area for more information")
-              #   )
-              # ), # carousel item end
               # carouselItem(
               #   box(
               #     width = 7,
