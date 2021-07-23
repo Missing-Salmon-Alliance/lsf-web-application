@@ -209,14 +209,10 @@ metadata. This will automatically fill the fields of this page as long as the eq
 submitIntroCopyPara2 <- "This interface ensures the data submitted into the Central Data Resource is labelled to both 
 spatial and temporal extents and linked to how it may be applicable to Atlantic salmon."
 
-domainsDescriptionCopy <- "Life-Stage Domains refer to the various environments
-Atlantic salmon move through during their
-lifecycle. These domains represent the transitional
-habitats such as rivers, estuaries, coasts and
-oceans where the salmon experience different
-environmental pressures at different stages in their
-lifecycle. The domains are further split to represent
-the life-stages of the salmon."
+domainsDescriptionCopy <- "Life-Stage Domains refer to the various environments Atlantic salmon move through
+during their lifecycle, including freshwater, transition and marine. The salmon experience different
+conditions and pressures at different domains and stages in their lifecycle. The domains are further
+split to represent the life-stages of the salmon."
 
 esvDescriptionCopy <- "The variable classes we use
 are a list of general groupings and specific

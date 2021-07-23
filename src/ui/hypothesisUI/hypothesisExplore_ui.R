@@ -7,10 +7,16 @@ tabItem( # tabItem
   conditionalPanel(
     condition = "output.logonTrue",
     h4("Explore available data resources based on addressing a specific hypothesis."),
-    p("We have developed 11 example Mortality Hypotheses to demonstrate data resource availability in this light."),
+    p("To advance international efforts to uncover the reasons for downward trends in
+      salmon abundance, the MSA Likely Suspects Framework team has been trying to focus
+      scientific efforts onto identifying a group of key hypotheses relating to possible
+      drivers of salmon mortality. Read more about this activity on the",a(href="https://missingsalmonalliance.org","MSA website.",target="_blank"),
+      "The set of 11 resultant priority candidate hypotheses statements are presented here
+      as a way to filter available data resources based on how applicable variable classes
+      are to the selected hypothesis."),
     box(
       status = 'primary',
-      title = "Step 1 - Filter by Hypothesis",
+      title = "Step 1 - Hypotheses",
       width = 5,
       column(
         width = 12,
@@ -30,7 +36,7 @@ tabItem( # tabItem
     ),
     box(
       status = 'primary',
-      title = "Step 2 - Select Variable Classes to filter resources in step 3",
+      title = "Step 2 - Variable Classes",
       width = 7,
       #fluidRow(
         #width = 4,
@@ -64,7 +70,7 @@ tabItem( # tabItem
       status = 'success',
       width = 12,
       solidHeader = TRUE,
-      title = "Step 3 - Available Resources for Selected Variable Classes",
+      title = "Step 3 - Results",
       DT::DTOutput('hypothesisExploreTable')
     )
   ),

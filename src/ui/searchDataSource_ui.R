@@ -22,10 +22,13 @@ tabItem( # tabItem 1
       shiny::tabsetPanel(id = "maptable",selected = "Map View",
                          tabPanel(title = "Map View",
                                   leaflet::leafletOutput("map", height = "85vh"),
-                                  textOutput('clickOutput'),
-                                  textOutput('clickMarkerOutput'),
-                                  textOutput('clickShapeOutput'),
-                                  textOutput('clickBoundsOutput')
+                                  conditionalPanel(
+                                    condition = "input.debug",
+                                    textOutput('clickOutput'),
+                                    textOutput('clickMarkerOutput'),
+                                    textOutput('clickShapeOutput'),
+                                    textOutput('clickBoundsOutput')
+                                  )
                                   
                          ),
                          tabPanel(title = "Table View",

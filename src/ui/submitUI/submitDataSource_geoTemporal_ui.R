@@ -35,7 +35,9 @@ box(title = p("Geographic Coverage and Temporal Coverage",actionLink(inputId = "
                          ),
                          column(
                            width = 3,
-                           sliderInput(inputId = "sourceStartEndYear", label = "Indicate Range of Years Covered", min = 1900, max = 2021, value = c(2000,2020), sep = ""),
+                           tags$b("Indicate Range of Years Covered"),
+                           numericInput(inputId = 'sourceStartYear',label = "Start",min = 0,max = 9999,value = 2021,step = 1,width = '45%'),
+                           numericInput(inputId = 'sourceEndYear',label = "End",min = 0,max = 9999,value = 2021,step = 1,width = '45%'),
                            shinyWidgets::checkboxGroupButtons("monthsOfYear", "Indicate Months Covered", choices = month.abb,
                                                               status = "default",
                                                               checkIcon = checkboxGroupButtonsIcons),

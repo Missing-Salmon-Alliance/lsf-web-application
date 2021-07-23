@@ -73,7 +73,8 @@ resetAll <- function(){
   shinyWidgets::updateCheckboxGroupButtons(session, inputId = 'esvCategory',selected = character(0))
   
   #reset Source Temporal Section
-  updateSliderInput(session,inputId = 'sourceStartEndYear',value = c(2000,2020))
+  updateNumericInput(session,inputId = 'sourceStartYear',value = 2021)
+  updateNumericInput(session,inputId = 'sourceEndYear',value = 2021)
   shinyWidgets::updateCheckboxGroupButtons(session, inputId = 'monthsOfYear',selected = character(0))
   updateActionButton(session, 'monthsOfYearToggleAll', label = "Select All")
   
@@ -186,9 +187,8 @@ observeEvent(input$loadKNB,{
       updateTextInput(session,inputId = 'sourceCreatorORCID',value = xml_text(xml2::xml_find_first(xml_doc, emlNodes$creatorUserID)))
       updateTextInput(session,inputId = 'sourceALTURI',value = xml_text(xml2::xml_find_first(xml_doc, emlNodes$altURL)))
       
-      
-      updateSliderInput(session,inputId = 'sourceStartEndYear',value = c(as.integer(format(xml_text(xml2::xml_find_first(xml_doc, emlNodes$dateStart)), format = "%Y")),
-                                                                         as.integer(format(xml_text(xml2::xml_find_first(xml_doc, emlNodes$dateEnd)), format = "%Y"))))
+      updateNumericInput(session,inputId = 'sourceStartYear',value = as.integer(format(xml_text(xml2::xml_find_first(xml_doc, emlNodes$dateStart)), format = "%Y")))
+      updateNumericInput(session,inputId = 'sourceEndYear',value = as.integer(format(xml_text(xml2::xml_find_first(xml_doc, emlNodes$dateEnd)), format = "%Y")))
       
       updateTextAreaInput(session,inputId = 'sourceGeographicDescription',value = xml_text(xml2::xml_find_first(xml_doc, emlNodes$geogDescription)))
       updateNumericInput(session,inputId = 'submitNorth',value = xml_text(xml2::xml_find_first(xml_doc, emlNodes$geogNorth)))
@@ -356,8 +356,8 @@ submitSourceConfirmDataTable <- reactive({
              # KNBURI=input$sourceURI,
              # metadataAlternateURI=input$sourceALTURI,
              # metadataCreatorORCID=input$sourceCreatorORCID,
-             # metadataCoverageStartYear=input$sourceStartEndYear[1],
-             # metadataCoverageEndYear=input$sourceStartEndYear[2],
+             # metadataCoverageStartYear=input$sourceStartYear,
+             # metadataCoverageEndYear=input$sourceEndYear,
              # metadataCoverageMonthsOfYear=paste(input$monthsOfYear,collapse = ","),#collapse months of year into csv string
              # metadataCoverageNorth=input$submitNorth,
              # metadataCoverageSouth=input$submitSouth,
@@ -534,8 +534,8 @@ observeEvent(input$confirmSubmitNewDataSource, {
                                      "',metadataGeographicDescription:'",input$sourceGeographicDescription,
                                      "',metadataCreatorEmail:'",input$sourceCreatorEmail,
                                      "',metadataCreatorORCID:'",input$sourceCreatorORCID,
-                                     "',metadataCoverageStartYear:'",input$sourceStartEndYear[1],
-                                     "',metadataCoverageEndYear:'",input$sourceStartEndYear[2],
+                                     "',metadataCoverageStartYear:'",input$sourceStartYear,
+                                     "',metadataCoverageEndYear:'",input$sourceEndYear,
                                      "',metadataCoverageMonthsOfYear:'",paste(input$monthsOfYear,collapse = ","),#collapse months of year into csv string
                                      "',metadataCoverageNorth:'",input$submitNorth,
                                      "',metadataCoverageSouth:'",input$submitSouth,
