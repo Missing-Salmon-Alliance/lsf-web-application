@@ -30,7 +30,7 @@ output$submitNewDataSourceSidebarUI <- renderUI({
   actionButton(inputId = 'submitNewDataSourceSidebar',label = "Submit New Data Source", class = 'btn-success')
 })
 
-# KNB User Interface Inputs
+# KNB User Interface Inputs COMMENTED OUT FOR NOW AS FUNCTIONALITY NOT FULLED DESCRIBED ON SITE INFORMATION
 # output$sourceKNBURIUI <- renderUI({
 #   textInput(inputId = 'sourceKNBURI', label = "",placeholder = "Enter a KNB URN or DOI")
 # })
