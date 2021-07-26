@@ -53,22 +53,7 @@ ui <- dashboardPage(skin = "blue",
                     ),
                     body = dashboardBody(
                       shinyjs::useShinyjs(),
-                      # load custom css file to adjust site colours and some dimensions
-                      tags$head(
-                        tags$link(rel = "stylesheet", type = "text/css", href = "custom.css")
-                      ),
-                      
-                      # The following styles have been moved to custom.css in the www folder
-                      
-                      #tags$style(".popover{max-width: 50%;}"),
-                      # styling for search page filter collapse panels
-                      # makes them slightly faded until mouse over
-                      # tags$style("#searchFiltersAbsPanel {opacity:0.65;}"),
-                      # tags$style("#searchFiltersAbsPanel:hover{opacity:1;}"),
-                      # tags$style(".wrapper .main-header .logo {
-                      #   padding: 0px 0px;
-                      # }"),
-                      
+                      includeCSS('www/custom.css'),
                       
                       # EXPERIMENTAL changing background colours and picture - don't work too well!
                       #setBackgroundImage(src="https://www.transparenttextures.com/patterns/dark-mosaic.png", shinydashboard = TRUE),
