@@ -71,7 +71,7 @@ hypothesisSubhypothesis$relationships <- hypothesisSubhypothesis$relationships %
 subhypothesisESV$nodes <- subhypothesisESV$nodes %>% neo4r::unnest_nodes('all')
 subhypothesisESV$relationships <- subhypothesisESV$relationships %>% neo4r::unnest_relationships()
 
-LSFDomainTibble <- esvDomain$nodes[esvDomain$nodes$value == "Domain",] %>% dplyr::select(matches("^(id|domain*)")) %>% dplyr::arrange(id)
+LSFDomainTibble <- esvDomain$nodes[esvDomain$nodes$value == "Domain",] %>% dplyr::select(matches("^(id|domain*)")) %>% dplyr::arrange(domainOrder)
 LSFEssentialSalmonVariableTibble <- esvDomain$nodes[esvDomain$nodes$value == "EssentialSalmonVariable",] %>% dplyr::select(matches("^(id|esv*)"))
 LSFMetadataTibble <- metadataESV$nodes[metadataESV$nodes$value == "Metadata",] %>% dplyr::select(matches("^(id|metadata*)"))
 LSFHypothesisTibble <- hypothesisSubhypothesis$nodes[hypothesisSubhypothesis$nodes$value == "Hypothesis",] %>% dplyr::select(matches("^(id|hypothesis*)"))
