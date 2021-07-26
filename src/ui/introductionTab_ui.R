@@ -13,8 +13,7 @@ tabItem('introduction',
                a(href="https://missingsalmonalliance.org/likely-suspects-framework","Likely Suspects Framework,",target="_blank"),
                "this portal aims to guide researchers to data sources for testing hypotheses, 
                                         informing management activities, and ultimately improving Atlantic salmon populations."),
-            p("Access to the Central Data Resource is currently limited to members of a Data Sharing Group. To sign up to this group click",actionLink('introRegisterLink',"here."),
-              "You will be asked to abide by terms and guiding principles. To view and download a copy of these terms click",a(href='MemorandumofAgreement.pdf',"here.",target="_blank")),
+            
             tags$b("This resource is ready for use but may change in appearance and functionality as our user base and knowledge base grows. 
                                     Development suggestions are always welcome and can be directed to the team via",a(href="mailto: data.admin@missingsalmonalliance.org","email."),"It is best viewed in a modern browser, at a zoom level of 100% or less and is not designed to be viewed on a mobile device.")
           ),
@@ -124,14 +123,16 @@ tabItem('introduction',
                   status = 'success',
                   solidHeader = FALSE,
                   em("The creation of static and citable data sources with an associated Digital Object
-                                             Identifier (DOI) promotes more open and reproducible research,
-                                             as well as adding provenance to new syntheses that can otherwise
-                                             be difficult to trace. Data citation also provides a way for data owners to leverage more
-                                             value from their used data resources. The Central Data Resource assigns unique
-                                             DOI's to all submissions and members are expected to abide by
-                                             academic norms for citation. Data Citation conventions have been
-                                             developed by the FORCE11 community and can be found",
-                     a(href="https://www.force11.org/datacitationprinciples","here",target="_blank"))
+                     Identifier (DOI) promotes more open and reproducible research,
+                     as well as adding provenance to new syntheses that can otherwise
+                     be difficult to trace. Data citation also provides a way for data owners to leverage more
+                     value from their used data resources. The Central Data Resource assigns locally unique
+                     identifiers and can facilitate the creation of globally unique and derefenceable DOI's via
+                     the",a(href="https://knb.ecoinformatics.org","Knowledge Network for Biocomplexity.",target = "_blank")),
+                  br(),
+                  em("All members are expected to abide by academic norms for citation. Data Citation conventions have been
+                     developed by the FORCE11 community and can be found here:",
+                     a(href="https://www.force11.org/datacitationprinciples","force11.org",target="_blank"))
                 )
               ) # carousel item end
               # carouselItem(

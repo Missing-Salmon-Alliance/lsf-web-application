@@ -21,7 +21,9 @@ output$userpanel <- renderUI({
 })
 
 # observe logon button click - action use modal to prompt for username and password or for new user registration
-observeEvent(input$loginModal, {
+observeEvent(input$loginModal | input$introSideLogonButton, {
+  # req prevents trigger on load
+  req(input$loginModal != 0 || input$introSideLogonButton != 0)
   showModal(
     modalDialog(title = "Login",
                 p("Please enter your email and password",
