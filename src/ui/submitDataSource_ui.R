@@ -7,13 +7,11 @@ tabItem( # tabItem 3
   conditionalPanel(
     condition = "output.logonTrue",
     fluidRow(
-      column(12,
-             source("./src/ui/submitUI/submitDataSource_metadataFields_ui.R",local = TRUE)$value,
-             source("./src/ui/submitUI/submitDataSource_geoTemporal_ui.R",local = TRUE)$value,
-             source("./src/ui/submitUI/submitDataSource_domainsESV_ui.R",local = TRUE)$value,
-             # second submit button at the bottom of the page for user convenience
-             uiOutput('submitNewDataSourceBodyUI')
-      )
+      source("./src/ui/submitUI/submitDataSource_metadataFields_ui.R",local = TRUE)$value,
+      source("./src/ui/submitUI/submitDataSource_geoTemporal_ui.R",local = TRUE)$value,
+      source("./src/ui/submitUI/submitDataSource_domainsESV_ui.R",local = TRUE)$value,
+      # second submit button at the bottom of the page for user convenience
+      uiOutput('submitNewDataSourceBodyUI')
     ),
       
     ##############################

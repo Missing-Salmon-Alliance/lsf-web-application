@@ -228,29 +228,71 @@ observeEvent(input$clearSubmitForm,{
 })
 
 
+##########################################################
+# SubmitDataSource_server Life-Stage and Domains Selection
+##########################################################
+
+
 # User feedback - if no domain is selected
 output$domainSelectionCheck <- renderText('Please Select a Life-Stage Domain...')
 
-# User feedback - if no ESV Category is selected
-output$esvCategorySelectionCheck <- renderText('Please Select a Variable Category...')
-
-# ESV Check Boxes - Controlled by domainNodeList and esvCategory inputs
+# Variable Class (esv) Check Boxes - Controlled by domainNodeList inputs
 output$esvPerDomain <- renderUI({
   if(length(input$domainNodeList) == 0){
     textOutput('domainSelectionCheck')
-  }else if(length(input$esvCategory) == 0){
-    textOutput('esvCategorySelectionCheck')
   }else{
     lapply(1:length(input$domainNodeList), function(i) {
       domainName <- input$domainNodeList[i]
-      esvNodeListResult <- neo4r::call_neo4j(paste("MATCH (n:EssentialSalmonVariable)-[:HAS_DOMAIN]-(m:Domain{domainTitle:'",domainName,"'}) WHERE n.esvCategory IN [",formatCheckboxGroupCategories(input$esvCategory),"] RETURN n.esvTitle;",sep = ''),neo_con, type = 'row')
-      shinyWidgets::checkboxGroupButtons(domainName,domainName,choices = sort(esvNodeListResult$n.esvTitle$value),
-                           justified = F,
-                           individual = T,
-                           status = "default",
-                           checkIcon = checkboxGroupButtonsIcons)
-    })}
+      esvNodeListResultPhys <- neo4r::call_neo4j(paste0("MATCH (n:EssentialSalmonVariable{esvCategory:'Physical'})-[:HAS_DOMAIN]-(m:Domain{domainTitle:'",domainName,"'}) RETURN n.esvTitle;"),neo_con, type = 'row')
+      esvNodeListResultBiol <- neo4r::call_neo4j(paste0("MATCH (n:EssentialSalmonVariable{esvCategory:'Biological'})-[:HAS_DOMAIN]-(m:Domain{domainTitle:'",domainName,"'}) RETURN n.esvTitle;"),neo_con, type = 'row')
+      esvNodeListResultTrait <- neo4r::call_neo4j(paste0("MATCH (n:EssentialSalmonVariable{esvCategory:'Salmon Trait'})-[:HAS_DOMAIN]-(m:Domain{domainTitle:'",domainName,"'}) RETURN n.esvTitle;"),neo_con, type = 'row')
+      # UI code
+      # Note dynamic input_ids created from domain name and 3 variable categories physical, biological and salmon trait
+      # These dynamic id's are used later on in the server logic when the user presses submit and the selected
+      # variable classes are passed back to the database. 
+      box(
+        width = 12,
+        title = domainName,
+        status = 'warning',
+        column(
+          width = 4,
+          shinyWidgets::checkboxGroupButtons(paste0(domainName,"_physical"),"Physical",choices = sort(esvNodeListResultPhys$n.esvTitle$value),
+                                             justified = F,
+                                             individual = T,
+                                             status = "default",
+                                             size = 'xs',
+                                             direction = 'vertical',
+                                             checkIcon = checkboxGroupButtonsIcons)
+        ),
+        column(
+          width = 4,
+          shinyWidgets::checkboxGroupButtons(paste0(domainName,"_biological"),"Biological",choices = sort(esvNodeListResultBiol$n.esvTitle$value),
+                                             justified = F,
+                                             individual = T,
+                                             status = "default",
+                                             size = 'xs',
+                                             direction = 'vertical',
+                                             checkIcon = checkboxGroupButtonsIcons)
+        ),
+        column(
+          width = 4,
+          shinyWidgets::checkboxGroupButtons(paste0(domainName,"_salmontrait"),"Salmon Trait",choices = sort(esvNodeListResultTrait$n.esvTitle$value),
+                                             justified = F,
+                                             individual = T,
+                                             status = "default",
+                                             size = 'xs',
+                                             direction = 'vertical',
+                                             checkIcon = checkboxGroupButtonsIcons)
+        )
+      ) # close box
+    }) # close lapply loop
+    } # else clause end
 })
+
+##########################################################
+# SubmitDataSource_server Life-Stage and Domains Selection
+##########################################################
+
 
 # observers for checkbox enable/disable inputs
 observeEvent(input$embargoEndToggle,{
@@ -371,24 +413,24 @@ submitSourceConfirmDataTable <- reactive({
 
 submitSourceConfirmESVDomains <- reactive({
   # DEVELOPMENT - Build a table of Life-Stage Domains and Variable Classes chosen by user
-  tibble(Domains = c(
-      "River Rearing",
-      "River Migration Smolt",
-      "River Migration Adult",
-      "Estuary Migration Post-Smolt",
-      "Coastal Migration Post-Smolt",
-      "Ocean Migration",
-      "Coastal Migration Adult",
-      "Estuary Migration Adult"),
-      `Selected Variable Classes` = c(
-        formatCheckboxGroupCategories(input$`River Rearing`),
-        formatCheckboxGroupCategories(input$`River Migration Smolt`),
-        formatCheckboxGroupCategories(input$`River Migration Adult`),
-        formatCheckboxGroupCategories(input$`Estuary Migration Post-Smolt`),
-        formatCheckboxGroupCategories(input$`Coastal Migration Post-Smolt`),
-        formatCheckboxGroupCategories(input$`Ocean Migration`),
-        formatCheckboxGroupCategories(input$`Coastal Migration Adult`),
-        formatCheckboxGroupCategories(input$`Estuary Migration Adult`))
+  domainVector <- c(
+    "River Rearing",
+    "River Migration Smolt",
+    "Estuary Migration Post-Smolt",
+    "Coastal Migration Post-Smolt",
+    "Ocean Migration",
+    "Coastal Migration Adult",
+    "Estuary Migration Adult",
+    "River Migration Adult")
+  selectedClasses <- c()
+  for(dom in domainVector){
+    categoryCollapse <- formatCheckboxGroupCategories(c(input[[paste0(dom,"_physical")]],
+                                                        input[[paste0(dom,"_biological")]],
+                                                        input[[paste0(dom,"_salmontrait")]]))
+    selectedClasses <- append(selectedClasses,categoryCollapse)
+  }
+  tibble(Domains = domainVector,
+      `Selected Variable Classes` = selectedClasses
       )
 })
 
@@ -470,6 +512,7 @@ observeEvent(input$submitNewDataSourceBody | input$submitNewDataSourceSidebar, {
   results <- neo4r::call_neo4j(paste("MATCH (n:Metadata{metadataUUID:'",sessionUUID(),"'}) RETURN n;",sep = ""),neo_con,type = 'row',include_stats = T,include_meta = T)
   if(is.null(results$stats)){ # case UUID does not already exist
     # confirm all required fields have information in them
+    # If user has missed out any inputs that are classed as required, show them a modal window and colour the blank required inputs red until they input text
     if(input$sourceTitle == "" || input$sourceAbstract == "" || input$sourceCreator == "" || input$sourceCreatorEmail == "" || input$sourceOrganisation == ""){
       showModal(modalDialog(title = "Required Information Missing",p("Please ensure that none of the following fields are blank before submitting:"),
                             p("Title"),p("Abstract"),p("Primary Contact Name"),p("Primary Contact Email"),p("Organisation"),
@@ -562,14 +605,17 @@ observeEvent(input$confirmSubmitNewDataSource, {
     # initiate a vector to capture the queries
     queryMasterList <- c()
     
-    # define a base query, common elements that all the queries will share
+    # create base query elements
     queryBase <- c("MATCH (esv:EssentialSalmonVariable{esvTitle:'","'}),(md:Metadata{metadataUUID:'","'}) CREATE (esv)<-[:HAS_ESV{domain:'","'}]-(md);")
     # cycle through all the selected ESV for each domain IS THIS EFFICIENT?
-    
     for(domain in input$domainNodeList){
-      # create basic relationship between metadata and domain
-      neo4r::call_neo4j(paste0("MATCH (d:Domain{domainTitle:'",domain,"'}),(md:Metadata{metadataUUID:'",sessionUUID(),"'}) CREATE (md)-[:HAS_DOMAIN]->(d);"),neo_con,type = 'row',include_stats = F,include_meta = F)
-      for(esv in input[[domain]]){
+      # create basic relationship between metadata and domain (capture even if user selects no ESV's)
+      addDomainQuery <- paste0("MATCH (d:Domain{domainTitle:'",domain,"'}),(md:Metadata{metadataUUID:'",sessionUUID(),"'}) CREATE (md)-[:HAS_DOMAIN]->(d);")
+      queryMasterList <- append(queryMasterList,addDomainQuery)
+      
+      # build full ESV list for domain (collapse from 3 categories presented in the UI)
+      variableClassesForDomain <- c(input[[paste0(domain,"_biological")]],input[[paste0(domain,"_physical")]],input[[paste0(domain,"_salmontrait")]])
+      for(esv in variableClassesForDomain){
         # create sub query for single esv-metadata
         querySubMaster <- paste(queryBase[1],esv,queryBase[2],sessionUUID(),queryBase[3],domain,queryBase[4],sep = "")
         # add sub query to master query list
@@ -578,7 +624,7 @@ observeEvent(input$confirmSubmitNewDataSource, {
     }
     
     #####################^^^^^^^^
-    # Create relationships to ESV/Variable Class using DOMAIN SPECIFIC RELATIONSHIPS
+    # Create relationships using DOMAIN SPECIFIC RELATIONSHIPS
     #####################
     
     for(query in queryMasterList){
@@ -642,8 +688,8 @@ output$CreateMetadataNodeQueryBuilder <- renderText({
   # cycle through all the selected ESV for each domain IS THIS EFFICIENT?
   
   for(domain in input$domainNodeList){
-    
-    for(esv in input[[domain]]){
+    variableClassesForDomain <- c(input[[paste0(domain,"_biological")]],input[[paste0(domain,"_physical")]],input[[paste0(domain,"_salmontrait")]])
+    for(esv in variableClassesForDomain){
       # create sub query for single esv-metadata
       querySubMaster <- paste(queryBase[1],esv,queryBase[2],sessionUUID(),queryBase[3],domain,queryBase[4],sep = "")
       # add sub query to master query list
@@ -665,7 +711,6 @@ output$showCurrentSelection <- DT::renderDT(tibble(inputID = c(#"icesStockUnit:"
   #"icesStatAreas:",
   #"river:",
   "domainNodeList:",
-  "esvCategory:",
   "River Rearing:",
   "River Migration Smolt:",
   "River Migration Adult:",
@@ -678,7 +723,6 @@ output$showCurrentSelection <- DT::renderDT(tibble(inputID = c(#"icesStockUnit:"
     #formatCheckboxGroupCategories(input$icesStatAreas),
     #input$river,
     formatCheckboxGroupCategories(input$domainNodeList),
-    formatCheckboxGroupCategories(input$esvCategory),
     formatCheckboxGroupCategories(input$`River Rearing`),
     formatCheckboxGroupCategories(input$`River Migration Smolt`),
     formatCheckboxGroupCategories(input$`River Migration Adult`),

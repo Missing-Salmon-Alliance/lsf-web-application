@@ -25,14 +25,14 @@ observeEvent(input$esvFields,{
       size = 'l',
       column(12,
              h3("Life-Stage Domains and Variable Classes"),
-             em("Here the data being submitted can be tagged regarding how it may be relevant to the differing habitats across the Atlantic salmon’s lifecycle."),
+             em("Here the data being submitted can be tagged regarding how it may be relevant to the differing habitats across the Atlantic salmon’s lifecycle.
+                Select the Life-Stage Domains that the data you are submitting relates to, and then select variable classes that best match observations/measurements in the data.
+                Tagging the data in this way can facilitate data discovery for those searching for related sets of observations, e.g. 'Biological' observations of the environment in the Life-Stage Domain 'River Rearing'."),
              br(),
              h4("Life-Stage Domain"),
              em(domainsDescriptionCopy),
-             h4("Variable Category"),
-             em("Select whether the data being submitted is regarding biological processes (e.g. Fish Parasites), physical processes (e.g. Sea Surface Temperature) or salmon traits (e.g. Sex Ratio (smolt)). Following selection of this category the extended variable classes will become available for selection on the right, organised by their relevant life-stage domains."),
              h4("Variable Class"),
-             em(esvDescriptionCopy),
+             em(esvDescriptionCopy)
       )
     )
   )

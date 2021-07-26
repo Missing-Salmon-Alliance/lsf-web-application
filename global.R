@@ -218,9 +218,9 @@ esvDescriptionCopy <- "The variable classes we use
 are a list of general groupings and specific
 variables into which salmon related knowledge
 can be classified. These classes are themselves grouped
-into three primary categories including physical,
-biological and salmon-trait (observations specific to salmon)
-knowledge. Knowledge resources may originate from empirical (direct 
+into three primary categories: Physical measurements of the environment,
+Biological measurements of the environment, and Salmon Traits (observations specific to salmon).
+Knowledge resources may originate from empirical (direct 
 measurement), derived (simulated outputs) or expert 
 (opinion) sources."
 
