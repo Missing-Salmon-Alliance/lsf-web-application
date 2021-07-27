@@ -8,11 +8,11 @@ observeEvent(input$map_shape_click,{
     # get name of area clicked using id and pass to filter metadata
     if(input$map_shape_click[3] == "ICES Ecoregions"){
       layerID <- stringr::str_split(input$map_shape_click[1],"_",simplify = T)[,2]
-      layerIDname <- ICES_Ecoregions[ICES_Ecoregions$id == layerID,]$name
+      layerIDname <- ICES_Ecoregions[ICES_Ecoregions$objectid == layerID,]$ecoregion
       metadataFilterReactive(LSFMetadataTibble[str_detect(LSFMetadataTibble$metadataCoverageIntersectICESEcoRegion,layerIDname),])
     }else{
       layerID <- stringr::str_split(input$map_shape_click[1],"_",simplify = T)[,2]
-      layerIDname <- nafoDivisionsSF[nafoDivisionsSF$id == layerID,]$name
+      layerIDname <- nafoDivisionsSF[nafoDivisionsSF$ogc_fid == layerID,]$zone
       metadataFilterReactive(LSFMetadataTibble[str_detect(LSFMetadataTibble$metadataCoverageIntersectNAFODivision,layerIDname),])
     }
     # redraw new filtered data

@@ -115,58 +115,9 @@ filterAppliedInformation <- reactiveValues()
 filterAppliedInformation$filterType <- "None"
 filterAppliedInformation$filterName <- "None"
 
-############################################
-# Pull data from SQL database using function
-
-icesEcoregions <- loadgeoJSONData("ices_ecoregions","ecoregion")
-icesEcoregionsGeoJSON <- convertToGeojsonFeatureCollection(icesEcoregions,"ecoregion")
-ICES_Ecoregions <- sf::read_sf(icesEcoregionsGeoJSON)
-rm(icesEcoregions,icesEcoregionsGeoJSON)
-
-# neContinents <- loadgeoJSONData("ne_continents","continent")
-# neContinentsGeoJSON <- convertToGeojsonFeatureCollection(neContinents,"continent")
-# neContinentsSF <- sf::read_sf(neContinentsGeoJSON)
-# rm(neContinents,neContinentsGeoJSON)
-
-
-# nascoRivers <- loadgeoJSONData("nasco_rivers_db","rivername")
-# nascoRiversGeoJSON <- convertToGeojsonFeatureCollection(nascoRivers,"rivername")
-# nascoRiversSF <- sf::read_sf(nascoRiversGeoJSON)
-# rm(nascoRivers,nascoRiversGeoJSON)
-
-
-nafoDivisions <-loadgeoJSONData("nafo_divisions","zone")
-nafoDivisionsGeoJSON <- convertToGeojsonFeatureCollection(nafoDivisions,"zone")
-nafoDivisionsSF <- sf::read_sf(nafoDivisionsGeoJSON)
-rm(nafoDivisions,nafoDivisionsGeoJSON)
-
-
-icesStatEco <- loadgeoJSONData("ices_stat_rect_eco","icesname")
-icesStatEcoGeoJSON <- convertToGeojsonFeatureCollection(icesStatEco,"icesname")
-icesStatEcoSF <- sf::read_sf(icesStatEcoGeoJSON)
-rm(icesStatEco,icesStatEcoGeoJSON)
-
-
-# migration <- loadgeoJSONData("buffered_seasalar_migration","current")
-# migrationGeoJSON <- convertToGeojsonFeatureCollection(migration,"current")
-# migrationSF <- sf::read_sf(migrationGeoJSON)
-# rm(migration,migrationGeoJSON)
-# 
-# 
-# feeding <- loadgeoJSONData("feeding_zones","name")
-# feedingGeoJSON <- convertToGeojsonFeatureCollection(feeding,"name")
-# feedingSF <- sf::read_sf(feedingGeoJSON)
-# rm(feeding,feedingGeoJSON)
-
-# MOVE TO SQL SERVER!!!!
-migrationSF <- sf::read_sf("./src/Migration_as_ICES_Squares.shp") %>% dplyr::rename(id = ID) # snappy rename to bring in line with the other layers
-
-feedingSF <- sf::read_sf("./src/Feeding_Zones.shp")
-
-NASCO_rivers <- read_csv("./src/NASCO_RiversDB.csv",locale = locale(encoding = 'latin1'))
-NASCO_rivers <- NASCO_rivers %>% filter(Longitude_Decimal != "") %>%
-  filter(Latitude_Decimal != "") %>% filter(RiverName != "") 
-NASCO_rivers <- sf::st_as_sf(NASCO_rivers, coords = c("Longitude_Decimal","Latitude_Decimal"), crs = 4326)
+#####################
+# Load map layers from SQL and CSV
+source('./src/server/searchDataSource_MapLayerSource_server.R',local = TRUE)
 
 ###################################################
 # Write a HTML Legend (As have used HTML ICONS and no gradient)
@@ -211,7 +162,7 @@ output$map <- leaflet::renderLeaflet({
                  removeOutsideVisibleBounds = TRUE,
                  spiderLegPolylineOptions = list(weight = 1.5, color = "#222", opacity = 0.5),
                  freezeAtZoom = 10)) %>%
-    
+    # 
     leaflet.extras::addSearchFeatures(
       targetGroups = 'Data Source',
       options = leaflet.extras::searchFeaturesOptions(zoom=12, openPopup = FALSE, firstTipSubmit = TRUE,
@@ -225,7 +176,7 @@ output$map <- leaflet::renderLeaflet({
                         icon = list(
                           iconUrl = "https://img.icons8.com/cotton/64/000000/salmon--v1.png",
                           iconSize = c(35, 35))) %>%
-    
+    # 
     leaflet::addCircleMarkers(data = NASCO_rivers,
                               label = ~RiverName,
                               group = "NASCO River DB",
@@ -243,28 +194,28 @@ output$map <- leaflet::renderLeaflet({
     # ) %>%
     
     leaflet::addPolygons(data = ICES_Ecoregions,
-                label = ~name,
-                layerId = paste0("eco_",ICES_Ecoregions$id),
+                label = ~ecoregion,
+                layerId = paste0("eco_",ICES_Ecoregions$objectid),
                 color = "green", group = "ICES Ecoregions", weight = 1,
                 highlightOptions = leaflet::highlightOptions(color = "yellow", weight = 3,
                                                     bringToFront = TRUE))  %>%
-    
-    leaflet::addPolygons(data = icesStatEcoSF,
-                label = ~name,
-                layerId = paste0("sta_",icesStatEcoSF$id),
-                color = "blue", group = "ICES Stat Squares", weight = 1,
-                highlightOptions = leaflet::highlightOptions(color = "yellow", weight = 3,
-                                                    bringToFront = TRUE))  %>%
-     
+    # 
+    # leaflet::addPolygons(data = icesStatEcoSF,
+    #             label = ~name,
+    #             layerId = paste0("sta_",icesStatEcoSF$id),
+    #             color = "blue", group = "ICES Stat Squares", weight = 1,
+    #             highlightOptions = leaflet::highlightOptions(color = "yellow", weight = 3,
+    #                                                 bringToFront = TRUE))  %>%
+    #  
     leaflet::addPolygons(data = nafoDivisionsSF,
-                label = ~name,
-                layerId = paste0("div_",nafoDivisionsSF$id),
+                label = ~zone,
+                layerId = paste0("div_",nafoDivisionsSF$ogc_fid),
                 color = "purple", group = "NAFO Divisions", weight = 1,
                 highlightOptions = leaflet::highlightOptions(color = "yellow", weight = 3,
                                                     bringToFront = TRUE)) %>%
     leaflet::addPolygons(data = migrationSF,
-                label = ~ICESNAME,
-                layerId = paste0("mig_",migrationSF$id),
+                label = ~icesname,
+                layerId = paste0("mig_",migrationSF$fid),
                 color = "blue", group = "Proposed Outward Migration", weight = 1,
                 highlightOptions = leaflet::highlightOptions(color = "yellow", weight = 3,
                                                     bringToFront = TRUE)) %>%
@@ -279,16 +230,16 @@ output$map <- leaflet::renderLeaflet({
                                                                      "ICES Index Rivers",
                                                                      "ICES Ecoregions",
                                                                      "NAFO Divisions",
-                                                                     "ICES Stat Squares",
+                                                                     #"ICES Stat Squares",
                                                                      "Proposed Outward Migration",
                                                                      "NASCO River DB"),
                      options = leaflet::layersControlOptions(collapsed = FALSE)) %>%
     leaflet::hideGroup(c("ICES Ecoregions",
                          "NAFO Divisions",
-                         "ICES Stat Squares",
+                         #"ICES Stat Squares",
                          "Proposed Outward Migration",
                          "NASCO River DB")) %>%
-    
+
     htmlwidgets::onRender("
         function() {
             $('.leaflet-control-layers-overlays').prepend('<label style=\"text-align:left; font-size:16px;\">Layer Control</label>');
@@ -327,13 +278,7 @@ source("./src/server/searchDataSource_GeographicFilters_server.R",local = TRUE)$
 source("./src/server/searchDataSource_temporalFilters_server.R",local = TRUE)$value
 
 
-###############################################
-# Framework Filters
-#source("./src/server/searchDataSource_frameworkFilters_server.R",local = TRUE)$value
-
-##############################################
-
-
+# Observer for Search Map Click - Action: When user clicks a marker add the extents of the marker data source as rectangle to the map
 observeEvent(input$map_marker_click,{
     leaflet::leafletProxy("map") %>%
     leaflet::clearGroup(group = 'markerRectangle') %>%
@@ -345,13 +290,13 @@ observeEvent(input$map_marker_click,{
   }
 )
 
-# clear rectangle on background click
+# Observer for Search Map Click - Action: clear rectangle on background click
 observeEvent(input$map_click,{
   leaflet::leafletProxy("map") %>%
     leaflet::clearGroup(group = 'markerRectangle')
 })
 ############################################## 
-# Modal pop-up on each marker_click
+# Observer for Search Map Click - Action: Modal pop-up on each marker_click
 
 observeEvent(input$button_click, {
   click = input$map_marker_click
@@ -499,6 +444,7 @@ output$No_Eco <- renderInfoBox({
           value = length(uniqueICESEcoRegions),
           fill = T, color = "green")
 })
+
 
 # Debugging Information
 output$clickMarkerOutput <- renderText({paste0("Marker: ",input$map_marker_click,collapse = ",")})

@@ -101,11 +101,6 @@ uniqueICESEcoRegions <- unique(str_split(paste0(LSFMetadataTibble$metadataCovera
 uniqueMigrationRoutes <- unique(str_split(paste0(LSFMetadataTibble$metadataCoverageIntersectMigrationRoutes[LSFMetadataTibble$metadataCoverageIntersectMigrationRoutes != ""],collapse = ','),pattern = ",")[[1]])
 uniqueMonths <- unique(str_split(paste0(LSFMetadataTibble$metadataCoverageMonthsOfYear[LSFMetadataTibble$metadataCoverageMonthsOfYear != ""], collapse = ','),pattern = ",")[[1]])
 
-
-rivers <- read_csv("./src/Index_Rivers_DB.csv")
-rivers <- sf::st_as_sf(rivers, coords = c("Longitude_Decimal","Latitude_Decimal"), crs = 4326)
-riversSF <- rivers
-
 ###############################################
 
 # Create standard map marker popup information
@@ -209,7 +204,14 @@ metadata. This will automatically fill the fields of this page as long as the eq
 submitIntroCopyPara2 <- "This interface ensures the data submitted into the Central Data Resource is labelled to both 
 spatial and temporal extents and linked to how it may be applicable to Atlantic salmon."
 
-domainsDescriptionCopy <- "Life-Stage Domains refer to the various environments Atlantic salmon move through
+domainsDescriptionCopy <- "Consideration of the range of space-time domains occupied by salmon as they
+transition life-stages and change habitats is important when discussing the range of changing conditions,
+possible pressures and the potential drivers of the survival patterns we see in populations through time.
+The conditions and factors influencing salmon in these series of domains will vary and may result in a
+direct response (e.g. death or poor growth) be expressed cumulatively with responses in subsequent domain
+or act together in more complex (synergistic) ways on salmon survival chances."
+
+domainsDescriptionCopyx <- "Life-Stage Domains refer to the various environments Atlantic salmon move through
 during their lifecycle, including freshwater, transition and marine. The salmon experience different
 conditions and pressures at different domains and stages in their lifecycle. The domains are further
 split to represent the life-stages of the salmon."
@@ -218,8 +220,8 @@ esvDescriptionCopy <- "The variable classes we use
 are a list of general groupings and specific
 variables into which salmon related knowledge
 can be classified. These classes are themselves grouped
-into three primary categories: Physical measurements of the environment,
-Biological measurements of the environment, and Salmon Traits (observations specific to salmon).
+into three primary categories: Physical environment,
+Biological processes, and Salmon Traits (observation or assessment specific to the salmon).
 Knowledge resources may originate from empirical (direct 
 measurement), derived (simulated outputs) or expert 
 (opinion) sources."

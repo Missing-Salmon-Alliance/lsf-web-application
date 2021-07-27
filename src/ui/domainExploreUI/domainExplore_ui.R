@@ -7,7 +7,9 @@ tabItem( # tabItem
   conditionalPanel(
     condition = "output.logonTrue",
     h4("Explore available data resources based on salmon life-stage domains."),
-    p("The life-stage domains represent a combination of salmon lifecycle and the environments within which they reside and transit."),
+    p("The life-stage domains represent a combination of salmon lifecycle and the environments within which they reside and transit.
+      These domains encompass the journey from river rearing to ocean feeding grounds and back again. Although marine phases are defined here at a low resolution,
+      geographic information available within the resource increase"),
     box(
       width = 5,
       status = 'primary',
@@ -17,7 +19,7 @@ tabItem( # tabItem
     ),
     box(
       status = 'primary',
-      title = "Step 2 - Variable Class",
+      title = "Step 2 - Variable Classes Relevant to Selected Life-Stage Domains",
       width = 7,
       shinyWidgets::checkboxGroupButtons('esvFilterBioDom',"Biological Variables",choices = c("Please select a Domain"),selected = "Please select a Domain"),
       shinyWidgets::checkboxGroupButtons('esvFilterPhysDom',"Physical Variables",choices = c("Please select a Domain"),selected = "Please select a Domain"),

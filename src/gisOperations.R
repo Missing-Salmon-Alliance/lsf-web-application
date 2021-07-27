@@ -14,7 +14,6 @@ loadFullWKBData <- function(tblname) {
   
   result$wkb_geometry <- sf::st_as_sfc(result$wkb_geometry)
   result <- sf::st_as_sf(result,crs = 4326)
-  result <- subset(result, select = -c(geojson))
   
   return(result)
   

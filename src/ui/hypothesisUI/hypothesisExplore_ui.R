@@ -36,7 +36,7 @@ tabItem( # tabItem
     ),
     box(
       status = 'primary',
-      title = "Step 2 - Variable Classes",
+      title = "Step 2 - Variable Classes Relevant to Selected Hypothesis",
       width = 7,
       #fluidRow(
         #width = 4,
