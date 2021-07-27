@@ -37,7 +37,7 @@
 ###########################################
 # NEW METHOD - Possible after simplifying SQL tables
 
-ICES_Ecoregions <- loadFullWKBData("ices_ecoregions")
+ICES_Ecoregions <- loadFullWKBData("ices_ecoregions_simplified")
 nafoDivisionsSF <- loadFullWKBData("nafo_divisions")
 migrationSF <- loadFullWKBData("proposed_migration_routes")
 #icesStatEcoSF <- loadFullWKBData("ices_stat_rect_eco")
