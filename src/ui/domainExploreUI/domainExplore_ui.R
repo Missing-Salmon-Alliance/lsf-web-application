@@ -8,8 +8,7 @@ tabItem( # tabItem
     condition = "output.logonTrue",
     h4("Explore available data resources based on salmon life-stage domains."),
     p("The life-stage domains represent a combination of salmon lifecycle and the environments within which they reside and transit.
-      These domains encompass the journey from river rearing to ocean feeding grounds and back again. Although marine phases are defined here at a low resolution,
-      geographic information available within the resource increase"),
+    Although marine phases are defined here at a low resolution, geographic information available within the resource can improve context."),
     box(
       width = 5,
       status = 'primary',

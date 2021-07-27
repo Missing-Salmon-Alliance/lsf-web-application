@@ -19,15 +19,15 @@ metadataFilterReactive(LSFMetadataTibble)
 # TODO: Alternatively all modals could reside in a single file such as searchDataSource_modals_server.R for easy access
 observeEvent(input$basket,{
   showModal(
-    modalDialog(title = "Your Basket", size = "l",
-                fluidPage(title = "Your Basket",
-                          box(width = 12, h4("Basket Contents"),
+    modalDialog(title = "Your Bookmarks", size = "l",
+                fluidPage(title = "Your Bookmarks",
+                          box(width = 12, h4("Bookmarked Sources"),
                               DT::DTOutput('basketContentsTable'),
-                              column(width = 6,actionButton('clearBasket', "Clear All Basket Contents")),
+                              column(width = 6,actionButton('clearBasket', "Clear All Bookmarked Sources")),
                               column(width = 5,actionButton('clearRows', "Delete Selected Row")),
                               column(width = 1, textOutput('basketCountSelect'))
                           ),
-                          box(width = 12, h4("Check Out"),
+                          box(width = 12, h4("Request Bookmarked Data"),
                               textInput('basketName', "Name:", value = user_info()$user_info$fullname),
                               textInput('basketOrganisation', "Organisation:", value = user_info()$user_info$affiliation),
                               #selectInput("basketPosition", "Position/Occupation:", choices = c("Researcher","Database Manager","Government Official", "Conservationist", "Student", "Lecturer", "Other")),
@@ -100,6 +100,7 @@ observeEvent(input$searchRefresh,{
 
 observeEvent(input$searchFilterReset,{
   metadataFilterReactive(LSFMetadataTibble)
+  activeGeographicFilterReactive("No Filter Selected")
   # clear existing markers
   leaflet::leafletProxy("map", session) %>%
     leaflet::clearGroup(group = 'Data Source')
@@ -163,12 +164,13 @@ output$map <- leaflet::renderLeaflet({
                  spiderLegPolylineOptions = list(weight = 1.5, color = "#222", opacity = 0.5),
                  freezeAtZoom = 10)) %>%
     # 
-    leaflet.extras::addSearchFeatures(
-      targetGroups = 'Data Source',
-      options = leaflet.extras::searchFeaturesOptions(zoom=12, openPopup = FALSE, firstTipSubmit = TRUE,
-        autoCollapse = TRUE, hideMarkerOnCollapse = TRUE
-      )
-    ) %>%
+    # On map search box
+    # leaflet.extras::addSearchFeatures(
+    #   targetGroups = 'Data Source',
+    #   options = leaflet.extras::searchFeaturesOptions(zoom=12, openPopup = FALSE, firstTipSubmit = TRUE,
+    #     autoCollapse = TRUE, hideMarkerOnCollapse = TRUE
+    #   )
+    # ) %>%
     
     leaflet::addMarkers(data = rivers,
                         label = ~paste("Salmon Index River: ",RiverName),
@@ -338,7 +340,7 @@ observeEvent(input$button_click, {
 output$addToBasketUI <- renderUI({
   click = input$map_marker_click
   if(LSFMetadataTibble[LSFMetadataTibble$id == click[1],]$id %in% sessionUserBasket()){
-    h4("This resource is in your basket.")
+    h4("This resource is in your bookmarks.")
   }else if(LSFMetadataTibble[LSFMetadataTibble$id == click[1],]$id %in% neo4r::call_neo4j(paste0("MATCH (p:Person)-[r:HAS_REQUESTED]-(m:Metadata) WHERE id(p) = ",user_info()$user_info$id," RETURN id(m) as id;"),con = neo_con, type = 'row')$id$value){
     box(
       headerBorder = F,
@@ -348,7 +350,7 @@ output$addToBasketUI <- renderUI({
       p("Request Status:",neo4r::call_neo4j(paste0("MATCH (p:Person)-[r:HAS_REQUESTED]-(m:Metadata) WHERE id(p) = ",user_info()$user_info$id," AND id(m) = ",LSFMetadataTibble[LSFMetadataTibble$id == click[1],]$id," RETURN r.status as status;"),con = neo_con, type = 'row')$status$value)
     )
   }else{
-    actionButton('Request', "Add to Basket")
+    actionButton('Request', "Add to Bookmarks")
   }
 })
 
@@ -359,7 +361,7 @@ sessionUserBasket <- reactiveVal(c())
 observeEvent(input$Request, {
   # when user adds to basket disable request button and change label to indicate action completed
   shinyjs::disable(id = 'Request')
-  updateActionButton(session, inputId = 'Request',label = "Added to basket!")
+  updateActionButton(session, inputId = 'Request',label = "Added to bookmarks!")
   click = input$map_marker_click
   string_basket <- paste0(LSFMetadataTibble[LSFMetadataTibble$id == click[1],]$id)
   sessionUserBasket(append(sessionUserBasket(),string_basket))
@@ -378,7 +380,7 @@ output$basketContents <- renderText(paste0(unique(LSFMetadataTibble[LSFMetadataT
 # Creation of a DT which shows the contents of the Basket
 output$basketContentsTable <- DT::renderDT({
   LSFMetadataTibble[LSFMetadataTibble$id %in% sessionUserBasket(),c("id","metadataTitle")]
-}, selection = "single", rownames = FALSE, caption = "Basket Contents")
+}, selection = "single", rownames = FALSE, caption = "Bookmarked Sources")
 
 # Remove a Single Basket Item using Tables_Rows_selected
 
@@ -406,8 +408,8 @@ observeEvent(input$clearBasket, {
 output$basketUi <- renderUI({
   req(user_info())
   if (user_info()$result) {
-    dynamicLabel <- paste("Basket:",length(unique(sessionUserBasket())))
-    actionLink(inputId = "basket", label = dynamicLabel ,icon = icon("shopping-cart"),style='padding:5px; font-size:120%; color:white;float:right;')
+    dynamicLabel <- paste("Bookmarks:",length(unique(sessionUserBasket())))
+    actionLink(inputId = "basket", label = dynamicLabel ,icon = icon("bookmark"),style='padding:5px; font-size:120%; color:white;float:right;')
   }
 })
 

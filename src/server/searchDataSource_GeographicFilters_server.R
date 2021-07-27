@@ -1,3 +1,5 @@
+activeGeographicFilterReactive <- reactiveVal("No Filter Selected")
+
 # One observer for map_shape_click, search based on layer id
 observeEvent(input$map_shape_click,{
   # first detect shape layer name and ignore if not one of the searchable layers
@@ -10,16 +12,22 @@ observeEvent(input$map_shape_click,{
       layerID <- stringr::str_split(input$map_shape_click[1],"_",simplify = T)[,2]
       layerIDname <- ICES_Ecoregions[ICES_Ecoregions$objectid == layerID,]$ecoregion
       metadataFilterReactive(LSFMetadataTibble[str_detect(LSFMetadataTibble$metadataCoverageIntersectICESEcoRegion,layerIDname),])
+      activeGeographicFilterReactive(paste0("ICES Ecoregions - ",layerIDname))
     }else{
       layerID <- stringr::str_split(input$map_shape_click[1],"_",simplify = T)[,2]
       layerIDname <- nafoDivisionsSF[nafoDivisionsSF$ogc_fid == layerID,]$zone
       metadataFilterReactive(LSFMetadataTibble[str_detect(LSFMetadataTibble$metadataCoverageIntersectNAFODivision,layerIDname),])
+      activeGeographicFilterReactive(paste0("NAFO Divisions - ",layerIDname))
     }
     # redraw new filtered data
     redrawFilteredMarkers(metadataFilterReactive(),session)
   }
   
 })
+
+
+output$activeGeographicFilter <- renderText(activeGeographicFilterReactive())
+
 
 # Eco regions based on pre-calculated intersects
 observeEvent(input$ecoregionFilter,{

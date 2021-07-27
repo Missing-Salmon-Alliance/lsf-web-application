@@ -102,7 +102,8 @@ checkUserCredentials <- function(user,pw){
         admin = result$personAdmin,
         user_info = list(id = result$id, fullname = result$personName,email = result$personEmail,affiliation = result$personAffiliation,
                          requested = requestedTibble,
-                         submitted = submittedTibble))
+                         submitted = submittedTibble,
+                         bookmarks = result$personBookmarks))
     }else{
       # build a dummy NULL list to return to reactive user_info value if the above conditions are false
       auth <- list(
