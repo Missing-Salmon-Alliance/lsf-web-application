@@ -163,15 +163,19 @@ generalIntroCopyPara2 <- "Salmon management is frequently impeded by poor access
 changing their approaches. The Likely Suspects Framework is working to mobilise biological, physical and 
 salmon specific information from freshwater and marine environments located around the North Atlantic."
 
-carouselGeneralIntro <- "The Central Data Resource is designed to collate salmon knowledge and index it 
-in a way that will guide researchers to the data they need to test hypotheses. All knowledge in the 
-resource will have been included because it is relevant to Atlantic salmon ecology, including but not 
-restricted to:"
+carouselGeneralIntro <- "The Central Data Resource is an online portal intending to provide a unique
+platform for Atlantic salmon knowledge mobilisation. The portal consists of an area inviting users
+to register salmon knowledge through a simplified metadata submission form, and a set of search areas
+to guide researchers to the data they need to test hypotheses. Registered knowledge sources are
+indexed within the resource by how they relate to the Atlantic salmon by Life-Stage via the use of
+temporal detail, spatial detail, and specially defined salmon domains, as well as information on the
+classification of variables within the data. All knowledge in the resource is present because it is
+relevant to Atlantic salmon ecology, be that through Primary Observation, Derived Output, or Modelled Output."
 
-searchIntroCopy <- "Search tabs allow exploration of the knowledge sources that have been registered.
-These searches are presented in different ways to facilitate different use cases, from a location
-based map search, free text based tabular search, to predefined filters based on mortality questions
-and Atlantic salmon life-stages."
+searchIntroCopy <- "The search areas allow exploration of the knowledge sources that have been
+registered in the Central Data Resource. These searches are presented in ways to facilitate different
+use cases, from a location-based map search, free text based tabular search, to predefined filters
+based on Mortality Hypotheses or Atlantic salmon Life-Stage."
 
 searchIntroCopyPara1 <- "This interface allows exploration of the knowledge resources we have registered. Our system 
 categorises data regarding both its temporal and spatial extents and additionally how it may be applicable to Atlantic salmon. 
@@ -184,8 +188,12 @@ data will return descriptions of data (metadata) relevant to your search terms. 
 knowledge sources and allow you to gain access via either primary sources or from within the Central Data Resource."
 
 
-submitIntroCopy <- "Through this portal you may submit knowledge sources via an easy to follow metadata collection form. Our metadata form 
-ties in to existing metadata standards to ensure the descriptions have longevity and portability across other data repositories."
+submitIntroCopy <- "Through this portal you may submit knowledge sources via an easy-to-follow metadata
+form. The metadata captured ties in to existing metadata standards to ensure the descriptions have
+longevity and portability across other data repositories. The metadata form has a minimum set of fields
+to capture at least the existence of a dataset along with owner contact details, plus more expansive
+fields to capture detail on location, time and attributes, among other information. The more detail
+that can be supplied at this stage then the more utility the resource can add to the search areas."
 
 
 submitIntroCopyPara1 <- "This interface allows you to submit data along with a thorough description (metadata) into the Central Data 
