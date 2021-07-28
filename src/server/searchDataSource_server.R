@@ -14,31 +14,33 @@ output$searchFilterResetUI <- renderUI(actionButton('searchFilterReset',"Reset F
 metadataFilterReactive <- reactiveVal()
 metadataFilterReactive(LSFMetadataTibble)
 
-# basket modal
+# bookmarks modal
 # TODO: Move all modals defined in UI files to observers in SERVER files
 # TODO: Alternatively all modals could reside in a single file such as searchDataSource_modals_server.R for easy access
-observeEvent(input$basket,{
+observeEvent(input$bookmarks,{
   showModal(
     modalDialog(title = "Your Bookmarks", size = "l",
-                fluidPage(title = "Your Bookmarks",
-                          box(width = 12, h4("Bookmarked Sources"),
-                              DT::DTOutput('basketContentsTable'),
-                              column(width = 6,actionButton('clearBasket', "Clear All Bookmarked Sources")),
-                              column(width = 5,actionButton('clearRows', "Delete Selected Row")),
-                              column(width = 1, textOutput('basketCountSelect'))
-                          ),
-                          box(width = 12, h4("Request Bookmarked Data"),
-                              textInput('basketName', "Name:", value = user_info()$user_info$fullname),
-                              textInput('basketOrganisation', "Organisation:", value = user_info()$user_info$affiliation),
-                              #selectInput("basketPosition", "Position/Occupation:", choices = c("Researcher","Database Manager","Government Official", "Conservationist", "Student", "Lecturer", "Other")),
-                              #selectInput("basketDataUse", "What will the data be used for?", choices = c("Independent Research", "Conservation", "Guidance to Managers", "Other")),
-                              #textInput("basketOther","Please describe what is meant, if you selected other"),
-                              #selectInput("basketProvision", "Do you intend to provide data to the Central Data Resource?", choices = c("Yes", "No", "In the Future")),
-                              textAreaInput('basketIntention', "Please describe the intended use for the data. Please include information on the project, time scale of usage and expected number of users.", width = "1000px", height = "50px"),
-                              actionButton('sendRequest', "Send Data Request")
-                              
-                          )
+                column(width = 12,
+                    DT::DTOutput('bookmarkContentsTable'),
+                    column(width = 6,actionButton('clearBookmarks', "Clear All Bookmarked Sources")),
+                    column(width = 5,actionButton('clearRows', "Delete Selected Row")),
+                    column(width = 1, textOutput('bookmarkCountSelect')),
+                    hr()
+                ),
+                column(
+                  width = 12,
+                    h4("Request Bookmarked Data"),
+                    textInput('requestName', "Name:", value = user_info()$user_info$fullname),
+                    textInput('requestOrganisation', "Organisation:", value = user_info()$user_info$affiliation),
+                    #selectInput("requestPosition", "Position/Occupation:", choices = c("Researcher","Database Manager","Government Official", "Conservationist", "Student", "Lecturer", "Other")),
+                    #selectInput("requestDataUse", "What will the data be used for?", choices = c("Independent Research", "Conservation", "Guidance to Managers", "Other")),
+                    #textInput("requestOther","Please describe what is meant, if you selected other"),
+                    #selectInput("requestProvision", "Do you intend to provide data to the Central Data Resource?", choices = c("Yes", "No", "In the Future")),
+                    textAreaInput('requestIntention', "Please describe the intended use for the data. Please include information on the project, time scale of usage and expected number of users.", width = "1000px", height = "50px"),
+                    actionButton('sendRequest', "Send Data Request")
+                    
                 )
+                
     )
   )
 })
@@ -49,16 +51,16 @@ observeEvent(input$sendRequest,{
   # create temp area in memory to write to
   rc <- rawConnection(raw(0), 'r+')
   # write csv to temp area
-  write_file(paste(paste(unique(sessionUserBasket()),collapse = ','),input$basketIntention,sep = ','),rc)
+  write_file(paste(paste(unique(sessionUserBookmarks()),collapse = ','),input$requestIntention,sep = ','),rc)
   # send csv object from temp area to S3
   aws.s3::put_object(file = rawConnectionValue(rc),bucket = "likelysuspects-datastore/userRequests",object = paste0("user_",user_info()$user_info$id,"_",as.character(Sys.time()),".txt"))
   # close and remove temp area
   close(rc)
   # create requested source relationships in graph
-  neo4r::call_neo4j(paste0("MATCH (p:Person{personEmail:'",user_info()$user_info$email,"'}),(m:Metadata) WHERE id(m) IN [",formatNumericList(sessionUserBasket()),"] CREATE (p)-[:HAS_REQUESTED{created:'",Sys.time(),"',lastModified:'",Sys.time(),"',status:'pendingReview'}]->(m)"),con = neo_con,type = 'row')
-  # clear basket
-  sessionUserBasket(c())
-  shiny::updateTextAreaInput(session, inputId = 'basketIntention', value = "")
+  neo4r::call_neo4j(paste0("MATCH (p:Person{personEmail:'",user_info()$user_info$email,"'}),(m:Metadata) WHERE id(m) IN [",formatNumericList(sessionUserBookmarks()),"] CREATE (p)-[:HAS_REQUESTED{created:'",Sys.time(),"',lastModified:'",Sys.time(),"',status:'pendingReview'}]->(m)"),con = neo_con,type = 'row')
+  # clear bookmarks
+  sessionUserBookmarks(c())
+  shiny::updateTextAreaInput(session, inputId = 'requestIntention', value = "")
   showModal(modalDialog(title = "Request Received",
                         p("Thank you for submitting a request for data!"),
                         p("The Data Manager will process your request soon.")))
@@ -329,17 +331,17 @@ observeEvent(input$button_click, {
     em("Start Year: "), paste(LSFMetadataTibble[LSFMetadataTibble$id == click[1],]$metadataCoverageStartYear), br(), em("End Year: ", paste(LSFMetadataTibble[LSFMetadataTibble$id == click[1],]$metadataCoverageEndYear)),
     br(),br(),
     # dynamic content based on user activity and history
-    uiOutput('addToBasketUI')
+    uiOutput('addToBookmarksUI')
   )
   )
 })
 
 ##############################################
-# Basket System
+# Bookmark System
 
-output$addToBasketUI <- renderUI({
+output$addToBookmarksUI <- renderUI({
   click = input$map_marker_click
-  if(LSFMetadataTibble[LSFMetadataTibble$id == click[1],]$id %in% sessionUserBasket()){
+  if(LSFMetadataTibble[LSFMetadataTibble$id == click[1],]$id %in% sessionUserBookmarks()){
     h4("This resource is in your bookmarks.")
   }else if(LSFMetadataTibble[LSFMetadataTibble$id == click[1],]$id %in% neo4r::call_neo4j(paste0("MATCH (p:Person)-[r:HAS_REQUESTED]-(m:Metadata) WHERE id(p) = ",user_info()$user_info$id," RETURN id(m) as id;"),con = neo_con, type = 'row')$id$value){
     box(
@@ -354,62 +356,74 @@ output$addToBasketUI <- renderUI({
   }
 })
 
-# Basket Creation - as a reactive Value
-sessionUserBasket <- reactiveVal(c())
+# Bookmark Creation - as a reactive Value
+sessionUserBookmarks <- reactiveVal(c())
 
-# Action button uses information from the map_marker_click to update the Basket 
+# Action button uses information from the map_marker_click to update the bookmarks list 
 observeEvent(input$Request, {
-  # when user adds to basket disable request button and change label to indicate action completed
+  # when user adds to bookmark disable request button and change label to indicate action completed
   shinyjs::disable(id = 'Request')
   updateActionButton(session, inputId = 'Request',label = "Added to bookmarks!")
   click = input$map_marker_click
-  string_basket <- paste0(LSFMetadataTibble[LSFMetadataTibble$id == click[1],]$id)
-  sessionUserBasket(append(sessionUserBasket(),string_basket))
+  sourceIDString <- paste0(LSFMetadataTibble[LSFMetadataTibble$id == click[1],]$id)
+  sessionUserBookmarks(append(sessionUserBookmarks(),sourceIDString))
   })
 
-# A system for Creator Feedback to see the Basket - NOT REQUIRED
-output$baskettext <- renderText(paste0(unique(sessionUserBasket()), collapse = ","))
+# # A system for Creator Feedback to see the bookmarks - NOT REQUIRED
+# output$bookmarkText <- renderText(paste0(unique(sessionUserBookmarks()), collapse = ","))
+# 
+# # An output which renders both the Title and ID. - NOT REQUIRED
+# output$bookmarkContents <- renderText(paste0(unique(LSFMetadataTibble[LSFMetadataTibble$id %in% sessionUserBookmarks(),]$metadataTitle), 
+#                                            "ID:", 
+#                                            unique(LSFMetadataTibble[LSFMetadataTibble$id %in% sessionUserBookmarks(),]$id, collapse = ", "))
+#                                     )
 
-# An output which renders both the Title and ID. - NOT REQUIRED
-output$basketContents <- renderText(paste0(unique(LSFMetadataTibble[LSFMetadataTibble$id %in% sessionUserBasket(),]$metadataTitle), 
-                                           "ID:", 
-                                           unique(LSFMetadataTibble[LSFMetadataTibble$id %in% sessionUserBasket(),]$id, collapse = ", "))
-                                    )
 
+# Creation of a DT which shows the contents of the Bookmarks
+output$bookmarkContentsTable <- DT::renderDT({
+  LSFMetadataTibble[LSFMetadataTibble$id %in% sessionUserBookmarks(),c("id","metadataTitle","metadataCoverageCentroid")]
+},
+selection = 'single',
+rownames = FALSE,
+editable = FALSE,
+colnames = c("ID","Title","Centroid"),
+options = list(pageLength = 7,
+               searching = F,
+               lengthChange = F,
+               info = FALSE,
+               columnDefs = list(list(visible=FALSE, targets=c(0,2)))
+)
 
-# Creation of a DT which shows the contents of the Basket
-output$basketContentsTable <- DT::renderDT({
-  LSFMetadataTibble[LSFMetadataTibble$id %in% sessionUserBasket(),c("id","metadataTitle")]
-}, selection = "single", rownames = FALSE, caption = "Bookmarked Sources")
+)
 
-# Remove a Single Basket Item using Tables_Rows_selected
+# Remove a Single Bookmark Item using Tables_Rows_selected
 
 observeEvent(input$clearRows,{
   
-  if (!is.null(input$basketContentsTable_rows_selected)) {
+  if (!is.null(input$bookmarkContentsTable_rows_selected)) {
     
-    sessionUserBasket(sessionUserBasket()[sessionUserBasket() != sessionUserBasket()[input$basketContentsTable_rows_selected]]) #Need to somehow subset it to ID of selected rows
+    sessionUserBookmarks(sessionUserBookmarks()[sessionUserBookmarks() != sessionUserBookmarks()[input$bookmarkContentsTable_rows_selected]]) #Need to somehow subset it to ID of selected rows
   }
 })
 
 
-# Clear the Basket using Action Button
-observeEvent(input$clearBasket, {
-  sessionUserBasket(c())
+# Clear the Bookmark using Action Button
+observeEvent(input$clearBookmarks, {
+  sessionUserBookmarks(c())
 })
 
-# Basket Count 
+# Bookmark Count 
 
-# Selected Basket Count - NOT REQUIRED with a single selection function in DT
-# output$basketCountSelect <- renderText(length(input$basketContentsTable_rows_selected))
+# Selected Bookmark Count - NOT REQUIRED with a single selection function in DT
+# output$bookmarkCountSelect <- renderText(length(input$bookmarkContentsTable_rows_selected))
 
-# Render UI which includes both an action link, and a count of the Basket Length. 
+# Render UI which includes both an action link, and a count of the Bookmark Length. 
 
-output$basketUi <- renderUI({
+output$bookmarkUI <- renderUI({
   req(user_info())
   if (user_info()$result) {
-    dynamicLabel <- paste("Bookmarks:",length(unique(sessionUserBasket())))
-    actionLink(inputId = "basket", label = dynamicLabel ,icon = icon("bookmark"),style='padding:5px; font-size:120%; color:white;float:right;')
+    dynamicLabel <- paste("Bookmarks:",length(unique(sessionUserBookmarks())))
+    actionLink(inputId = "bookmarks", label = dynamicLabel ,icon = icon("bookmark"),style='padding:5px; font-size:120%; color:white;float:right;')
   }
 })
 
