@@ -40,17 +40,9 @@
 ICES_Ecoregions <- loadFullWKBData("ices_ecoregions_simplified")
 nafoDivisionsSF <- loadFullWKBData("nafo_divisions")
 migrationSF <- loadFullWKBData("proposed_migration_routes")
+riversDBSF <- loadFullWKBData('rivers_db')
+nascoRiversDBSF <- riversDBSF[riversDBSF$nasco_rivers_db == TRUE,] # subset of rivers that were sourced from the original NASCO DB
+indexRiversSF <- riversDBSF[riversDBSF$ices_index == TRUE,] # subset of rivers that are ICES index rivers
 #icesStatEcoSF <- loadFullWKBData("ices_stat_rect_eco")
 #feedingSF <- loadFullWKBData("feeding_zones")
 
-# CSV Files - To be moved to SQL
-
-rivers <- read_csv("./src/Index_Rivers_DB.csv")
-rivers <- sf::st_as_sf(rivers, coords = c("Longitude_Decimal","Latitude_Decimal"), crs = 4326)
-riversSF <- rivers
-
-
-NASCO_rivers <- read_csv("./src/NASCO_RiversDB.csv",locale = locale(encoding = 'latin1'))
-NASCO_rivers <- NASCO_rivers %>% filter(Longitude_Decimal != "") %>%
-  filter(Latitude_Decimal != "") %>% filter(RiverName != "")
-NASCO_rivers <- sf::st_as_sf(NASCO_rivers, coords = c("Longitude_Decimal","Latitude_Decimal"), crs = 4326)

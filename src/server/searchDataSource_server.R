@@ -174,16 +174,16 @@ output$map <- leaflet::renderLeaflet({
     #   )
     # ) %>%
     
-    leaflet::addMarkers(data = rivers,
-                        label = ~paste("Salmon Index River: ",RiverName),
+    leaflet::addMarkers(data = indexRiversSF,
+                        label = ~paste("Salmon Index River: ",rivername),
                         group = "ICES Index Rivers",
                         icon = list(
                           iconUrl = "https://img.icons8.com/cotton/64/000000/salmon--v1.png",
                           iconSize = c(35, 35))) %>%
     # 
-    leaflet::addCircleMarkers(data = NASCO_rivers,
-                              label = ~RiverName,
-                              group = "NASCO River DB",
+    leaflet::addCircleMarkers(data = nascoRiversDBSF,
+                              label = ~rivername,
+                              group = "NASCO Rivers DB",
                               color = "black",
                               radius = 3,
                               stroke = FALSE,
@@ -236,13 +236,13 @@ output$map <- leaflet::renderLeaflet({
                                                                      "NAFO Divisions",
                                                                      #"ICES Stat Squares",
                                                                      "Proposed Outward Migration",
-                                                                     "NASCO River DB"),
+                                                                     "NASCO Rivers DB"),
                      options = leaflet::layersControlOptions(collapsed = FALSE)) %>%
     leaflet::hideGroup(c("ICES Ecoregions",
                          "NAFO Divisions",
                          #"ICES Stat Squares",
                          "Proposed Outward Migration",
-                         "NASCO River DB")) %>%
+                         "NASCO Rivers DB")) %>%
 
     htmlwidgets::onRender("
         function() {
