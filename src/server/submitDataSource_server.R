@@ -555,8 +555,8 @@ observeEvent(input$submitNewDataSourceBody | input$submitNewDataSourceSidebar, {
 
 # TODO Some duplication occurs between these two (above and below) observeEvents that could be trimmed down
 observeEvent(input$confirmSubmitNewDataSource, {
-  # disable confirm button and update text to show user it has been pressed
-  # this avoids multiple presses if file upload is large
+  # disable modal
+  # this avoids multiple 'Confirm' presses if file upload is large
   shinyjs::disable(id = 'shiny-modal')
   # Generate a unique Identifier for this data source UNLESS it already exists (expected condition if user has loaded KNB metadata)
   # TODO: Confirm that this logic works, is there a condition where sessionUUID is not NULL but also not loaded from KNB?
@@ -580,24 +580,25 @@ observeEvent(input$confirmSubmitNewDataSource, {
     # Quick center point calcs
     lngCenter <- (input$submitWest+input$submitEast)/2
     latCenter <- (input$submitSouth+input$submitNorth)/2
+    
 
     # Create query that creates a metadata node with all the properties supplied in the form
     # Also creates a relationship to the logged on user
     metadataNodeCreateQuery <- paste("MATCH (p:Person{personEmail:'",user_info()$user_info$email,
                                      "'}) CREATE (p)-[:HAS_SUBMITTED{created:'",Sys.time(),
                                      "',lastModified:'",Sys.time(),
-                                     "',status:'pendingQC'}]->(:Metadata{metadataTitle:'",input$sourceTitle,
-                                     "',metadataCreator:'",input$sourceCreator,
+                                     "',status:'pendingQC'}]->(:Metadata{metadataTitle:'",sanitiseFreeTextInputs(input$sourceTitle),
+                                     "',metadataCreator:'",sanitiseFreeTextInputs(input$sourceCreator),
                                      "',metadataKNBURI:'",input$sourceURI,
-                                     "',metadataAlternateURI:'",input$sourceALTURI,
-                                     "',metadataOrganisation:'",input$sourceOrganisation,
-                                     "',metadataAbstract:'",input$sourceAbstract,
+                                     "',metadataAlternateURI:'",sanitiseFreeTextInputs(input$sourceALTURI),
+                                     "',metadataOrganisation:'",sanitiseFreeTextInputs(input$sourceOrganisation),
+                                     "',metadataAbstract:'",sanitiseFreeTextInputs(input$sourceAbstract),
                                      "',metadataAvailableOnline:",input$sourceAvailableOnline,
                                      ",metadataEmbargoed:",input$embargoEndToggle,
-                                     ",metadataEmbargoEnd:'",input$embargoEnd,
-                                     "',metadataGeographicDescription:'",input$sourceGeographicDescription,
-                                     "',metadataCreatorEmail:'",input$sourceCreatorEmail,
-                                     "',metadataCreatorORCID:'",input$sourceCreatorORCID,
+                                     ",metadataEmbargoEnd:'",sanitiseFreeTextInputs(input$embargoEnd),
+                                     "',metadataGeographicDescription:'",sanitiseFreeTextInputs(input$sourceGeographicDescription),
+                                     "',metadataCreatorEmail:'",sanitiseFreeTextInputs(input$sourceCreatorEmail),
+                                     "',metadataCreatorORCID:'",sanitiseFreeTextInputs(input$sourceCreatorORCID),
                                      "',metadataCoverageStartYear:'",input$sourceStartYear,
                                      "',metadataCoverageEndYear:'",input$sourceEndYear,
                                      "',metadataCoverageMonthsOfYear:'",paste(input$monthsOfYear,collapse = ","),#collapse months of year into csv string
