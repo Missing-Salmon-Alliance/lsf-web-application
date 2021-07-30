@@ -43,7 +43,7 @@ source("./src/secrets.R",local = TRUE)
 #am <- dataone::AuthenticationManager()
 
 # Custom functions
-source("./src/gisOperations.R",local = TRUE)
+source("./src/custom_functions.R",local = TRUE)
 
 
 ## Create NEO4J Connection object

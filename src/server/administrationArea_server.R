@@ -1,5 +1,5 @@
 observeEvent(input$addNewUser,{
-  # send details to adminCreateNewUser function located in gisOperations (yeah, name change required!)
+  # send details to adminCreateNewUser function located in custom_functions.R
   adminCreateNewUser(fullname = input$useradminFullname,
                      pw = input$useradminPassword,
                      email = input$useradminEmail,
