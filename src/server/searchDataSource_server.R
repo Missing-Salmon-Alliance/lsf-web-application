@@ -14,6 +14,7 @@ output$searchFilterResetUI <- renderUI(actionButton('searchFilterReset',"Reset F
 metadataFilterReactive <- reactiveVal()
 metadataFilterReactive(LSFMetadataTibble)
 
+
 # bookmarks modal
 # TODO: Move all modals defined in UI files to observers in SERVER files
 # TODO: Alternatively all modals could reside in a single file such as searchDataSource_modals_server.R for easy access
@@ -24,7 +25,6 @@ observeEvent(input$bookmarks,{
                     DT::DTOutput('bookmarkContentsTable'),
                     column(width = 6,actionButton('clearBookmarks', "Clear All Bookmarked Sources")),
                     column(width = 5,actionButton('clearRows', "Delete Selected Row")),
-                    column(width = 1, textOutput('bookmarkCountSelect')),
                     hr()
                 ),
                 column(
@@ -393,7 +393,7 @@ options = list(pageLength = 7,
                searching = F,
                lengthChange = F,
                info = FALSE,
-               columnDefs = list(list(visible=FALSE, targets=c(0,2)))
+               columnDefs = list(list(visible=FALSE, targets=c(2)))
 )
 
 )
@@ -403,8 +403,9 @@ options = list(pageLength = 7,
 observeEvent(input$clearRows,{
   
   if (!is.null(input$bookmarkContentsTable_rows_selected)) {
-    
-    sessionUserBookmarks(sessionUserBookmarks()[sessionUserBookmarks() != sessionUserBookmarks()[input$bookmarkContentsTable_rows_selected]]) #Need to somehow subset it to ID of selected rows
+    rowToBeRemoved <- input$bookmarkContentsTable_rows_selected
+    idToBeRemoved <- LSFMetadataTibble[LSFMetadataTibble$id %in% sessionUserBookmarks(),]$id[rowToBeRemoved]
+    sessionUserBookmarks(sessionUserBookmarks()[sessionUserBookmarks() != idToBeRemoved])
   }
 })
 
