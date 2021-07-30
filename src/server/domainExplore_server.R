@@ -5,7 +5,6 @@
 domainExploreReactive <- reactiveVal()
 # Observe Domain Filter - Action: Update Variable Class Filters (available class choices filtered by Domain)
 observeEvent(input$domainFilter,{
-  #req(input$domainFilter)
   
   if(is.null(input$domainFilter)){
     shinyWidgets::updateCheckboxGroupButtons(session, 'esvFilterBioDom', choices = c("Please select a Domain"),selected = "Please select a Domain",

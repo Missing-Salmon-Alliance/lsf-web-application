@@ -20,9 +20,9 @@ tabItem( # tabItem
       status = 'primary',
       title = "Step 2 - Variable Classes Relevant to Selected Life-Stage Domains",
       width = 7,
-      shinyWidgets::checkboxGroupButtons('esvFilterBioDom',"Biological Variables",choices = c("Please select a Domain"),selected = "Please select a Domain"),
-      shinyWidgets::checkboxGroupButtons('esvFilterPhysDom',"Physical Variables",choices = c("Please select a Domain"),selected = "Please select a Domain"),
-      shinyWidgets::checkboxGroupButtons('esvFilterTraitDom',"Salmon Trait Variables",choices = c("Please select a Domain"),selected = "Please select a Domain")
+      shinyWidgets::checkboxGroupButtons('esvFilterBioDom',"Biological Processes",choices = c("Please select a Domain"),selected = "Please select a Domain"),
+      shinyWidgets::checkboxGroupButtons('esvFilterPhysDom',"Physical Environment",choices = c("Please select a Domain"),selected = "Please select a Domain"),
+      shinyWidgets::checkboxGroupButtons('esvFilterTraitDom',"Salmon Traits",choices = c("Please select a Domain"),selected = "Please select a Domain")
     ),
     box(
       status = 'success',

@@ -331,8 +331,10 @@ observeEvent(input$button_click, {
     em("Start Year: "), paste(LSFMetadataTibble[LSFMetadataTibble$id == click[1],]$metadataCoverageStartYear), br(), em("End Year: ", paste(LSFMetadataTibble[LSFMetadataTibble$id == click[1],]$metadataCoverageEndYear)),
     br(),br(),
     # dynamic content based on user activity and history
-    uiOutput('addToBookmarksUI')
+    uiOutput('addToBookmarksUI'),
+    easyClose = TRUE
   )
+  
   )
 })
 

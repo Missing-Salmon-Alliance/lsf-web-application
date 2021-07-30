@@ -5,11 +5,11 @@
 hypothesisExploreReactive <- reactiveVal()
 # observe Mortality Hypothesis Filter - Action: populate Sub-Hypothesis filter
 observeEvent(input$hypothesisFilter,{
-  #prevent run when filter reset to character(0) by using req()
-  req(input$hypothesisFilter)
+  
   # capture user remove all values from filter, reset dependent filters
   if(is.null(input$hypothesisFilter) || input$hypothesisFilter == ""){
     updateSelectizeInput(session, 'subHypothesisFilter', choices = c("Please select a Mortality Hypothesis"),selected = "Please select a Mortality Hypothesis")
+    hypothesisExploreReactive(NULL)
   }else{
     # capture filtered domain ID's as vector
     filteredHypothesisIds <- LSFHypothesisTibble[LSFHypothesisTibble$hypothesisTitle == input$hypothesisFilter,]$id
@@ -35,6 +35,7 @@ observeEvent(input$subHypothesisFilter,{
     shinyWidgets::updateCheckboxGroupButtons(session, 'esvFilterTraitHyp', choices = c("Please select a Sub-Hypothesis"),selected = "Please select a Sub-Hypothesis",
                                              checkIcon = checkboxGroupButtonsIcons,
                                              size = 'xs')
+    hypothesisExploreReactive(NULL)
   }else{
     # capture filtered subhypothesis ID's as vector
     filteredSubHypothesisIds <- LSFSubHypothesisTibble[LSFSubHypothesisTibble$subHypothesisTitle == input$subHypothesisFilter,]$id
