@@ -32,7 +32,7 @@ tabItem(# tabItem metadataNodeReport OPEN
   ),
   conditionalPanel(
     condition = "!output.logonTrue",
-    h1("Framework Statistics Area"),
+    h1("Central Data Resource Statistics Area"),
     h3("Please authenticate to access this area")
   )
 )# tabItem metadataNodeReport Close

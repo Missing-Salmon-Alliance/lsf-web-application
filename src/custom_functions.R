@@ -1,3 +1,9 @@
+######################
+# General functions used throughout the app
+######################
+
+# SQL GIS Loader function
+
 loadFullWKBData <- function(tblname) {
   
   con <- DBI::dbConnect(RPostgres::Postgres(),dbname = "gisdb", 
@@ -14,50 +20,18 @@ loadFullWKBData <- function(tblname) {
   
   result$wkb_geometry <- sf::st_as_sfc(result$wkb_geometry)
   result <- sf::st_as_sf(result,crs = 4326)
-  result <- subset(result, select = -c(geojson))
   
   return(result)
   
 }
 
+# Sanitise User Free Text Inputs Function
 
-loadgeoJSONData <- function(tblname,nameColumn) {
-  
-  con <- DBI::dbConnect(RPostgres::Postgres(),dbname = "gisdb", 
-                   host = PSQL_HOST,
-                   port = PSQL_PORT,
-                   user = PSQL_USER,
-                   password = PSQL_PASSWD)
-  res <- DBI::dbSendQuery(con, paste("SELECT ogc_fid,",nameColumn,",geojson FROM ",tblname," ORDER BY ogc_fid;",sep=''))
-  result <- DBI::dbFetch(res)
-  DBI::dbClearResult(res)
-  DBI::dbDisconnect(con)
-  return(result)
-  
+sanitiseFreeTextInputs <- function(userInput){
+  safeString <- stringr::str_replace_all(string = userInput,pattern = "'",replacement = "_") # remove single quotes
+  safeString <- stringr::str_replace_all(string = safeString,pattern = '"',replacement = "_") # remove double quotes
+  return(safeString)
 }
-
-convertToGeojsonFeatureCollection <- function(data,name){
-  
-  #Takes a list of geojson features (for example the geojson column from a tibble) and converts them into a single
-  #gosJSON feature collection.
-  #INPUT: geom, list of geojson features
-  #OUTPUT: string, single string geoJSON feature collection
-  ## USE CASE: Data from PostgreSQL database is in WKB format, easily converted to GeoJSON but as a list of single features
-  ## Leaflet takes in the geoJSON featureCollection easily as one object
-  ## TODO: Encapsulate information from other columns into properties for each feature
-  featureCollectionHead <- '{"type":"FeatureCollection","features":['
-  featureCollectionTail <- ']}'
-  
-  data$featureCollectionFeatures <- paste('{"type":"Feature","properties":{"id":"',data$ogc_fid,'","name":"',data[[name]],'"},"geometry":',data$geojson,'}',sep = "")
-  
-  featureCollectionBody <- paste0(data$featureCollectionFeatures,collapse = ',')
-  
-  featureCollection <- paste0(featureCollectionHead,featureCollectionBody,featureCollectionTail)
-  
-  
-  return(featureCollection)
-}
-
 
 #############################################
 # NEO4J USER FUNCTIONS
@@ -103,7 +77,8 @@ checkUserCredentials <- function(user,pw){
         admin = result$personAdmin,
         user_info = list(id = result$id, fullname = result$personName,email = result$personEmail,affiliation = result$personAffiliation,
                          requested = requestedTibble,
-                         submitted = submittedTibble))
+                         submitted = submittedTibble,
+                         bookmarks = result$personBookmarks))
     }else{
       # build a dummy NULL list to return to reactive user_info value if the above conditions are false
       auth <- list(
@@ -124,7 +99,7 @@ checkUserCredentials <- function(user,pw){
 }
 
 # Admin area create new user function
-adminCreateNewUser <- function(fullname,pw,email,affiliation,admin){
+adminCreateNewUser <- function(fullname,pw,email,affiliation,acceptDSA,promoteORG,admin){
   # Create a new user in the database
   # TODO: work out how to get rid of workaroundnode, this is used because check credentials function requires a node returned with at least 1 relationship
   # TODO: user feedback success/failure
@@ -132,9 +107,53 @@ adminCreateNewUser <- function(fullname,pw,email,affiliation,admin){
                     "',personPassword:'",pw,
                     "',personEmail:'",email,
                     "',personAffiliation:'",affiliation,
-                    "',personAdmin:",admin,
+                    "',personAcceptDSA:",acceptDSA,
+                    ",personPromoteOrg:",promoteORG,
+                    ",personAdmin:",admin,
                     "})-[:NEWUSER]->(w)"),
                     neo_con,
                     type = 'row')
   
 }
+
+
+#######################################################################
+# Functions no longer in use
+#######################################################################
+
+# loadgeoJSONData <- function(tblname,nameColumn) {
+#   
+#   con <- DBI::dbConnect(RPostgres::Postgres(),dbname = "gisdb", 
+#                         host = PSQL_HOST,
+#                         port = PSQL_PORT,
+#                         user = PSQL_USER,
+#                         password = PSQL_PASSWD)
+#   res <- DBI::dbSendQuery(con, paste("SELECT ogc_fid,",nameColumn,",geojson FROM ",tblname," ORDER BY ogc_fid;",sep=''))
+#   result <- DBI::dbFetch(res)
+#   DBI::dbClearResult(res)
+#   DBI::dbDisconnect(con)
+#   return(result)
+#   
+# }
+# 
+# convertToGeojsonFeatureCollection <- function(data,name){
+#   
+#   #Takes a list of geojson features (for example the geojson column from a tibble) and converts them into a single
+#   #gosJSON feature collection.
+#   #INPUT: geom, list of geojson features
+#   #OUTPUT: string, single string geoJSON feature collection
+#   ## USE CASE: Data from PostgreSQL database is in WKB format, easily converted to GeoJSON but as a list of single features
+#   ## Leaflet takes in the geoJSON featureCollection easily as one object
+#   ## TODO: Encapsulate information from other columns into properties for each feature
+#   featureCollectionHead <- '{"type":"FeatureCollection","features":['
+#   featureCollectionTail <- ']}'
+#   
+#   data$featureCollectionFeatures <- paste('{"type":"Feature","properties":{"id":"',data$ogc_fid,'","name":"',data[[name]],'"},"geometry":',data$geojson,'}',sep = "")
+#   
+#   featureCollectionBody <- paste0(data$featureCollectionFeatures,collapse = ',')
+#   
+#   featureCollection <- paste0(featureCollectionHead,featureCollectionBody,featureCollectionTail)
+#   
+#   
+#   return(featureCollection)
+# }

@@ -21,7 +21,9 @@ output$userpanel <- renderUI({
 })
 
 # observe logon button click - action use modal to prompt for username and password or for new user registration
-observeEvent(input$loginModal, {
+observeEvent(input$loginModal | input$introSideLogonButton, {
+  # req prevents trigger on load
+  req(input$loginModal != 0 || input$introSideLogonButton != 0)
   showModal(
     modalDialog(title = "Login",
                 p("Please enter your email and password",
@@ -60,8 +62,14 @@ observeEvent(input$loginSubmit, {
     updateTextInput(session, 'sourceCreatorEmail', value = user_info()$user_info$email)
     updateTextInput(session, 'sourceOrganisation', value = user_info()$user_info$affiliation)
     # Autofill some fileds in the checkout page
-    updateTextInput(session, 'basketName', value = user_info()$user_info$fullname)
-    updateTextInput(session, 'basketOrganisation', value = user_info()$user_info$affiliation)
+    updateTextInput(session, 'requestName', value = user_info()$user_info$fullname)
+    updateTextInput(session, 'requestOrganisation', value = user_info()$user_info$affiliation)
+    # Pull in users saved bookmarks (saved on logout) and populate bookmarks list
+    if(user_info()$user_info$bookmarks != ""){
+      sessionUserBookmarks(stringr::str_split(user_info()$user_info$bookmarks,",",simplify = T)[1,])
+    }else{
+      sessionUserBookmarks(NULL)
+    }
     removeModal()
   }else{
     # logon fail, add red fail text to modal
@@ -76,19 +84,19 @@ observeEvent(input$loginSubmit, {
 
 # observe logout button click - action: show thank you message, log user out and return to intro screen
 observeEvent(input$logoutModal, {
-  # Capture users basket so it can be retained for next time they log in
-  neo4r::call_neo4j(query = paste0("MATCH (p:Person) WHERE id(p) = ",user_info()$user_info$id," SET p.liveBasket = '",formatNumericList(sessionUserBasket()),"';"),con = neo_con, type = 'row')
+  # Capture users bookmarks so it can be retained for next time they log in
+  neo4r::call_neo4j(query = paste0("MATCH (p:Person) WHERE id(p) = ",user_info()$user_info$id," SET p.personBookmarks = '",formatNumericList(sessionUserBookmarks()),"';"),con = neo_con, type = 'row')
   # clear user information
   user_info(NULL)
-  # clear basket
-  sessionUserBasket(c())
+  # clear bookmarks
+  sessionUserBookmarks(c())
   # change logout button into login button
   shinyjs::hideElement('logoutModal')
   shinyjs::showElement('loginModal')
   # goodbye message
   showModal(
     modalDialog(title = "Logged Out",
-                p("Thank you for visiting the Likely Suspects Framework for Atlantic Salmon"),
+                p("Thank you for visiting the Likely Suspects Framework for Atlantic Salmon Central Data Resource"),
                 p("We hope you found this interface useful and will return soon"),
                 p("All feedback welcome via either registering an issue/bug or feature request at our",
                   a(href="https://github.com/Missing-Salmon-Alliance/lsf-web-application","github repository"),

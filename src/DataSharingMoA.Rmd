@@ -11,7 +11,7 @@ output:
 
 ### Data Sharing Group 
 
-The Missing Salmon Alliance is developing its’ Likely Suspects Framework programme to coordinate efforts to collate and mobilise relevant datasets from around the North Atlantic to facilitate testing hypotheses relating to drivers of salmon mortality. We are building a unique data resource utilizing variable categories and search tools to help researchers explore and utilize data from a wide range of sources.  
+The Missing Salmon Alliance is developing its’ Likely Suspects Framework programme to coordinate efforts to collate and mobilise relevant knowledge from around the North Atlantic to facilitate testing hypotheses relating to drivers of salmon mortality. We are building a unique data resource using variable categories and search tools to help researchers explore and utilize data from a wide range of sources.  
 
 Parties can join the **Likely Suspect Framework’s Data Sharing Group** (hereafter the Data Sharing Group), in which there is a mutualistic relationship of data being shared and used. This document sets out the guiding principles as a memorandum of our agreement among all parties joining the Data Sharing Group.  
 
