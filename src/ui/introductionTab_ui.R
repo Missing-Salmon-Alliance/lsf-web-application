@@ -4,159 +4,162 @@
 
 tabItem('introduction',
         fluidPage(
-          h1("Welcome to the Missing Salmon Alliance Data Portal",align = 'center'),
-          br(),
-          h2("The Likely Suspects Framework",align = 'center'),
-          br(),
-          em("In response to the dramatic declines of Atlantic salmon populations, the Missing Salmon Alliance has developed the Likely Suspects Framework. This programme hopes to improve our understanding of the factors driving salmon population trends to help provision salmon managers with new tools to support their future decisions to help stabilise or reverse these declines in salmon."),
-          p(),
-          em("Salmon management is frequently impeded by poor access to data that may support changing their approaches. The Likely Suspects Framework is working to mobilise biological, physical and salmon specific information from freshwater and marine environments located around the North Atlantic."),
-          br(),
-          br(),
-          carousel(
-            id = "mycarousel",
-            width = 12,
-            carouselItem(
-              column(
-                2
-              ),
-              box(
-                width = 8,
-                title = "Search The Framework",
-                status = 'primary',
-                solidHeader = TRUE,
-                h4(searchIntroCopyPara1),
-                br(),
-                h4(searchIntroCopyPara2),
-                br(),
-                br(),
-                br(),
-                br()
-              ),
-              column(
-                2
-              )
-            ),
-            carouselItem(
-              column(
-                2
-              ),
-              box(
-                width = 8,
-                title = "Submit Data to The Framework",
-                status = 'primary',
-                solidHeader = TRUE,
-                h4(submitIntroCopyPara1),
-                br(),
-                br(),
-                br(),
-                br(),
-                br(),
-                br(),
-                br(),
-                br()
-              ),
-              column(
-                2
-              )
-            ),
-            carouselItem(
-              column(
-                2
-              ),
-              box(
-                width = 8,
-                title = "The Framework",
-                status = 'primary',
-                solidHeader = TRUE,
-                h4("The framework is designed to collate salmon knowledge and index it in a way that will guide researchers to the data they need to test hypotheses. All knowledge in the framework will have been included because it fits in to Atlantic salmon ecology at some point, including but not restricted to:"),
-                br(),
+          fluidRow(
+            h1("Welcome to the Central Data Resource for Atlantic Salmon"),
+            br(),
+            h4("Brought to you by the ",
+               a(href="https://missingsalmonalliance.org/","Missing Salmon Alliance",target="_blank"),
+               "as part of the",
+               a(href="https://missingsalmonalliance.org/likely-suspects-framework","Likely Suspects Framework,",target="_blank"),
+               "this portal aims to guide researchers to data sources for testing hypotheses, 
+                                        informing management activities, and ultimately improving Atlantic salmon populations."),
+            
+            tags$b("This resource is ready for use but may change in appearance and functionality as our user base and knowledge base grows. 
+                                    Development suggestions are always welcome and can be directed to the team via",a(href="mailto: data.admin@missingsalmonalliance.org","email."),"It is best viewed in a modern browser, at a zoom level of 100% or less and is not designed to be viewed on a mobile device.")
+          ),
+          fluidRow(
+            hr(style="border-color: purple")
+          ),
+          fluidRow(
+            carousel(
+              id = "mycarousel",
+              width = 12,
+              carouselItem(
                 column(
-                  2
+                  width = 7,
+                  img(src = 'msa-logo.png', height = '350vh')
+                ),
+                box(
+                  width = 5,
+                  title = "The Missing Salmon Alliance",
+                  status = 'primary',
+                  em("A group of conservation focused organisations working together to drive action and save our wild Atlantic salmon from extinction by combining expertise, coordinating activities and advocating effective management solutions.")
+                )
+              ),
+              carouselItem(
+                box(
+                  width = 7,
+                  title = "The Central Data Resource",
+                  status = 'success',
+                  solidHeader = FALSE,
+                  em(carouselGeneralIntro)
                 ),
                 column(
-                  6,
-                  tags$ul(
-                    tags$li(h4("Primary Observation")),
-                    tags$li(h4("Derived Output")),
-                    tags$li(h4("Model Output"))
-                  )
-                ),
-                br(),
-                br(),
-                br(),
-                br(),
-                br(),
-                br(),
-                br(),
-                br()
-              ),
-              column(
-                2
-              )
-            ),
-            carouselItem(
-              column(
-                2
-              ),
-              box(
-                width = 8,
-                title = "The Metadata",
-                status = 'primary',
-                solidHeader = TRUE,
-                h4("Metadata (the data source descriptions) are grounded in a common language (Ecological Metadata Language) https://www.dcc.ac.uk/resources/metadata-standards/eml-ecological-metadata-language, all effort put in to describing the data thoroughly via this interface is interoperable with popular online data portals such as:"),
-                br(),
-                column(
-                  2
+                  width = 5,
+                  img(src = 'MSA_WebsiteLayout_lowres.png', height = '350vh')
+                )
+              ), # carousel item end
+              carouselItem(
+                box(
+                  width = 5,
+                  title = "Search The Framework",
+                  status = 'primary',
+                  solidHeader = FALSE,
+                  em(searchIntroCopy)
                 ),
                 column(
-                  6,
-                  tags$ul(
-                    tags$li(h4("Global Biodiversity Information Facility")),
-                    tags$li(h4("Long Term Ecological Research Network")),
-                    tags$li(h4("Knowledge Network for Biocomplexity")),
-                  )
-                ),
-                br(),
-                br(),
-                br(),
-                br(),
-                br(),
-                br(),
-                br()
-              ),
-              column(
-                2
-              )
-            ),
-            carouselItem(
-              column(
-                2
-              ),
-              box(
-                width = 8,
-                status = 'primary',
-                solidHeader = TRUE,
-                title = "Variable Classes",
-                h4("Variable classes are used to index data sources within the framework. You may like to explore the classes here prior to searching for or submitting data sources"),
-                column(
+                  width = 7,
+                  img(src = 'images/screenshot_map_carousel.PNG', height = '350vh')
+                )
+              ), # carousel item end
+              carouselItem(
+                box(
                   width = 6,
-                  selectInput('varClassesDomain',"Domain",choices = LSFDomainTibble$domainTitle)
+                  title = "Submit Data to The Central Data Resource",
+                  status = 'primary',
+                  solidHeader = FALSE,
+                  em(submitIntroCopy)
                 ),
                 column(
                   width = 6,
-                  selectInput('varClassesCats',"Category",choices = unique(LSFEssentialSalmonVariableTibble$esvCategory))
+                  img(src = 'images/screenshot_submit_carousel.PNG', height = '350vh')
+                )
+              ), # carousel item end
+              carouselItem(
+                box(
+                  width = 7,
+                  title = "The Metadata",
+                  status = 'danger',
+                  solidHeader = FALSE,
+                  em("The data source descriptions are grounded in a common language,",a(href="https://www.dcc.ac.uk/resources/metadata-standards/eml-ecological-metadata-language","Ecological Metadata Language (EML).",target="_blank"),"All efforts put in to describing the data thoroughly via this interface are interoperable with popular online metadata catalogues such as:"),
+                  br(),
+                  column(
+                    2
+                  ),
+                  column(
+                    10,
+                    tags$ul(
+                      tags$li(em(a(href="https://knb.ecoinformatics.org/","Knowledge Network for Biocomplexity",target="_blank"))),
+                      tags$li(em(a(href="https://www.gbif.org/","Global Biodiversity Information Facility",target="_blank"))),
+                      tags$li(em(a(href="https://lternet.edu/","Long Term Ecological Research Network",target="_blank")))
+                    )
+                  )
                 ),
-                DT::DTOutput('varClassesFull'),
-                br(),
-                br(),
-                br()
-              )
-            ),
-            column(
-              2
-            )
-          )
+                column(
+                  width = 5,
+                  img(src = 'images/eml_logo.png', height = '350vh')
+                )
+              ), # carousel item end
+              carouselItem(
+                column(
+                  width = 3,
+                  img(src = 'images/sitemap-solid.svg', height = '350vh', alt = "https://fontawesome.com/license")
+                ),
+                box(
+                  width = 9,
+                  title = "Data Citation",
+                  status = 'success',
+                  solidHeader = FALSE,
+                  #height = '350vh',
+                  em("The creation of static and citable data sources with an associated Digital Object
+                     Identifier (DOI) promotes more open and reproducible research,
+                     as well as adding provenance to new syntheses that can otherwise
+                     be difficult to trace. Data citation also provides a way for data owners to leverage more
+                     value from their used data resources. The Central Data Resource assigns locally unique
+                     identifiers and can facilitate the creation of globally unique and dereferenceable DOI's via
+                     the",a(href="https://knb.ecoinformatics.org","Knowledge Network for Biocomplexity.",target = "_blank")),
+                  br(),
+                  em("All members are expected to abide by academic norms for citation. Data Citation conventions have been
+                     developed by the FORCE11 community and can be found here:",
+                     a(href="https://www.force11.org/datacitationprinciples","force11.org",target="_blank"))
+                )
+              ) # carousel item end
+              # carouselItem(
+              #   box(
+              #     width = 7,
+              #     title = "Blank Item 2",
+              #     status = 'danger',
+              #     solidHeader = FALSE,
+              #     em("Holding area for more information")
+              #   ),
+              #   column(
+              #     width = 5,
+              #     img(src = 'images/screenshot_searchmap.PNG', height = '350vh')
+              #   )
+              # ) # carousel item end
+            ) # carousel end
+          ) # fluid row end
+          # fluidRow(
+          #   box(
+          #     width = 12,
+          #     status = 'warning',
+          #     solidHeader = FALSE,
+          #     title = "Variable Classes",
+          #     h4("Variable classes are used to index data sources within the Central Data Resource. You may like to explore the classes here prior to searching for or submitting data sources"),
+          #     column(
+          #       width = 6,
+          #       selectInput('varClassesDomain',"Domain",choices = LSFDomainTibble$domainTitle)
+          #     ),
+          #     column(
+          #       width = 6,
+          #       selectInput('varClassesCats',"Category",choices = unique(LSFEssentialSalmonVariableTibble$esvCategory))
+          #     ),
+          #     DT::DTOutput('varClassesFull'),
+          #     br(),
+          #     br(),
+          #     br()
+          #   )
+          # ) # fluid row end
         )
 )
 

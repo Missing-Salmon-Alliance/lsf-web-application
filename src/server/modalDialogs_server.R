@@ -7,7 +7,7 @@ observeEvent(input$submitDescript,{
     modalDialog(title = "",
                 size = 'l',
                 column(12,
-                       h1("Introduction to the Submit Page of the Likely Suspects Framework"),
+                       h1("Introduction to the Submit Page of the Central Data Resource"),
                        br(),
                        em(submitIntroCopyPara1),
                        p(),
@@ -24,14 +24,15 @@ observeEvent(input$esvFields,{
       title = "",
       size = 'l',
       column(12,
-             h3("Domain and Variable Class"),
-             em("Here the data being submitted can be tagged regarding how it may be relevant to the differing habitats across the Atlantic salmon’s lifecycle."),
+             h3("Life-Stage Domains and Variable Classes"),
+             em("Here the data being submitted can be tagged regarding how it may be relevant to the differing habitats across the Atlantic salmon’s lifecycle.
+                Select the Life-Stage Domains that the data you are submitting relates to, and then select variable classes that best match observations/measurements in the data.
+                Tagging the data in this way can facilitate data discovery for those searching for related sets of observations, e.g. 'Biological' observations of the environment in the Life-Stage Domain 'River Rearing'."),
              br(),
-             h4("Domain"),
-             em("Select whether the data is relevant to the salmon-specific domains which are present in either the freshwater or marine environments. Multiple domains may be selected. Domains are specific to the life stages of salmon e.g. River Migration Smolt and River Migration Adult. Therefore, please choose carefully. "),
+             h4("Life-Stage Domain"),
+             em(domainsDescriptionCopy),
              h4("Variable Class"),
-             em("Select whether the data being submitted is regarding biological processes (e.g. Fish Parasites), physical processes (e.g. Sea Surface Temperature) or salmon traits (e.g. Sex Ratio (smolt)). Following selection of this category the extended variable classes will become available for selection on the left, organised by their relevant domains."),
-             em("Following this process of filtering the classes that may be appropriate to the data being selected, please select the relevant class. Multiple may be selected if appropriate."),
+             em(esvDescriptionCopy)
       )
     )
   )
@@ -67,7 +68,7 @@ observeEvent(input$metadataFields,{
              br(),
              h4("URL"),
              em("If the data being submitted is hosted on another website or database, please provide the URL for the location of this data."),
-             em("Note that if the data is already hosted on the Knowledge Network for Biocomplexity then the sidebar ",strong("'Load from KNB'")," option can be used to link the resources."),
+             #em("Note that if the data is already hosted on the Knowledge Network for Biocomplexity then the sidebar ",strong("'Load from KNB'")," option can be used to link the resources."),
              br(),
              h4("Select Update Frequency "),
              em("Provide information on how regularly the data is updated, if updated at all."),
@@ -85,11 +86,13 @@ observeEvent(input$geogTimeFields,{
     modalDialog(
       title = "",
       size = 'l',
-      h3("Temporal Coverage"),
-      em("Provide information of the temporal extents of the data being provided both regarding an annual and monthly basis. Use the slider and buttons provided to describe in what months was/is the data collected and which years were the data collected."),
-      hr(),
       h3("Geographical Coverage"),
-      em("Provide a brief description of the geographic location of where the data was collected e.g. The River Bush, Northern Ireland. Use the sliders and the map provided to give the data North-South and West-East coordinates. Be as accurate as you can ")
+      em("Provide a brief description of the geographic location of where the data was collected e.g. The River Bush, Northern Ireland, and define the location boundaries in decimal degrees. 
+      Clicking a location on the map will automatically fill in the boundaries on the left. 
+      The boundary inputs can also be modified manually and accept decimal degrees to an accuracy of 4 decimal places (roughly 10 metres)."),
+      hr(),
+      h3("Temporal Coverage"),
+      em("Provide information of the temporal extents of the data. Use the slider to define which years the data were collected over, and the buttons to identify during which months data were collected if applicable")
     )
   )
 })
@@ -100,7 +103,7 @@ observeEvent(input$searchDescript,{
       title = "",
       size = 'l',
       column(12,
-             h1("Instructions on the LSF Search Page"),
+             h1("Instructions on the Central Data Resource Search Page"),
              br(),
              em(searchIntroCopyPara1),
              p(),
@@ -125,7 +128,7 @@ observeEvent(input$searchDescript,{
              em("NAFO have categorised the North-West Atlantic into Divisions. Selection of NAFO Divisions using the dropdown tool we provide will help focus the metadata in the table to only return relevant data."),
              # filter_select("Chose_NAFO", "Choose your NAFO Division", sd, group = ~nafo),
              br(),
-             h4("Domains"),
+             h4("Life-stage Domains"),
              em(domainsDescriptionCopy),
              br(),
              h4("Variable Classes"),

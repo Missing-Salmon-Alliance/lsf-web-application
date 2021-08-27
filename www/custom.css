@@ -1,0 +1,69 @@
+/*
+Main Colour Scheme CSS 
+Matches MSA colour Scheme
+
+*/
+
+/*Set height of dashboardHeader so that it fits MSA logo*/
+.main-header {max-height: 100px}
+
+/*
+adjust size, padding and colour around header logo
+*/
+.skin-blue .main-header .logo {
+  padding: 0 0;
+  height: 100px;
+  background-color: #5aa7bc;
+}
+
+/*
+adjust popover size site wide
+*/
+
+.popover{max-width: 50%;}
+
+
+/* logo when hovered */
+.skin-blue .main-header .logo:hover {
+                      background-color: #cee5d5;
+                      }
+
+/* navbar (rest of the header) */
+.skin-blue .main-header .navbar {
+                      background-color: #5aa7bc;
+                      }        
+
+/* main sidebar */
+.skin-blue .main-sidebar {
+                      background-color: #71918c;
+                      }
+
+/* active selected tab in the sidebarmenu */
+.skin-blue .main-sidebar .sidebar .sidebar-menu .active a{
+                      background-color: #5aa7bc;
+                      }
+
+/* other links in the sidebarmenu */
+.skin-blue .main-sidebar .sidebar .sidebar-menu a{
+                      background-color: #71918c;
+                      color: #3c3c3b;
+                      }
+
+/* other links in the sidebarmenu when hovered */
+ .skin-blue .main-sidebar .sidebar .sidebar-menu a:hover{
+                      background-color: #cee5d5;
+                      }
+/* toggle button when hovered  */                    
+ .skin-blue .main-header .navbar .sidebar-toggle:hover{
+                      background-color: #cee5d5;
+                      }
+                      
+/* END of COLOUR SCHEME CSS */
+
+/*
+styling for search page filter collapse panels
+makes them slightly faded until mouse over
+*/
+#searchFiltersAbsPanel {opacity:0.65;}
+#searchFiltersAbsPanel:hover{opacity:1;}
+
