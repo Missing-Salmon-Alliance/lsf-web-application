@@ -16,3 +16,5 @@ observeEvent(input$addNewUser,{
   updateCheckboxInput(session, inputId = 'useradminPromoteOrg',value = FALSE)
   updateCheckboxInput(session, inputId = 'useradminAdmin',value = FALSE)
 })
+
+# Quality Control Section

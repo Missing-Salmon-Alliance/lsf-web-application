@@ -70,7 +70,7 @@ resetAll <- function(){
   updateTextInput(session,inputId = 'embargoEnd',value = "")
   #reset Source Domain/ESV Section
   shinyWidgets::updateCheckboxGroupButtons(session, inputId = 'domainNodeList',selected = character(0))
-  shinyWidgets::updateCheckboxGroupButtons(session, inputId = 'esvCategory',selected = character(0))
+  #shinyWidgets::updateCheckboxGroupButtons(session, inputId = 'esvCategory',selected = character(0))
   
   #reset Source Temporal Section
   updateNumericInput(session,inputId = 'sourceStartYear',value = 2021)
