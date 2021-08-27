@@ -3,7 +3,14 @@ conditionalPanel(
   column(
     width = 12,
     hr(),
-    uiOutput('searchRefreshUI'),
-    uiOutput('searchFilterResetUI')
+    column(
+      width = 12,
+      h4("Active Filter:"),
+      textOutput('activeGeographicFilter')
+      
+    ),
+    uiOutput('searchFilterResetUI'),
+    hr(),
+    uiOutput('searchRefreshUI')
   )
 )

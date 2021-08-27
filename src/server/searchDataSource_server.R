@@ -19,21 +19,21 @@ metadataFilterReactive(LSFMetadataTibble)
 # TODO: Alternatively all modals could reside in a single file such as searchDataSource_modals_server.R for easy access
 observeEvent(input$basket,{
   showModal(
-    modalDialog(title = "Your Basket", size = "l",
-                fluidPage(title = "Your Basket",
-                          box(width = 12, h4("Basket Contents"),
+    modalDialog(title = "Your Bookmarks", size = "l",
+                fluidPage(title = "Your Bookmarks",
+                          box(width = 12, h4("Bookmarked Sources"),
                               DT::DTOutput('basketContentsTable'),
-                              column(width = 6,actionButton('clearBasket', "Clear All Basket Contents")),
+                              column(width = 6,actionButton('clearBasket', "Clear All Bookmarked Sources")),
                               column(width = 5,actionButton('clearRows', "Delete Selected Row")),
                               column(width = 1, textOutput('basketCountSelect'))
                           ),
-                          box(width = 12, h4("Check Out"),
+                          box(width = 12, h4("Request Bookmarked Data"),
                               textInput('basketName', "Name:", value = user_info()$user_info$fullname),
                               textInput('basketOrganisation', "Organisation:", value = user_info()$user_info$affiliation),
                               #selectInput("basketPosition", "Position/Occupation:", choices = c("Researcher","Database Manager","Government Official", "Conservationist", "Student", "Lecturer", "Other")),
                               #selectInput("basketDataUse", "What will the data be used for?", choices = c("Independent Research", "Conservation", "Guidance to Managers", "Other")),
                               #textInput("basketOther","Please describe what is meant, if you selected other"),
-                              #selectInput("basketProvision", "Do you intend to provide data to the LSF database?", choices = c("Yes", "No", "In the Future")),
+                              #selectInput("basketProvision", "Do you intend to provide data to the Central Data Resource?", choices = c("Yes", "No", "In the Future")),
                               textAreaInput('basketIntention', "Please describe the intended use for the data. Please include information on the project, time scale of usage and expected number of users.", width = "1000px", height = "50px"),
                               actionButton('sendRequest', "Send Data Request")
                               
@@ -91,7 +91,20 @@ observeEvent(input$searchRefresh,{
   LSFMetadataTibble <- sf::st_as_sf(LSFMetadataTibble, wkt = "metadataCoverageCentroid", crs = 4326, na.fail = FALSE)
   
   metadataFilterReactive(LSFMetadataTibble)
-  
+  # clear existing markers
+  leaflet::leafletProxy("map", session) %>%
+    leaflet::clearGroup(group = 'Data Source')
+  # and redraw
+  redrawFilteredMarkers(metadataFilterReactive(),session)
+})
+
+observeEvent(input$searchFilterReset,{
+  metadataFilterReactive(LSFMetadataTibble)
+  activeGeographicFilterReactive("No Filter Selected")
+  # clear existing markers
+  leaflet::leafletProxy("map", session) %>%
+    leaflet::clearGroup(group = 'Data Source')
+  # and redraw
   redrawFilteredMarkers(metadataFilterReactive(),session)
 })
 
@@ -103,76 +116,27 @@ filterAppliedInformation <- reactiveValues()
 filterAppliedInformation$filterType <- "None"
 filterAppliedInformation$filterName <- "None"
 
-############################################
-# Pull data from SQL database using function
-
-icesEcoregions <- loadgeoJSONData("ices_ecoregions","ecoregion")
-icesEcoregionsGeoJSON <- convertToGeojsonFeatureCollection(icesEcoregions,"ecoregion")
-ICES_Ecoregions <- sf::read_sf(icesEcoregionsGeoJSON)
-rm(icesEcoregions,icesEcoregionsGeoJSON)
-
-# neContinents <- loadgeoJSONData("ne_continents","continent")
-# neContinentsGeoJSON <- convertToGeojsonFeatureCollection(neContinents,"continent")
-# neContinentsSF <- sf::read_sf(neContinentsGeoJSON)
-# rm(neContinents,neContinentsGeoJSON)
-
-
-# nascoRivers <- loadgeoJSONData("nasco_rivers_db","rivername")
-# nascoRiversGeoJSON <- convertToGeojsonFeatureCollection(nascoRivers,"rivername")
-# nascoRiversSF <- sf::read_sf(nascoRiversGeoJSON)
-# rm(nascoRivers,nascoRiversGeoJSON)
-
-
-nafoDivisions <-loadgeoJSONData("nafo_divisions","zone")
-nafoDivisionsGeoJSON <- convertToGeojsonFeatureCollection(nafoDivisions,"zone")
-nafoDivisionsSF <- sf::read_sf(nafoDivisionsGeoJSON)
-rm(nafoDivisions,nafoDivisionsGeoJSON)
-
-
-# icesStatEco <- loadgeoJSONData("ices_stat_rect_eco","icesname")
-# icesStatEcoGeoJSON <- convertToGeojsonFeatureCollection(icesStatEco,"icesname")
-# icesStatEcoSF <- sf::read_sf(icesStatEcoGeoJSON)
-# rm(icesStatEco,icesStatEcoGeoJSON)
-
-
-# migration <- loadgeoJSONData("buffered_seasalar_migration","current")
-# migrationGeoJSON <- convertToGeojsonFeatureCollection(migration,"current")
-# migrationSF <- sf::read_sf(migrationGeoJSON)
-# rm(migration,migrationGeoJSON)
-# 
-# 
-# feeding <- loadgeoJSONData("feeding_zones","name")
-# feedingGeoJSON <- convertToGeojsonFeatureCollection(feeding,"name")
-# feedingSF <- sf::read_sf(feedingGeoJSON)
-# rm(feeding,feedingGeoJSON)
-
-migrationSF <- sf::read_sf("./src/Migration_as_ICES_Squares.shp")
-
-feedingSF <- sf::read_sf("./src/Feeding_Zones.shp")
-
-NASCO_rivers <- read_csv("./src/NASCO_RiversDB.csv",locale = locale(encoding = 'latin1'))
-NASCO_rivers <- NASCO_rivers %>% filter(Longitude_Decimal != "") %>%
-  filter(Latitude_Decimal != "") %>% filter(RiverName != "") 
-NASCO_rivers <- sf::st_as_sf(NASCO_rivers, coords = c("Longitude_Decimal","Latitude_Decimal"), crs = 4326)
+#####################
+# Load map layers from SQL and CSV
+source('./src/server/searchDataSource_MapLayerSource_server.R',local = TRUE)
 
 ###################################################
 # Write a HTML Legend (As have used HTML ICONS and no gradient)
 
-html_legend <- "<h4>Markers</h4>
-<img src='https://img.icons8.com/ios-filled/50/4a90e2/marker.png'style = 'width:30px;height:30px;'/> <b>Data Sources<br>
-<img src='https://img.icons8.com/cotton/64/000000/salmon--v1.png'style = 'width:30px;height:30px;'/> <b>Index Rivers<br>
-&nbsp; <img src='https://img.icons8.com/emoji/48/000000/black-circle-emoji.png'style = 'width:15px;height:15px;'/> &nbsp; <b> NASCO Rivers<br>
-<br>
-<h4>Polygon Overlays</h4> 
-<img src='https://img.icons8.com/emoji/48/26e07f/green-circle-emoji.png'style = 'width:30px;height:30px;'/> <b>ICES Ecoregions<br>
-<img src='https://img.icons8.com/emoji/48/26e07f/purple-circle-emoji.png'style = 'width:30px;height:30px;'/> <b> NAFO Divisions<br>
-<img src='https://img.icons8.com/emoji/48/4a90e2/blue-square-emoji.png'style = 'width:30px;height:30px;'/> <b> Areas of Migration <br/>
-"
+html_legend <- "<img src='https://img.icons8.com/ios-filled/50/4a90e2/marker.png'style = 'width:30px;height:30px;'>Data Sources</img><br>
+<img src='https://img.icons8.com/cotton/64/000000/salmon--v1.png'style = 'width:30px;height:30px;'>Index Rivers</img><br>
+<img src='https://img.icons8.com/emoji/48/000000/black-circle-emoji.png'style = 'width:15px;height:15px;'>NASCO Rivers</img>"
+# <br>
+# <h4>Polygon Overlays</h4> 
+# <img src='https://img.icons8.com/emoji/48/26e07f/green-circle-emoji.png'style = 'width:30px;height:30px;'/> <b>ICES Ecoregions<br>
+# <img src='https://img.icons8.com/emoji/48/26e07f/purple-circle-emoji.png'style = 'width:30px;height:30px;'/> <b>NAFO Divisions<br>
+# <img src='https://img.icons8.com/emoji/48/4a90e2/blue-square-emoji.png'style = 'width:30px;height:30px;'/> <b>Areas of Migration<br/>
+# "
 
 # TODO: improve visual information in markers, colour index rivers or use river icon, check out the IYS icons
 output$map <- leaflet::renderLeaflet({ 
   leaflet::leaflet (options = leaflet::leafletOptions(minZoom = 3,maxZoom = 10))%>%
-    leaflet::setView(lng = 35,lat = 60,zoom = 3) %>% 
+    leaflet::setView(lng = 10,lat = 60,zoom = 3) %>% 
     leaflet::setMaxBounds( lng1 = -130
                   , lat1 = -20
                   , lng2 = 210
@@ -182,7 +146,7 @@ output$map <- leaflet::renderLeaflet({
     leaflet::addMarkers(data = LSFMetadataTibble,
                label = ~metadataTitle,
                layerId = ~id,
-               group = 'metadataMarkers',
+               group = 'Data Source',
                popup = ~paste("<h3>More Information</h3>",
                               "<b>Title:</b>",metadataTitle,"<br>","<br>",
                               "<b>Abstract:</b>",metadataAbstract,"<br>","<br>",
@@ -199,18 +163,31 @@ output$map <- leaflet::renderLeaflet({
                  removeOutsideVisibleBounds = TRUE,
                  spiderLegPolylineOptions = list(weight = 1.5, color = "#222", opacity = 0.5),
                  freezeAtZoom = 10)) %>%
+    # 
+    # On map search box
+    # leaflet.extras::addSearchFeatures(
+    #   targetGroups = 'Data Source',
+    #   options = leaflet.extras::searchFeaturesOptions(zoom=12, openPopup = FALSE, firstTipSubmit = TRUE,
+    #     autoCollapse = TRUE, hideMarkerOnCollapse = TRUE
+    #   )
+    # ) %>%
     
-    leaflet.extras::addSearchFeatures(
-      targetGroups = 'metadataMarkers',
-      options = leaflet.extras::searchFeaturesOptions(zoom=12, openPopup = FALSE, firstTipSubmit = TRUE,
-        autoCollapse = TRUE, hideMarkerOnCollapse = TRUE
-      )
-    ) %>%
-    leaflet::addMarkers(data = rivers,label = ~paste("Salmon Index River: ",RiverName), group = "ICES Index Rivers", icon = list(
-      iconUrl = "https://img.icons8.com/cotton/64/000000/salmon--v1.png",
-      iconSize = c(35, 35))) %>%
-    leaflet::addCircleMarkers(data = NASCO_rivers, label = ~RiverName, group = "NASCO River DB", color = "black", radius = 3,
-                     stroke = FALSE, fillOpacity = 1) %>%
+    leaflet::addMarkers(data = rivers,
+                        label = ~paste("Salmon Index River: ",RiverName),
+                        group = "ICES Index Rivers",
+                        icon = list(
+                          iconUrl = "https://img.icons8.com/cotton/64/000000/salmon--v1.png",
+                          iconSize = c(35, 35))) %>%
+    # 
+    leaflet::addCircleMarkers(data = NASCO_rivers,
+                              label = ~RiverName,
+                              group = "NASCO River DB",
+                              color = "black",
+                              radius = 3,
+                              stroke = FALSE,
+                              fillOpacity = 1) %>%
+    
+    # Demonstration - Add WMS Tiles
     # leaflet::addWMSTiles(
     #   "https://gis.ices.dk/gis/services/Mapping_layers/ICES_Statrec_mapto_Ecoregions/MapServer/WMSServer",
     #   layers = "0",
@@ -219,24 +196,29 @@ output$map <- leaflet::renderLeaflet({
     # ) %>%
     
     leaflet::addPolygons(data = ICES_Ecoregions,
-                label = ICES_Ecoregions$name,
-                color = "green", group = "Ecoregions", weight = 1,
+                label = ~ecoregion,
+                layerId = paste0("eco_",ICES_Ecoregions$objectid),
+                color = "green", group = "ICES Ecoregions", weight = 1,
                 highlightOptions = leaflet::highlightOptions(color = "yellow", weight = 3,
                                                     bringToFront = TRUE))  %>%
+    # 
     # leaflet::addPolygons(data = icesStatEcoSF,
-    #             label = icesStatEcoSF$name,
-    #             layerId = ~name, color = "blue", group = "Statistical Squares", weight = 1,
+    #             label = ~name,
+    #             layerId = paste0("sta_",icesStatEcoSF$id),
+    #             color = "blue", group = "ICES Stat Squares", weight = 1,
     #             highlightOptions = leaflet::highlightOptions(color = "yellow", weight = 3,
     #                                                 bringToFront = TRUE))  %>%
-    
+    #  
     leaflet::addPolygons(data = nafoDivisionsSF,
-                label = nafoDivisionsSF$name,
+                label = ~zone,
+                layerId = paste0("div_",nafoDivisionsSF$ogc_fid),
                 color = "purple", group = "NAFO Divisions", weight = 1,
                 highlightOptions = leaflet::highlightOptions(color = "yellow", weight = 3,
                                                     bringToFront = TRUE)) %>%
     leaflet::addPolygons(data = migrationSF,
-                label = migrationSF$name,
-                color = "blue", group = "Migration Routes", weight = 1,
+                label = ~icesname,
+                layerId = paste0("mig_",migrationSF$fid),
+                color = "blue", group = "Proposed Outward Migration", weight = 1,
                 highlightOptions = leaflet::highlightOptions(color = "yellow", weight = 3,
                                                     bringToFront = TRUE)) %>%
     
@@ -245,14 +227,30 @@ output$map <- leaflet::renderLeaflet({
     #             color = "black", group = "Migration Routes", weight = 1,
     #             highlightOptions = leaflet::highlightOptions(color = "yellow", weight = 3,
     #                                                 bringToFront = TRUE)) %>%
-    # 
-    leaflet::addLayersControl(position = 'topleft',overlayGroups = c("Ecoregions", "NAFO Divisions","Migration Routes","NASCO River DB","ICES Index Rivers"),#,"Statistical Squares","Migration Routes"),
+    
+    leaflet::addLayersControl(position = 'topleft',overlayGroups = c("Data Source",
+                                                                     "ICES Index Rivers",
+                                                                     "ICES Ecoregions",
+                                                                     "NAFO Divisions",
+                                                                     #"ICES Stat Squares",
+                                                                     "Proposed Outward Migration",
+                                                                     "NASCO River DB"),
                      options = leaflet::layersControlOptions(collapsed = FALSE)) %>%
-    leaflet::hideGroup(c("Ecoregions", "NAFO Divisions","Migration Routes", "NASCO River DB")) %>%
-    leaflet::addControl(position = "bottomleft", html = html_legend )
+    leaflet::hideGroup(c("ICES Ecoregions",
+                         "NAFO Divisions",
+                         #"ICES Stat Squares",
+                         "Proposed Outward Migration",
+                         "NASCO River DB")) %>%
+
+    htmlwidgets::onRender("
+        function() {
+            $('.leaflet-control-layers-overlays').prepend('<label style=\"text-align:left; font-size:16px;\">Layer Control</label>');
+        }
+    ")
+    # commenting out legend for now, the layer control in a way works as a legend and the screen was a bit cluttered with both
+    #leaflet::addControl(position = "bottomright", html = html_legend)
 })
 
-#output$table <- DT::renderDT({metadataFilterReactive()})
 
 output$table <- DT::renderDT({
   sf::st_set_geometry(metadataFilterReactive()[,c('metadataTitle','metadataAbstract','metadataKeywords')],NULL)
@@ -273,75 +271,34 @@ output$table <- DT::renderDT({
 # Map metadata node marker filter OBSERVERS
 ###########################################
 
-# Eco regions based on pre-calculated intersects
-observeEvent(input$ecoregionFilter,{
-  leaflet::leafletProxy("map", session) %>%
-    leaflet::clearGroup(group = 'metadataMarkers')
-  if(input$ecoregionFilter == "All"){
-    metadataFilterReactive(LSFMetadataTibble)
-  }else{
-    metadataFilterReactive(LSFMetadataTibble[str_detect(LSFMetadataTibble$metadataCoverageIntersectICESEcoRegion,input$ecoregionFilter),])
-  }
-  redrawFilteredMarkers(metadataFilterReactive(),session)
-})
-
-
-# NAFO divisions based on pre-calculated intersects
-observeEvent(input$nafodivisionFilter,{
-  leaflet::leafletProxy("map", session) %>%
-    leaflet::clearGroup(group = 'metadataMarkers')
-  if(input$nafodivisionFilter == "All"){
-    metadataFilterReactive(LSFMetadataTibble)
-  }else{
-    metadataFilterReactive(LSFMetadataTibble[str_detect(LSFMetadataTibble$metadataCoverageIntersectNAFODivision,input$nafodivisionFilter),])
-  }
-  redrawFilteredMarkers(metadataFilterReactive(),session)
-})
-
-# migration routes based on pre-calculated intersects
-observeEvent(input$migrationRouteFilter,{
-  leaflet::leafletProxy("map", session) %>%
-    leaflet::clearGroup(group = 'metadataMarkers')
-  if(input$migrationRouteFilter == "All"){
-    metadataFilterReactive(LSFMetadataTibble)
-  }else{
-    # apply regex escape
-    filterValue <- str_replace_all(str_replace_all(input$migrationRouteFilter,"\\(","\\\\("),"\\)","\\\\)")
-    metadataFilterReactive(LSFMetadataTibble[str_detect(LSFMetadataTibble$metadataCoverageIntersectMigrationRoutes,filterValue),])
-  }
-  redrawFilteredMarkers(metadataFilterReactive(),session)
-})
+###############################################
+# Geograpic Filters
+source("./src/server/searchDataSource_GeographicFilters_server.R",local = TRUE)$value
 
 ###############################################
 # Temporal Filters
 source("./src/server/searchDataSource_temporalFilters_server.R",local = TRUE)$value
 
 
-###############################################
-# Framework Filters
-source("./src/server/searchDataSource_frameworkFilters_server.R",local = TRUE)$value
-
-##############################################
-# Polygon Mouse Over
-
-observe(
-  {click = input$map_marker_click
-  if(is.null(click))
-    leaflet::leafletProxy("map") %>%
-    leaflet::clearGroup(group = 'markerRectangle')
-  else
+# Observer for Search Map Click - Action: When user clicks a marker add the extents of the marker data source as rectangle to the map
+observeEvent(input$map_marker_click,{
     leaflet::leafletProxy("map") %>%
     leaflet::clearGroup(group = 'markerRectangle') %>%
-    leaflet::addRectangles(LSFMetadataTibble[LSFMetadataTibble$id == click[1],]$metadataCoverageWest,
-                  LSFMetadataTibble[LSFMetadataTibble$id == click[1],]$metadataCoverageNorth,
-                  LSFMetadataTibble[LSFMetadataTibble$id == click[1],]$metadataCoverageEast,
-                  LSFMetadataTibble[LSFMetadataTibble$id == click[1],]$metadataCoverageSouth
+    leaflet::addRectangles(LSFMetadataTibble[LSFMetadataTibble$id == input$map_marker_click[1],]$metadataCoverageWest,
+                  LSFMetadataTibble[LSFMetadataTibble$id == input$map_marker_click[1],]$metadataCoverageNorth,
+                  LSFMetadataTibble[LSFMetadataTibble$id == input$map_marker_click[1],]$metadataCoverageEast,
+                  LSFMetadataTibble[LSFMetadataTibble$id == input$map_marker_click[1],]$metadataCoverageSouth
                   ,group = 'markerRectangle', color = "blue", weight = 1, stroke = TRUE)
   }
 )
 
+# Observer for Search Map Click - Action: clear rectangle on background click
+observeEvent(input$map_click,{
+  leaflet::leafletProxy("map") %>%
+    leaflet::clearGroup(group = 'markerRectangle')
+})
 ############################################## 
-# Modal pop-up on each marker_click
+# Observer for Search Map Click - Action: Modal pop-up on each marker_click
 
 observeEvent(input$button_click, {
   click = input$map_marker_click
@@ -383,7 +340,7 @@ observeEvent(input$button_click, {
 output$addToBasketUI <- renderUI({
   click = input$map_marker_click
   if(LSFMetadataTibble[LSFMetadataTibble$id == click[1],]$id %in% sessionUserBasket()){
-    h4("This resource is in your basket.")
+    h4("This resource is in your bookmarks.")
   }else if(LSFMetadataTibble[LSFMetadataTibble$id == click[1],]$id %in% neo4r::call_neo4j(paste0("MATCH (p:Person)-[r:HAS_REQUESTED]-(m:Metadata) WHERE id(p) = ",user_info()$user_info$id," RETURN id(m) as id;"),con = neo_con, type = 'row')$id$value){
     box(
       headerBorder = F,
@@ -393,7 +350,7 @@ output$addToBasketUI <- renderUI({
       p("Request Status:",neo4r::call_neo4j(paste0("MATCH (p:Person)-[r:HAS_REQUESTED]-(m:Metadata) WHERE id(p) = ",user_info()$user_info$id," AND id(m) = ",LSFMetadataTibble[LSFMetadataTibble$id == click[1],]$id," RETURN r.status as status;"),con = neo_con, type = 'row')$status$value)
     )
   }else{
-    actionButton('Request', "Add to Basket")
+    actionButton('Request', "Add to Bookmarks")
   }
 })
 
@@ -404,7 +361,7 @@ sessionUserBasket <- reactiveVal(c())
 observeEvent(input$Request, {
   # when user adds to basket disable request button and change label to indicate action completed
   shinyjs::disable(id = 'Request')
-  updateActionButton(session, inputId = 'Request',label = "Added to basket!")
+  updateActionButton(session, inputId = 'Request',label = "Added to bookmarks!")
   click = input$map_marker_click
   string_basket <- paste0(LSFMetadataTibble[LSFMetadataTibble$id == click[1],]$id)
   sessionUserBasket(append(sessionUserBasket(),string_basket))
@@ -423,7 +380,7 @@ output$basketContents <- renderText(paste0(unique(LSFMetadataTibble[LSFMetadataT
 # Creation of a DT which shows the contents of the Basket
 output$basketContentsTable <- DT::renderDT({
   LSFMetadataTibble[LSFMetadataTibble$id %in% sessionUserBasket(),c("id","metadataTitle")]
-}, selection = "single", rownames = FALSE, caption = "Basket Contents")
+}, selection = "single", rownames = FALSE, caption = "Bookmarked Sources")
 
 # Remove a Single Basket Item using Tables_Rows_selected
 
@@ -451,8 +408,8 @@ observeEvent(input$clearBasket, {
 output$basketUi <- renderUI({
   req(user_info())
   if (user_info()$result) {
-    dynamicLabel <- paste("Basket:",length(unique(sessionUserBasket())))
-    actionLink(inputId = "basket", label = dynamicLabel ,icon = icon("shopping-cart"),style='padding:5px; font-size:120%; color:white;float:right;')
+    dynamicLabel <- paste("Bookmarks:",length(unique(sessionUserBasket())))
+    actionLink(inputId = "basket", label = dynamicLabel ,icon = icon("bookmark"),style='padding:5px; font-size:120%; color:white;float:right;')
   }
 })
 
@@ -477,7 +434,7 @@ output$No_Data <- renderInfoBox({
 
 output$NAFO_Div <- renderInfoBox({
   infoBox(title = "NAFO Division Data",
-          subtitle = "NAFO Divisions across the North Atlantic are represented by data sources recognised by the LSF",
+          subtitle = "NAFO Divisions across the North Atlantic are represented by data sources registered in the Central Data Resource",
           value = length(uniqueNAFODivisions),
           fill = T, color = "purple")
 })
@@ -485,11 +442,17 @@ output$NAFO_Div <- renderInfoBox({
 output$No_Eco <- renderInfoBox({
   infoBox(title = "ICES Eco Regions",
           icon = icon("globe-europe"),
-          subtitle = "ICES ecoregions across the North Atlantic are represented by data sources recognised by the LSF",
+          subtitle = "ICES ecoregions across the North Atlantic are represented by data sources registered in the Central Data Resource",
           value = length(uniqueICESEcoRegions),
           fill = T, color = "green")
 })
 
+
+# Debugging Information
+output$clickMarkerOutput <- renderText({paste0("Marker: ",input$map_marker_click,collapse = ",")})
+output$clickOutput <- renderText({paste0("Click: ",input$map_click,collapse = ",")})
+output$clickShapeOutput <- renderText({paste0("Shape: ",input$map_shape_click,collapse = ",")})
+output$clickBoundsOutput <- renderText({paste0("Bounds: ",input$map_bounds,collapse = ",")})
 ############################
 # DataSearch_server.R END
 ############################

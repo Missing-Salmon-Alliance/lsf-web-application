@@ -13,7 +13,7 @@ observeEvent(input$newUserRegisterSubmit, {
     # create temp area in memory to write to
     rc <- rawConnection(raw(0), 'r+')
     # write csv to temp area
-    write_csv(tibble(name = input$newUserName, email = input$newUserEmail, org = input$newUserOrganisation),rc)
+    write_csv(tibble(name = input$newUserName, email = input$newUserEmail, org = input$newUserOrganisation,acceptDSA = input$dataSharingAgreementAccept,acceptOrgPromote = input$dataSharingAgreementAdvertiseOrganisation),rc)
     # send csv object from temp area to S3
     aws.s3::put_object(file = rawConnectionValue(rc),bucket = "likelysuspects-datastore/userRegistration",object = paste0(as.character(floor(runif(1,min = 100000,max = 999999))),"_newUser.csv"))
     # close and remove temp area
@@ -23,13 +23,14 @@ observeEvent(input$newUserRegisterSubmit, {
     updateTextInput(session, inputId = 'newUserEmail',value = "")
     updateTextInput(session, inputId = 'newUserOrganisation',value = "")
     updateCheckboxInput(session, inputId = 'dataSharingAgreementAccept',value = FALSE)
+    updateCheckboxInput(session, inputId = 'dataSharingAgreementAdvertiseOrganisation',value = FALSE)
     # send user back to intro tab
     updateTabItems(session, 'menu1', 'introduction')
     
     # modal window to thank for new registration
     showModal(
       modalDialog(title = "Thank You!",
-                  p("You're information has been sent to the LSF administrator and we will be in touch soon with your logon details"),
+                  p("You're information has been sent to the Central Data Resource administrator and we will be in touch soon with your logon details"),
                   easyClose = TRUE
       )
     )

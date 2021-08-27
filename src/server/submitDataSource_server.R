@@ -22,23 +22,27 @@ output$clearSubmitFormUI <- renderUI({
   actionButton(inputId = 'clearSubmitForm',label = "Clear Form")
 })
 
-output$submitNewDataSourceUI <- renderUI({
-  actionButton(inputId = 'submitNewDataSource',label = "Submit New Data Source")
+# two submit buttons that do the same thing but one is located on the sidebar the other at the bottom of the main submit page
+output$submitNewDataSourceBodyUI <- renderUI({
+  actionButton(inputId = 'submitNewDataSourceBody',label = "Submit New Data Source", class = 'btn-success', style='float:right;')
+})
+output$submitNewDataSourceSidebarUI <- renderUI({
+  actionButton(inputId = 'submitNewDataSourceSidebar',label = "Submit New Data Source", class = 'btn-success')
 })
 
-# KNB User Interface Inputs
-output$sourceKNBURIUI <- renderUI({
-  textInput(inputId = 'sourceKNBURI', label = "",placeholder = "Enter a KNB URN or DOI")
-})
-output$loadKNBUI <- renderUI({
-  actionButton(inputId = 'loadKNB',label = "Load...")
-})
-output$refreshKNBTokenUI <- renderUI({
-  actionButton('refreshKNBToken', "Enter a KNB Access Token")
-})
-output$expiryDatetimeKNBTokenUI <- renderUI({
-  textOutput('expiryDatetimeKNBToken')
-})
+# KNB User Interface Inputs COMMENTED OUT FOR NOW AS FUNCTIONALITY NOT FULLED DESCRIBED ON SITE INFORMATION
+# output$sourceKNBURIUI <- renderUI({
+#   textInput(inputId = 'sourceKNBURI', label = "",placeholder = "Enter a KNB URN or DOI")
+# })
+# output$loadKNBUI <- renderUI({
+#   actionButton(inputId = 'loadKNB',label = "Load...")
+# })
+# output$refreshKNBTokenUI <- renderUI({
+#   actionButton('refreshKNBToken', "Enter a KNB Access Token")
+# })
+# output$expiryDatetimeKNBTokenUI <- renderUI({
+#   textOutput('expiryDatetimeKNBToken')
+# })
 ############
 
 # function to reset all submit form fields
@@ -63,13 +67,14 @@ resetAll <- function(){
   updateCheckboxInput(session, inputId = 'sourceAvailableOnline', value = FALSE)
   updateCheckboxInput(session, inputId = 'sourceMaintenanceToggle', value = FALSE)
   updateCheckboxInput(session,inputId = 'embargoEndToggle',value = FALSE)
-  updateDateInput(session,inputId = 'embargoEnd',value = Sys.Date())
+  updateTextInput(session,inputId = 'embargoEnd',value = "")
   #reset Source Domain/ESV Section
   shinyWidgets::updateCheckboxGroupButtons(session, inputId = 'domainNodeList',selected = character(0))
   shinyWidgets::updateCheckboxGroupButtons(session, inputId = 'esvCategory',selected = character(0))
   
   #reset Source Temporal Section
-  updateSliderInput(session,inputId = 'sourceStartEndYear',value = c(2000,2020))
+  updateNumericInput(session,inputId = 'sourceStartYear',value = 2021)
+  updateNumericInput(session,inputId = 'sourceEndYear',value = 2021)
   shinyWidgets::updateCheckboxGroupButtons(session, inputId = 'monthsOfYear',selected = character(0))
   updateActionButton(session, 'monthsOfYearToggleAll', label = "Select All")
   
@@ -182,9 +187,8 @@ observeEvent(input$loadKNB,{
       updateTextInput(session,inputId = 'sourceCreatorORCID',value = xml_text(xml2::xml_find_first(xml_doc, emlNodes$creatorUserID)))
       updateTextInput(session,inputId = 'sourceALTURI',value = xml_text(xml2::xml_find_first(xml_doc, emlNodes$altURL)))
       
-      
-      updateSliderInput(session,inputId = 'sourceStartEndYear',value = c(as.integer(format(xml_text(xml2::xml_find_first(xml_doc, emlNodes$dateStart)), format = "%Y")),
-                                                                         as.integer(format(xml_text(xml2::xml_find_first(xml_doc, emlNodes$dateEnd)), format = "%Y"))))
+      updateNumericInput(session,inputId = 'sourceStartYear',value = as.integer(format(xml_text(xml2::xml_find_first(xml_doc, emlNodes$dateStart)), format = "%Y")))
+      updateNumericInput(session,inputId = 'sourceEndYear',value = as.integer(format(xml_text(xml2::xml_find_first(xml_doc, emlNodes$dateEnd)), format = "%Y")))
       
       updateTextAreaInput(session,inputId = 'sourceGeographicDescription',value = xml_text(xml2::xml_find_first(xml_doc, emlNodes$geogDescription)))
       updateNumericInput(session,inputId = 'submitNorth',value = xml_text(xml2::xml_find_first(xml_doc, emlNodes$geogNorth)))
@@ -224,37 +228,79 @@ observeEvent(input$clearSubmitForm,{
 })
 
 
+##########################################################
+# SubmitDataSource_server Life-Stage and Domains Selection
+##########################################################
+
+
 # User feedback - if no domain is selected
-output$domainSelectionCheck <- renderText('Please Select a Domain...')
+output$domainSelectionCheck <- renderText('Please Select a Life-Stage Domain...')
 
-# User feedback - if no ESV Category is selected
-output$esvCategorySelectionCheck <- renderText('Please Select a Variable Category...')
-
-# ESV Check Boxes - Controlled by domainNodeList and esvCategory inputs
+# Variable Class (esv) Check Boxes - Controlled by domainNodeList inputs
 output$esvPerDomain <- renderUI({
   if(length(input$domainNodeList) == 0){
     textOutput('domainSelectionCheck')
-  }else if(length(input$esvCategory) == 0){
-    textOutput('esvCategorySelectionCheck')
   }else{
     lapply(1:length(input$domainNodeList), function(i) {
       domainName <- input$domainNodeList[i]
-      esvNodeListResult <- neo4r::call_neo4j(paste("MATCH (n:EssentialSalmonVariable)-[:HAS_DOMAIN]-(m:Domain{domainTitle:'",domainName,"'}) WHERE n.esvCategory IN [",formatCheckboxGroupCategories(input$esvCategory),"] RETURN n.esvTitle;",sep = ''),neo_con, type = 'row')
-      shinyWidgets::checkboxGroupButtons(domainName,domainName,choices = sort(esvNodeListResult$n.esvTitle$value),
-                           justified = F,
-                           individual = T,
-                           status = "default",
-                           checkIcon = checkboxGroupButtonsIcons)
-    })}
+      esvNodeListResultPhys <- neo4r::call_neo4j(paste0("MATCH (n:EssentialSalmonVariable{esvCategory:'Physical'})-[:HAS_DOMAIN]-(m:Domain{domainTitle:'",domainName,"'}) RETURN n.esvTitle;"),neo_con, type = 'row')
+      esvNodeListResultBiol <- neo4r::call_neo4j(paste0("MATCH (n:EssentialSalmonVariable{esvCategory:'Biological'})-[:HAS_DOMAIN]-(m:Domain{domainTitle:'",domainName,"'}) RETURN n.esvTitle;"),neo_con, type = 'row')
+      esvNodeListResultTrait <- neo4r::call_neo4j(paste0("MATCH (n:EssentialSalmonVariable{esvCategory:'Salmon Trait'})-[:HAS_DOMAIN]-(m:Domain{domainTitle:'",domainName,"'}) RETURN n.esvTitle;"),neo_con, type = 'row')
+      # UI code
+      # Note dynamic input_ids created from domain name and 3 variable categories physical, biological and salmon trait
+      # These dynamic id's are used later on in the server logic when the user presses submit and the selected
+      # variable classes are passed back to the database. 
+      box(
+        width = 12,
+        title = domainName,
+        status = 'warning',
+        column(
+          width = 4,
+          shinyWidgets::checkboxGroupButtons(paste0(domainName,"_physical"),"Physical",choices = sort(esvNodeListResultPhys$n.esvTitle$value),
+                                             justified = F,
+                                             individual = T,
+                                             status = "default",
+                                             size = 'xs',
+                                             direction = 'vertical',
+                                             checkIcon = checkboxGroupButtonsIcons)
+        ),
+        column(
+          width = 4,
+          shinyWidgets::checkboxGroupButtons(paste0(domainName,"_biological"),"Biological",choices = sort(esvNodeListResultBiol$n.esvTitle$value),
+                                             justified = F,
+                                             individual = T,
+                                             status = "default",
+                                             size = 'xs',
+                                             direction = 'vertical',
+                                             checkIcon = checkboxGroupButtonsIcons)
+        ),
+        column(
+          width = 4,
+          shinyWidgets::checkboxGroupButtons(paste0(domainName,"_salmontrait"),"Salmon Trait",choices = sort(esvNodeListResultTrait$n.esvTitle$value),
+                                             justified = F,
+                                             individual = T,
+                                             status = "default",
+                                             size = 'xs',
+                                             direction = 'vertical',
+                                             checkIcon = checkboxGroupButtonsIcons)
+        )
+      ) # close box
+    }) # close lapply loop
+    } # else clause end
 })
+
+##########################################################
+# SubmitDataSource_server Life-Stage and Domains Selection
+##########################################################
+
 
 # observers for checkbox enable/disable inputs
 observeEvent(input$embargoEndToggle,{
   if(input$embargoEndToggle){
-    updateDateInput(session, 'embargoEnd', value = Sys.Date())
+    updateTextInput(session, 'embargoEnd', value = "")
     shinyjs::enable('embargoEnd')
   }else{
-    updateDateInput(session, 'embargoEnd', value = Sys.Date())
+    updateTextInput(session, 'embargoEnd', value = "")
     shinyjs::disable('embargoEnd')
   }
 })
@@ -268,9 +314,17 @@ observeEvent(input$sourceAvailableOnline,{
 })
 observeEvent(input$sourceMaintenanceToggle,{
   if(input$sourceMaintenanceToggle){
+    updateSelectInput(session, inputId = 'sourceMaintenance', choices = c("continually",
+                                                                          "daily",
+                                                                          "weekly",
+                                                                          "monthly",
+                                                                          "annually",
+                                                                          "irregular",
+                                                                          "unknown"),
+                      selected = "unknown")
     shinyjs::enable('sourceMaintenance')
   }else{
-    updateSelectInput(session, inputId = 'sourceMaintenance', selected = "notPlanned")
+    updateSelectInput(session, inputId = 'sourceMaintenance', choices = c("notPlanned"), selected = "notPlanned")
     shinyjs::disable('sourceMaintenance')
   }
 })
@@ -288,17 +342,14 @@ observeEvent(input$monthsOfYearToggleAll,{
 
 
 # Geographic Detail Server
-# TODO: Convert all this to use a single reactiveValues, might reduce the line count significantly
 output$submitMap <- leaflet::renderLeaflet({
-  leaflet::leaflet(options = leaflet::leafletOptions(maxZoom = 5)) %>% # maxZoom set so that user can always see their rectangle in context of a coastline
-    #addPolygons(data = neContinentsSF, stroke = FALSE) %>%
-    #addProviderTiles("Stamen.TerrainBackground") %>%
+  leaflet::leaflet(options = leaflet::leafletOptions(maxZoom = 10)) %>% # maxZoom set so that user can always see their rectangle in context of a coastline
     leaflet::addProviderTiles(leaflet::providers$Esri.OceanBasemap) %>%
     leaflet::addRectangles(-15,61,-14,60,group = 'userRectangle') %>% 
-    leaflet::fitBounds(-15,61,-14,60)
+    leaflet::fitBounds(-15,61,-14,60,options = leaflet::leafletOptions(maxZoom = 5))
 })
-
-observeEvent(input$submitEast,{
+# observer for 4 numeric inputs lat/lon - action update userRectangle on submitMap, change zoom and centre
+observeEvent(input$submitEast | input$submitWest | input$submitNorth | input$submitSouth,{
   req(input$submitEast && input$submitWest && input$submitNorth && input$submitSouth) # catch empty value, prevent crash?
   leaflet::leafletProxy('submitMap') %>%
     leaflet::clearGroup(group = 'userRectangle') %>%
@@ -306,30 +357,13 @@ observeEvent(input$submitEast,{
     leaflet::fitBounds(input$submitWest,input$submitNorth,input$submitEast,input$submitSouth)
 })
 
-observeEvent(input$submitWest,{
-  req(input$submitEast && input$submitWest && input$submitNorth && input$submitSouth)
-  leaflet::leafletProxy('submitMap') %>%
-    leaflet::clearGroup(group = 'userRectangle') %>%
-    leaflet::addRectangles(input$submitWest,input$submitNorth,input$submitEast,input$submitSouth,group = 'userRectangle') %>%
-    leaflet::fitBounds(input$submitWest,input$submitNorth,input$submitEast,input$submitSouth)
+# observe user click on map and set coordinates
+observeEvent(input$submitMap_click,{
+  updateNumericInput(session,inputId = 'submitNorth',value = round(input$submitMap_click$lat,digits = 4))
+  updateNumericInput(session,inputId = 'submitEast',value = round(input$submitMap_click$lng,digits = 4))
+  updateNumericInput(session,inputId = 'submitSouth',value = round(input$submitMap_click$lat,digits = 4))
+  updateNumericInput(session,inputId = 'submitWest',value = round(input$submitMap_click$lng,digits = 4))
 })
-
-observeEvent(input$submitNorth,{
-  req(input$submitEast && input$submitWest && input$submitNorth && input$submitSouth)
-  leaflet::leafletProxy('submitMap') %>%
-    leaflet::clearGroup(group = 'userRectangle') %>%
-    leaflet::addRectangles(input$submitWest,input$submitNorth,input$submitEast,input$submitSouth,group = 'userRectangle') %>%
-    leaflet::fitBounds(input$submitWest,input$submitNorth,input$submitEast,input$submitSouth)
-})
-
-observeEvent(input$submitSouth,{
-  req(input$submitEast && input$submitWest && input$submitNorth && input$submitSouth)
-  leaflet::leafletProxy('submitMap') %>%
-    leaflet::clearGroup(group = 'userRectangle') %>%
-    leaflet::addRectangles(input$submitWest,input$submitNorth,input$submitEast,input$submitSouth,group = 'userRectangle') %>%
-    leaflet::fitBounds(input$submitWest,input$submitNorth,input$submitEast,input$submitSouth)
-})
-
 
 # Observer to pass file upload details to sessionFile reactive value
 # This is passed to a reactiveVal so that it can be cleared out once user has submitted the form.
@@ -357,15 +391,15 @@ uploadReactive <- reactive({
 submitSourceConfirmDataTable <- reactive({
   data.frame(Title=input$sourceTitle,
              Creator=input$sourceCreator,
+             Email=input$sourceCreatorEmail,
              Organisation=input$sourceOrganisation,
              Abstract=input$sourceAbstract,
              GeographicDescription=input$sourceGeographicDescription,
              # KNBURI=input$sourceURI,
              # metadataAlternateURI=input$sourceALTURI,
-             # metadataCreatorEmail=input$sourceCreatorEmail,
              # metadataCreatorORCID=input$sourceCreatorORCID,
-             # metadataCoverageStartYear=input$sourceStartEndYear[1],
-             # metadataCoverageEndYear=input$sourceStartEndYear[2],
+             # metadataCoverageStartYear=input$sourceStartYear,
+             # metadataCoverageEndYear=input$sourceEndYear,
              # metadataCoverageMonthsOfYear=paste(input$monthsOfYear,collapse = ","),#collapse months of year into csv string
              # metadataCoverageNorth=input$submitNorth,
              # metadataCoverageSouth=input$submitSouth,
@@ -378,25 +412,25 @@ submitSourceConfirmDataTable <- reactive({
 })
 
 submitSourceConfirmESVDomains <- reactive({
-  # DEVELOPMENT - Build a table of Domains and Variable Classes chosen by user
-  tibble(Domains = c(
-      "River Rearing",
-      "River Migration Smolt",
-      "River Migration Adult",
-      "Estuary Migration Post-Smolt",
-      "Coastal Migration Post-Smolt",
-      "Ocean Migration",
-      "Coastal Migration Adult",
-      "Estuary Migration Adult"),
-      `Selected Variable Classes` = c(
-        formatCheckboxGroupCategories(input$`River Rearing`),
-        formatCheckboxGroupCategories(input$`River Migration Smolt`),
-        formatCheckboxGroupCategories(input$`River Migration Adult`),
-        formatCheckboxGroupCategories(input$`Estuary Migration Post-Smolt`),
-        formatCheckboxGroupCategories(input$`Coastal Migration Post-Smolt`),
-        formatCheckboxGroupCategories(input$`Ocean Migration`),
-        formatCheckboxGroupCategories(input$`Coastal Migration Adult`),
-        formatCheckboxGroupCategories(input$`Estuary Migration Adult`))
+  # DEVELOPMENT - Build a table of Life-Stage Domains and Variable Classes chosen by user
+  domainVector <- c(
+    "River Rearing",
+    "River Migration Smolt",
+    "Estuary Migration Post-Smolt",
+    "Coastal Migration Post-Smolt",
+    "Ocean Migration",
+    "Coastal Migration Adult",
+    "Estuary Migration Adult",
+    "River Migration Adult")
+  selectedClasses <- c()
+  for(dom in domainVector){
+    categoryCollapse <- formatCheckboxGroupCategories(c(input[[paste0(dom,"_physical")]],
+                                                        input[[paste0(dom,"_biological")]],
+                                                        input[[paste0(dom,"_salmontrait")]]))
+    selectedClasses <- append(selectedClasses,categoryCollapse)
+  }
+  tibble(Domains = domainVector,
+      `Selected Variable Classes` = selectedClasses
       )
 })
 
@@ -455,21 +489,49 @@ submitSourceResultModal <- function() {
 }
 ######################
 
+######################
+# The following observers are to change the background colour of required fields back to white once the user starts to fill them in
+# The fields are initially white on load, but will turn red if the user tries to submit data with missing required fields
+# see observer for submitNewDataSourceBody/submitNewDataSourceSidebar for lines that turn the background red
+observeEvent(input$sourceTitle,{shinyjs::runjs('document.getElementById("sourceTitle").style.backgroundColor = "white";')})
+observeEvent(input$sourceAbstract,{shinyjs::runjs('document.getElementById("sourceAbstract").style.backgroundColor = "white";')})
+observeEvent(input$sourceCreator,{shinyjs::runjs('document.getElementById("sourceCreator").style.backgroundColor = "white";')})
+observeEvent(input$sourceCreatorEmail,{shinyjs::runjs('document.getElementById("sourceCreatorEmail").style.backgroundColor = "white";')})
+observeEvent(input$sourceOrganisation,{shinyjs::runjs('document.getElementById("sourceOrganisation").style.backgroundColor = "white";')})
 
-observeEvent(input$submitNewDataSource, {
+
+
+
+observeEvent(input$submitNewDataSourceBody | input$submitNewDataSourceSidebar, {
+  # note two submit buttons exist that invoke the routine here, the req line is needed so that it doesn't trigger when app loads initially
+  req(input$submitNewDataSourceBody!=0 | input$submitNewDataSourceSidebar!=0)
   if(is.null(sessionUUID())){
     sessionUUID(uuid::UUIDgenerate())
   }
+  # check if UUID already exists or not
   results <- neo4r::call_neo4j(paste("MATCH (n:Metadata{metadataUUID:'",sessionUUID(),"'}) RETURN n;",sep = ""),neo_con,type = 'row',include_stats = T,include_meta = T)
-  if(is.null(results$stats)){
-    # If the DOI/URN entered does not exist in the framework already, show confirmation modal
-    showModal(submitSourceConfirmModal())
+  if(is.null(results$stats)){ # case UUID does not already exist
+    # confirm all required fields have information in them
+    # If user has missed out any inputs that are classed as required, show them a modal window and colour the blank required inputs red until they input text
+    if(input$sourceTitle == "" || input$sourceAbstract == "" || input$sourceCreator == "" || input$sourceCreatorEmail == "" || input$sourceOrganisation == ""){
+      showModal(modalDialog(title = "Required Information Missing",p("Please ensure that none of the following fields are blank before submitting:"),
+                            p("Title"),p("Abstract"),p("Primary Contact Name"),p("Primary Contact Email"),p("Organisation"),
+                            easyClose = TRUE, footer = NULL))
+      if(input$sourceTitle == ""){shinyjs::runjs('document.getElementById("sourceTitle").style.backgroundColor = "OrangeRed";')}
+      if(input$sourceAbstract == ""){shinyjs::runjs('document.getElementById("sourceAbstract").style.backgroundColor = "OrangeRed";')}
+      if(input$sourceCreator == ""){shinyjs::runjs('document.getElementById("sourceCreator").style.backgroundColor = "OrangeRed";')}
+      if(input$sourceCreatorEmail == ""){shinyjs::runjs('document.getElementById("sourceCreatorEmail").style.backgroundColor = "OrangeRed";')}
+      if(input$sourceOrganisation == ""){shinyjs::runjs('document.getElementById("sourceOrganisation").style.backgroundColor = "OrangeRed";')}
+    }else{
+      # If the DOI/URN entered does not exist in the framework already, show confirmation modal
+      showModal(submitSourceConfirmModal())
+    }
   }else{ # otherwise show some detail for the user
     showModal(modalDialog(
       title = "This DOI/URN Already Exists",
       sessionUUID(),
-      p("This DOI/URN matches an object that already exists in the framework database."),
-      p("Data returned from LSF:"),
+      p("This DOI/URN matches an object that already exists in the database."),
+      p("Data returned from the database:"),
       results$n$metadataTitle,
       results$n$metadataAbstract,
       easyClose = TRUE,
@@ -515,8 +577,8 @@ observeEvent(input$confirmSubmitNewDataSource, {
                                      "',metadataGeographicDescription:'",input$sourceGeographicDescription,
                                      "',metadataCreatorEmail:'",input$sourceCreatorEmail,
                                      "',metadataCreatorORCID:'",input$sourceCreatorORCID,
-                                     "',metadataCoverageStartYear:'",input$sourceStartEndYear[1],
-                                     "',metadataCoverageEndYear:'",input$sourceStartEndYear[2],
+                                     "',metadataCoverageStartYear:'",input$sourceStartYear,
+                                     "',metadataCoverageEndYear:'",input$sourceEndYear,
                                      "',metadataCoverageMonthsOfYear:'",paste(input$monthsOfYear,collapse = ","),#collapse months of year into csv string
                                      "',metadataCoverageNorth:'",input$submitNorth,
                                      "',metadataCoverageSouth:'",input$submitSouth,
@@ -543,14 +605,17 @@ observeEvent(input$confirmSubmitNewDataSource, {
     # initiate a vector to capture the queries
     queryMasterList <- c()
     
-    # define a base query, common elements that all the queries will share
+    # create base query elements
     queryBase <- c("MATCH (esv:EssentialSalmonVariable{esvTitle:'","'}),(md:Metadata{metadataUUID:'","'}) CREATE (esv)<-[:HAS_ESV{domain:'","'}]-(md);")
     # cycle through all the selected ESV for each domain IS THIS EFFICIENT?
-    
     for(domain in input$domainNodeList){
-      # create basic relationship between metadata and domain
-      neo4r::call_neo4j(paste0("MATCH (d:Domain{domainTitle:'",domain,"'}),(md:Metadata{metadataUUID:'",sessionUUID(),"'}) CREATE (md)-[:HAS_DOMAIN]->(d);"),neo_con,type = 'row',include_stats = F,include_meta = F)
-      for(esv in input[[domain]]){
+      # create basic relationship between metadata and domain (capture even if user selects no ESV's)
+      addDomainQuery <- paste0("MATCH (d:Domain{domainTitle:'",domain,"'}),(md:Metadata{metadataUUID:'",sessionUUID(),"'}) CREATE (md)-[:HAS_DOMAIN]->(d);")
+      queryMasterList <- append(queryMasterList,addDomainQuery)
+      
+      # build full ESV list for domain (collapse from 3 categories presented in the UI)
+      variableClassesForDomain <- c(input[[paste0(domain,"_biological")]],input[[paste0(domain,"_physical")]],input[[paste0(domain,"_salmontrait")]])
+      for(esv in variableClassesForDomain){
         # create sub query for single esv-metadata
         querySubMaster <- paste(queryBase[1],esv,queryBase[2],sessionUUID(),queryBase[3],domain,queryBase[4],sep = "")
         # add sub query to master query list
@@ -559,7 +624,7 @@ observeEvent(input$confirmSubmitNewDataSource, {
     }
     
     #####################^^^^^^^^
-    # Create relationships to ESV/Variable Class using DOMAIN SPECIFIC RELATIONSHIPS
+    # Create relationships using DOMAIN SPECIFIC RELATIONSHIPS
     #####################
     
     for(query in queryMasterList){
@@ -605,7 +670,7 @@ observeEvent(input$confirmSubmitNewDataSource, {
 # DEBUGGING VIEW
 ################
 output$generalTesting <- reactive({
-  paste0("MATCH (p:Person) WHERE id(p) = ",user_info()$user_info$id," SET p.liveBasket = '",formatNumericList(sessionUserBasket()),"';")
+  paste0("MATCH (p:Person) WHERE id(p) = ",user_info()$user_info$id," SET p.personBookmarks = '",formatNumericList(sessionUserBasket()),"';")
   #paste0("MATCH (p:Person{personEmail:'",user_info()$user_info$email,"'}),(m:Metadata) WHERE id(m) IN [",formatNumericList(sessionUserBasket()),"] CREATE (p)-[:HAS_REQUESTED{created:'",Sys.time(),"',lastModified:'",Sys.time(),"',status:'pendingReview'}]->(m);")
 })
 ### CREATE Queries to insert metadata nodes with relevant relationships
@@ -623,8 +688,8 @@ output$CreateMetadataNodeQueryBuilder <- renderText({
   # cycle through all the selected ESV for each domain IS THIS EFFICIENT?
   
   for(domain in input$domainNodeList){
-    
-    for(esv in input[[domain]]){
+    variableClassesForDomain <- c(input[[paste0(domain,"_biological")]],input[[paste0(domain,"_physical")]],input[[paste0(domain,"_salmontrait")]])
+    for(esv in variableClassesForDomain){
       # create sub query for single esv-metadata
       querySubMaster <- paste(queryBase[1],esv,queryBase[2],sessionUUID(),queryBase[3],domain,queryBase[4],sep = "")
       # add sub query to master query list
@@ -646,7 +711,6 @@ output$showCurrentSelection <- DT::renderDT(tibble(inputID = c(#"icesStockUnit:"
   #"icesStatAreas:",
   #"river:",
   "domainNodeList:",
-  "esvCategory:",
   "River Rearing:",
   "River Migration Smolt:",
   "River Migration Adult:",
@@ -659,7 +723,6 @@ output$showCurrentSelection <- DT::renderDT(tibble(inputID = c(#"icesStockUnit:"
     #formatCheckboxGroupCategories(input$icesStatAreas),
     #input$river,
     formatCheckboxGroupCategories(input$domainNodeList),
-    formatCheckboxGroupCategories(input$esvCategory),
     formatCheckboxGroupCategories(input$`River Rearing`),
     formatCheckboxGroupCategories(input$`River Migration Smolt`),
     formatCheckboxGroupCategories(input$`River Migration Adult`),
