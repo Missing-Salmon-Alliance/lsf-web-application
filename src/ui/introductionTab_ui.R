@@ -42,19 +42,7 @@ tabItem('introduction',
                   title = "The Central Data Resource",
                   status = 'success',
                   solidHeader = FALSE,
-                  em(carouselGeneralIntro),
-                  br(),
-                  column(
-                    2
-                  ),
-                  column(
-                    10,
-                    tags$ul(
-                      tags$li(em("Primary Observation")),
-                      tags$li(em("Derived Output")),
-                      tags$li(em("Model Output"))
-                    )
-                  )
+                  em(carouselGeneralIntro)
                 ),
                 column(
                   width = 5,
@@ -109,25 +97,26 @@ tabItem('introduction',
                 ),
                 column(
                   width = 5,
-                  img(src = 'images/screenshot_searchmap.PNG', height = '350vh')
+                  img(src = 'images/eml_logo.png', height = '350vh')
                 )
               ), # carousel item end
               carouselItem(
                 column(
-                  width = 5,
-                  img(src = 'images/screenshot_searchmap.PNG', height = '350vh')
+                  width = 3,
+                  img(src = 'images/sitemap-solid.svg', height = '350vh', alt = "https://fontawesome.com/license")
                 ),
                 box(
-                  width = 7,
+                  width = 9,
                   title = "Data Citation",
                   status = 'success',
                   solidHeader = FALSE,
+                  #height = '350vh',
                   em("The creation of static and citable data sources with an associated Digital Object
                      Identifier (DOI) promotes more open and reproducible research,
                      as well as adding provenance to new syntheses that can otherwise
                      be difficult to trace. Data citation also provides a way for data owners to leverage more
                      value from their used data resources. The Central Data Resource assigns locally unique
-                     identifiers and can facilitate the creation of globally unique and derefenceable DOI's via
+                     identifiers and can facilitate the creation of globally unique and dereferenceable DOI's via
                      the",a(href="https://knb.ecoinformatics.org","Knowledge Network for Biocomplexity.",target = "_blank")),
                   br(),
                   em("All members are expected to abide by academic norms for citation. Data Citation conventions have been

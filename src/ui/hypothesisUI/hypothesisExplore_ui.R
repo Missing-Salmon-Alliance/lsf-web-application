@@ -38,33 +38,24 @@ tabItem( # tabItem
       status = 'primary',
       title = "Step 2 - Variable Classes Relevant to Selected Hypothesis",
       width = 7,
-      #fluidRow(
-        #width = 4,
-      shinyWidgets::checkboxGroupButtons('esvFilterBioHyp',"Biological Variables",choices = c("Please select a Sub-Hypothesis"),selected = "Please select a Sub-Hypothesis",
+      shinyWidgets::checkboxGroupButtons('esvFilterBioHyp',"Biological Processes",choices = c("Please select a Sub-Hypothesis"),selected = "Please select a Sub-Hypothesis",
                                          justified = F,
                                          individual = T,
                                          status = "default",
                                          size = 'xs',
                                          checkIcon = checkboxGroupButtonsIcons),
-      #),
-      #fluidRow(
-        #width = 4,
-      shinyWidgets::checkboxGroupButtons('esvFilterPhysHyp',"Physical Variables",choices = c("Please select a Sub-Hypothesis"),selected = "Please select a Sub-Hypothesis",
+      shinyWidgets::checkboxGroupButtons('esvFilterPhysHyp',"Physical Environment",choices = c("Please select a Sub-Hypothesis"),selected = "Please select a Sub-Hypothesis",
                                          justified = F,
                                          individual = T,
                                          status = "default",
-                                         size = 'lg',
+                                         size = 'xs',
                                          checkIcon = checkboxGroupButtonsIcons),
-      #),
-      #fluidRow(
-        #width = 4,
-      shinyWidgets::checkboxGroupButtons('esvFilterTraitHyp',"Salmon Trait Variables",choices = c("Please select a Sub-Hypothesis"),selected = "Please select a Sub-Hypothesis",
+      shinyWidgets::checkboxGroupButtons('esvFilterTraitHyp',"Salmon Traits",choices = c("Please select a Sub-Hypothesis"),selected = "Please select a Sub-Hypothesis",
                                          justified = F,
                                          individual = T,
                                          status = "default",
                                          size = 'xs',
                                          checkIcon = checkboxGroupButtonsIcons)
-      #)
     ),
     box(
       status = 'success',

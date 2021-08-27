@@ -462,6 +462,9 @@ submitSourceConfirmModal <- function() {
                   leaflet::leafletOutput('submitSourceConfirmMap')
                 )
               ),
+              em("Please Note - Upon clicking submit there may be a delay depending on how large
+                 a file you are uploading. It is recommended to wait for the 'Success' window to appear
+                 before continuing. This should take no longer than 1 minute."),
               
               footer = tagList(
                 modalButton("Cancel"),
@@ -472,15 +475,24 @@ submitSourceConfirmModal <- function() {
 
 ######################
 # create results modal as function to be called at the end of submit button push event
-# Graph Submission Results following confirmation
-createNewSourceResult <- reactiveVal(NULL)
+# Submission Results following confirmation
+userSubmitSourceFeedback <- reactiveVal(NULL)
 #
-output$createNewSourceResultTable <- DT::renderDT(createNewSourceResult())
+#output$createNewSourceResultTable <- DT::renderDT(createNewSourceResult())
+output$createNewSourceResultTable <- DT::renderDT(userSubmitSourceFeedback()[,c('Title','File','UUID')],
+                                                  rownames = FALSE,
+                                                  options = list(pageLength = 1,
+                                                                 lengthChange = FALSE, # disable result length change
+                                                                 searching = FALSE, # disable search field
+                                                                 paging = FALSE, # disable paging menu
+                                                                 info = FALSE,
+                                                                 ordering = FALSE)
+)
 
 submitSourceResultModal <- function() {
   modalDialog(size = "l",title = "Thank you for your submission!",
-              h4("The table below shows updates to the graph database"),
-              #createNewSourceResult(),
+              h4("The table below shows a summary of your upload."),
+              em("This information will appear in your account profile under 'Submit History'"),
               DT::DTOutput('createNewSourceResultTable'),
               footer = tagList(
                 modalButton("OK")
@@ -543,10 +555,19 @@ observeEvent(input$submitNewDataSourceBody | input$submitNewDataSourceSidebar, {
 
 # TODO Some duplication occurs between these two (above and below) observeEvents that could be trimmed down
 observeEvent(input$confirmSubmitNewDataSource, {
+  # disable modal
+  # this avoids multiple 'Confirm' presses if file upload is large
+  shinyjs::disable(id = 'shiny-modal')
   # Generate a unique Identifier for this data source UNLESS it already exists (expected condition if user has loaded KNB metadata)
   # TODO: Confirm that this logic works, is there a condition where sessionUUID is not NULL but also not loaded from KNB?
   if(is.null(sessionUUID())){
     sessionUUID(uuid::UUIDgenerate())
+  }
+  # Capture filename or NULL
+  if(!is.null(sessionFile())){
+    filename <- sessionFile()$name
+  }else{
+    filename <- "NA"
   }
   
   #Create template results tibble for reporting (creates a standard results tibble with 0 values)
@@ -559,24 +580,25 @@ observeEvent(input$confirmSubmitNewDataSource, {
     # Quick center point calcs
     lngCenter <- (input$submitWest+input$submitEast)/2
     latCenter <- (input$submitSouth+input$submitNorth)/2
+    
 
     # Create query that creates a metadata node with all the properties supplied in the form
     # Also creates a relationship to the logged on user
     metadataNodeCreateQuery <- paste("MATCH (p:Person{personEmail:'",user_info()$user_info$email,
                                      "'}) CREATE (p)-[:HAS_SUBMITTED{created:'",Sys.time(),
                                      "',lastModified:'",Sys.time(),
-                                     "',status:'pendingQC'}]->(:Metadata{metadataTitle:'",input$sourceTitle,
-                                     "',metadataCreator:'",input$sourceCreator,
+                                     "',status:'pendingQC'}]->(:Metadata{metadataTitle:'",sanitiseFreeTextInputs(input$sourceTitle),
+                                     "',metadataCreator:'",sanitiseFreeTextInputs(input$sourceCreator),
                                      "',metadataKNBURI:'",input$sourceURI,
-                                     "',metadataAlternateURI:'",input$sourceALTURI,
-                                     "',metadataOrganisation:'",input$sourceOrganisation,
-                                     "',metadataAbstract:'",input$sourceAbstract,
+                                     "',metadataAlternateURI:'",sanitiseFreeTextInputs(input$sourceALTURI),
+                                     "',metadataOrganisation:'",sanitiseFreeTextInputs(input$sourceOrganisation),
+                                     "',metadataAbstract:'",sanitiseFreeTextInputs(input$sourceAbstract),
                                      "',metadataAvailableOnline:",input$sourceAvailableOnline,
                                      ",metadataEmbargoed:",input$embargoEndToggle,
-                                     ",metadataEmbargoEnd:'",input$embargoEnd,
-                                     "',metadataGeographicDescription:'",input$sourceGeographicDescription,
-                                     "',metadataCreatorEmail:'",input$sourceCreatorEmail,
-                                     "',metadataCreatorORCID:'",input$sourceCreatorORCID,
+                                     ",metadataEmbargoEnd:'",sanitiseFreeTextInputs(input$embargoEnd),
+                                     "',metadataGeographicDescription:'",sanitiseFreeTextInputs(input$sourceGeographicDescription),
+                                     "',metadataCreatorEmail:'",sanitiseFreeTextInputs(input$sourceCreatorEmail),
+                                     "',metadataCreatorORCID:'",sanitiseFreeTextInputs(input$sourceCreatorORCID),
                                      "',metadataCoverageStartYear:'",input$sourceStartYear,
                                      "',metadataCoverageEndYear:'",input$sourceEndYear,
                                      "',metadataCoverageMonthsOfYear:'",paste(input$monthsOfYear,collapse = ","),#collapse months of year into csv string
@@ -591,6 +613,7 @@ observeEvent(input$confirmSubmitNewDataSource, {
                                      "',metadataCoverageIntersectNAFODivision:'","",
                                      "',metadataCoverageIntersectMigrationRoutes:'","",
                                      "',metadataUUID:'",sessionUUID(),
+                                     "',metadataFilename:'",filename,
                                      "',metadataTimestamp:'",Sys.time(),
                                      "'});",sep = "")
     
@@ -644,6 +667,32 @@ observeEvent(input$confirmSubmitNewDataSource, {
   # Trigger File Upload
   uploadReactive()
   
+  # Create log for submissions
+  resultCreateMetadataNode # table of graph database updates
+  # requires transposed to fit log file
+  resultCreateMetadataNodeTransform <- data.frame(t(resultCreateMetadataNode),row.names = NULL)[2,]
+  names(resultCreateMetadataNodeTransform) <- resultCreateMetadataNode$type
+  
+  # create user feedback table
+  userSubmitSourceFeedback(data.frame(date = Sys.time(),user = user_info()$user_info$email, Title = input$sourceTitle,File = filename,UUID = sessionUUID()))
+
+  logFileDataFrame <- dplyr::bind_cols(userSubmitSourceFeedback(),resultCreateMetadataNodeTransform)
+  
+  # send log to AWS, append to existing file
+  # get current logfile
+  # TODO - THis process can cause a collision if two people submit at the exact same time, add some collision avoidance
+  logfile <- readr::read_csv(aws.s3::get_object(object = "userSubmit.log",bucket = "likelysuspects-datastore/logs"),col_types = 'Tcccccccccccccccccc')
+  # append new log item
+  logfile <- dplyr::bind_rows(logfile,logFileDataFrame)
+  # create temp area in memory to write to
+  rc <- rawConnection(raw(0), 'r+')
+  # write csv to temp area
+  readr::write_csv(logfile,rc)
+  # send csv object from temp area to S3
+  aws.s3::put_object(file = rawConnectionValue(rc),bucket = "likelysuspects-datastore/logs",object = "userSubmit.log")
+  # close and remove temp area
+  close(rc)
+
   
   ##############
   # Clear INPUTS
@@ -652,12 +701,6 @@ observeEvent(input$confirmSubmitNewDataSource, {
   
   #Close confirm modal
   removeModal()
-  ##############
-  # Clear INPUTS
-  ##############
-
-  # Show user feedback on success/failure of graph update
-  createNewSourceResult(resultCreateMetadataNode)
   
   showModal(submitSourceResultModal())
   
@@ -670,8 +713,8 @@ observeEvent(input$confirmSubmitNewDataSource, {
 # DEBUGGING VIEW
 ################
 output$generalTesting <- reactive({
-  paste0("MATCH (p:Person) WHERE id(p) = ",user_info()$user_info$id," SET p.personBookmarks = '",formatNumericList(sessionUserBasket()),"';")
-  #paste0("MATCH (p:Person{personEmail:'",user_info()$user_info$email,"'}),(m:Metadata) WHERE id(m) IN [",formatNumericList(sessionUserBasket()),"] CREATE (p)-[:HAS_REQUESTED{created:'",Sys.time(),"',lastModified:'",Sys.time(),"',status:'pendingReview'}]->(m);")
+  paste0("MATCH (p:Person) WHERE id(p) = ",user_info()$user_info$id," SET p.personBookmarks = '",formatNumericList(sessionUserBookmarks()),"';")
+  #paste0("MATCH (p:Person{personEmail:'",user_info()$user_info$email,"'}),(m:Metadata) WHERE id(m) IN [",formatNumericList(sessionUserBookmarks()),"] CREATE (p)-[:HAS_REQUESTED{created:'",Sys.time(),"',lastModified:'",Sys.time(),"',status:'pendingReview'}]->(m);")
 })
 ### CREATE Queries to insert metadata nodes with relevant relationships
 ### At the moment just outputting as text to view/verify the resulting queries
