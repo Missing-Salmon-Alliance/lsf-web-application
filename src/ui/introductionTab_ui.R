@@ -26,58 +26,85 @@ tabItem('introduction',
               width = 12,
               carouselItem(
                 column(
-                  width = 7,
+                  1
+                ),
+                column(
+                  width = 6,
                   img(src = 'msa-logo.png', height = '350vh')
                 ),
                 box(
-                  width = 5,
+                  width = 4,
                   title = "The Missing Salmon Alliance",
                   status = 'primary',
                   em("A group of conservation focused organisations working together to drive action and save our wild Atlantic salmon from extinction by combining expertise, coordinating activities and advocating effective management solutions.")
+                ),
+                column(
+                  1
                 )
               ),
               carouselItem(
+                column(
+                  1
+                ),
                 box(
-                  width = 7,
+                  width = 6,
                   title = "The Central Data Resource",
                   status = 'success',
                   solidHeader = FALSE,
                   em(carouselGeneralIntro)
                 ),
                 column(
-                  width = 5,
+                  width = 4,
                   img(src = 'MSA_WebsiteLayout_lowres.png', height = '350vh')
+                ),
+                column(
+                  1
                 )
               ), # carousel item end
               carouselItem(
+                column(
+                  1
+                ),
                 box(
-                  width = 5,
+                  width = 4,
                   title = "Search The Framework",
                   status = 'primary',
                   solidHeader = FALSE,
                   em(searchIntroCopy)
                 ),
                 column(
-                  width = 7,
+                  width = 6,
                   img(src = 'images/screenshot_map_carousel.PNG', height = '350vh')
+                ),
+                column(
+                  1
                 )
               ), # carousel item end
               carouselItem(
+                column(
+                  1
+                ),
                 box(
-                  width = 6,
+                  width = 5,
                   title = "Submit Data to The Central Data Resource",
                   status = 'primary',
                   solidHeader = FALSE,
                   em(submitIntroCopy)
                 ),
                 column(
-                  width = 6,
+                  width = 5,
                   img(src = 'images/screenshot_submit_carousel.PNG', height = '350vh')
+                ),
+                column(
+                  1
                 )
               ), # carousel item end
               carouselItem(
+                column(
+                  1
+                ),
                 box(
-                  width = 7,
+                  width = 6,
                   title = "The Metadata",
                   status = 'danger',
                   solidHeader = FALSE,
@@ -96,17 +123,23 @@ tabItem('introduction',
                   )
                 ),
                 column(
-                  width = 5,
+                  width = 4,
                   img(src = 'images/eml_logo.png', height = '350vh')
+                ),
+                column(
+                  1
                 )
               ), # carousel item end
               carouselItem(
+                column(
+                  1
+                ),
                 column(
                   width = 3,
                   img(src = 'images/sitemap-solid.svg', height = '350vh', alt = "https://fontawesome.com/license")
                 ),
                 box(
-                  width = 9,
+                  width = 7,
                   title = "Data Citation",
                   status = 'success',
                   solidHeader = FALSE,
@@ -122,6 +155,9 @@ tabItem('introduction',
                   em("All members are expected to abide by academic norms for citation. Data Citation conventions have been
                      developed by the FORCE11 community and can be found here:",
                      a(href="https://www.force11.org/datacitationprinciples","force11.org",target="_blank"))
+                ),
+                column(
+                  1
                 )
               ) # carousel item end
               # carouselItem(
