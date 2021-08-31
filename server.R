@@ -17,7 +17,7 @@ server <- function(input, output, session) {
   # Reactive Values END
   ############################
   
-  # Send user to registration page if URL contains register query ?register=TRUE
+  # Send user to registration page if URL contains register query ?register
   observe({
     query <- parseQueryString(session$clientData$url_search)
     if (!is.null(query[['register']])) {
