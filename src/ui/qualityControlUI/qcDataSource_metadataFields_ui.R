@@ -52,10 +52,5 @@ box(title = p("Data Source Details"),
            textInput('qcEmbargoEnd',"Embargo End Date:",value = "")
          )
        )
-    ),
-    # debugging
-    column(
-      12,
-      textOutput('queryString')
     )
 )
