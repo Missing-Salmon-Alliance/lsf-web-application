@@ -45,13 +45,17 @@ box(title = p("Data Source Details"),
        fluidRow(
          column(
            width = 4,
-           checkboxInput("embargoEndToggle",label = "Is the data embargoed?", value = FALSE)
+           checkboxInput("qcEmbargoEndToggle",label = "Is the data embargoed?", value = FALSE)
          ),
          column(
            width = 8,
-           textInput('embargoEnd',"Embargo End Date:",value = "")
+           textInput('qcEmbargoEnd',"Embargo End Date:",value = "")
          )
        )
-  
-     )
+    ),
+    # debugging
+    column(
+      12,
+      textOutput('queryString')
+    )
 )
