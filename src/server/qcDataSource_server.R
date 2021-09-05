@@ -121,13 +121,17 @@ observeEvent(input$QCidSelector,{
 # Observe Prev/Next click
 observeEvent(input$QCpreviousID,{
   x <- match(input$QCidSelector,LSFMetadataTibble$id)
-  y <- LSFMetadataTibble$id[x-1]
-  updateSelectizeInput(session,inputId = 'QCidSelector',selected = y)
+  if(x != 1){ # don't let prev button go less than 1
+    y <- LSFMetadataTibble$id[x-1]
+    updateSelectizeInput(session,inputId = 'QCidSelector',selected = y)
+  }
 })
 observeEvent(input$QCnextID,{
   x <- match(input$QCidSelector,LSFMetadataTibble$id)
-  y <- LSFMetadataTibble$id[x+1]
-  updateSelectizeInput(session,inputId = 'QCidSelector',selected = y)
+  if(x != length(LSFMetadataTibble$id)){
+    y <- LSFMetadataTibble$id[x+1]
+    updateSelectizeInput(session,inputId = 'QCidSelector',selected = y)
+  }
 })
 
 # Observe User Reset to DB values - Action: Reload values from database
