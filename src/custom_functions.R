@@ -110,7 +110,8 @@ adminCreateNewUser <- function(fullname,pw,email,affiliation,acceptDSA,promoteOR
                     "',personAcceptDSA:",acceptDSA,
                     ",personPromoteOrg:",promoteORG,
                     ",personAdmin:",admin,
-                    "})-[:NEWUSER]->(w)"),
+                    ",personBookmarks:'", # empty on initial creation
+                    "'})-[:NEWUSER]->(w)"),
                     neo_con,
                     type = 'row')
   

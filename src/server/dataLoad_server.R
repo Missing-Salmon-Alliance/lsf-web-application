@@ -6,7 +6,7 @@
 # 
 # LSFMetadataTibble <- tibble(id=character(0),metadataAccessLevel=character(0),metadataCreatorORCID=character(0),metadataGeographicDescription=character(0),metadataCoverageEast=numeric(0),metadataAbstract=character(0),
 #                             metadataCoverageNorth=numeric(0),metadataKNBURI=character(0),metadataOrganisation=character(0),metadataCoverageSouth=numeric(0),metadataCoverageWest=numeric(0),metadataUUID=character(0),metadataCreator=character(0),
-#                             metadataAvailableOnline=logical(0),metadataQCCheck=logical(0),metadataCoverageStartYear=character(0),metadataCoverageEndYear=character(0),metadataAlternateURI=character(0),metadataCreatorEmail=character(0),
+#                             metadataAvailableOnline=logical(0),metadataQCCheck=logical(0),metadataCoverageStartYear=character(0),metadataCoverageEndYear=character(0),metadataAltURI=character(0),metadataCreatorEmail=character(0),
 #                             metadataTimestamp=character(0),metadataTitle=character(0),metadataCoverageIntersectMigrationRoutes=character(0),metadataCoverageIntersectNAFODivision=character(0),
 #                             metadataCoverageIntersectICESEcoRegion=character(0),metadataCoverageCentroid=character(0),metadataEmbargoed=logical(0),metadataMaintenance=character(0),metadataCoverageMonthsOfYear=character(0),
 #                             metadataAltURI=character(0),metadataEmbargoEnd=character(0))

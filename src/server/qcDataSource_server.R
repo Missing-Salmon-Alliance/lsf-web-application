@@ -118,6 +118,18 @@ observeEvent(input$QCidSelector,{
   qcLoadDomainESV()
 })
 
+# Observe Prev/Next click
+observeEvent(input$QCpreviousID,{
+  x <- match(input$QCidSelector,LSFMetadataTibble$id)
+  y <- LSFMetadataTibble$id[x-1]
+  updateSelectizeInput(session,inputId = 'QCidSelector',selected = y)
+})
+observeEvent(input$QCnextID,{
+  x <- match(input$QCidSelector,LSFMetadataTibble$id)
+  y <- LSFMetadataTibble$id[x+1]
+  updateSelectizeInput(session,inputId = 'QCidSelector',selected = y)
+})
+
 # Observe User Reset to DB values - Action: Reload values from database
 # separate button for each input area therefore three
 observeEvent(input$resetQCMetadata,{
@@ -236,7 +248,7 @@ observeEvent(input$qcConfirmComplete,{
 #                                      "',status:'pendingQC'}]->(:Metadata{metadataTitle:'",sanitiseFreeTextInputs(input$sourceTitle),
 #                                      "',metadataCreator:'",sanitiseFreeTextInputs(input$sourceCreator),
 #                                      "',metadataKNBURI:'",input$sourceURI,
-#                                      "',metadataAlternateURI:'",sanitiseFreeTextInputs(input$sourceALTURI),
+#                                      "',metadataAltURI:'",sanitiseFreeTextInputs(input$sourceALTURI),
 #                                      "',metadataOrganisation:'",sanitiseFreeTextInputs(input$sourceOrganisation),
 #                                      "',metadataAbstract:'",sanitiseFreeTextInputs(input$sourceAbstract),
 #                                      "',metadataAvailableOnline:",input$sourceAvailableOnline,
