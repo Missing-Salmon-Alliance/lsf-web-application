@@ -17,6 +17,13 @@ server <- function(input, output, session) {
   # Reactive Values END
   ############################
   
+  # Send user to registration page if URL contains register query ?register
+  observe({
+    query <- parseQueryString(session$clientData$url_search)
+    if (!is.null(query[['register']])) {
+      updateTabItems(session, 'menu1', 'newMemberRegistration')
+    }
+  })
   
   ############################
   # header items
@@ -113,7 +120,7 @@ server <- function(input, output, session) {
   ############################
   
   source("./src/server/administrationArea_server.R", local = TRUE)$value
-
+  source("./src/server/qcDataSource_server.R", local = TRUE)$value
   ############################
   # administrationArea_server.R END
   ############################

@@ -51,7 +51,8 @@ source("./src/custom_functions.R",local = TRUE)
 neo_con <- neo4r::neo4j_api$new(url = paste("http://",NEO4J_HOST,":",NEO4J_PORT,sep = ""),
                          user = NEO4J_USER,
                          password = NEO4J_PASSWD)  
-
+# neo4r query results are sometimes passed to log files. This is a list of the desired columns/fields that need captured
+neo4rResultFields <- c('contains_updates','nodes_created','nodes_deleted','properties_set','relationships_created','relationship_deleted','labels_added','labels_removed')
 ###################################################
 # Pull information from graph
 # TODO: This process adds a few seconds to the initial load time of the application. If the graph queries can be integrated in to the
@@ -74,6 +75,7 @@ subhypothesisESV$relationships <- subhypothesisESV$relationships %>% neo4r::unne
 LSFDomainTibble <- esvDomain$nodes[esvDomain$nodes$value == "Domain",] %>% dplyr::select(matches("^(id|domain*)")) %>% dplyr::arrange(domainOrder)
 LSFEssentialSalmonVariableTibble <- esvDomain$nodes[esvDomain$nodes$value == "EssentialSalmonVariable",] %>% dplyr::select(matches("^(id|esv*)"))
 LSFMetadataTibble <- metadataESV$nodes[metadataESV$nodes$value == "Metadata",] %>% dplyr::select(matches("^(id|metadata*)"))
+LSFMetadataTibble <- LSFMetadataTibble %>% dplyr::arrange(id) # order by ID for QC area
 LSFHypothesisTibble <- hypothesisSubhypothesis$nodes[hypothesisSubhypothesis$nodes$value == "Hypothesis",] %>% dplyr::select(matches("^(id|hypothesis*)"))
 LSFSubHypothesisTibble <- hypothesisSubhypothesis$nodes[hypothesisSubhypothesis$nodes$value == "SubHypothesis",] %>% dplyr::select(matches("^(id|subHypothesis*)"))
 

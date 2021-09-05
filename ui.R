@@ -44,10 +44,32 @@ ui <- dashboardPage(skin = "blue",
                       ##############################################
                       # Search Data Source Conditional Sidebar Items
                       ##############################################
-                      source("./src/ui/searchDataSource_Sidebar_ui.R",local = TRUE)$value
+                      source("./src/ui/searchDataSource_Sidebar_ui.R",local = TRUE)$value,
                       ##############################################
                       # Search Data Source Conditional Sidebar Items
                       ##############################################
+                      
+                      conditionalPanel(
+                        condition = "input.menu1 == 'adminZone' && output.logonTrue",
+                        column(
+                          width = 12,
+                          br(),
+                          h4("Load and review"),
+                          selectizeInput('QCidSelector','Dropdown',choices = LSFMetadataTibble$id, width = '100%'),
+                          column(
+                            width = 6,
+                            actionLink('QCpreviousID',"Prev")
+                          ),
+                          column(
+                            width = 6,
+                            actionLink('QCnextID',"Next")
+                          ),
+                          br(),
+                          h6("...OR...",align = 'center'),
+                          textInput('QCcustomID','Manual input:'),
+                          actionButton('QCcustomIDButton',"Load from ID")
+                        )
+                      )
                       
 
                     ),

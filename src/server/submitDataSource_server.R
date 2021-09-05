@@ -70,7 +70,7 @@ resetAll <- function(){
   updateTextInput(session,inputId = 'embargoEnd',value = "")
   #reset Source Domain/ESV Section
   shinyWidgets::updateCheckboxGroupButtons(session, inputId = 'domainNodeList',selected = character(0))
-  shinyWidgets::updateCheckboxGroupButtons(session, inputId = 'esvCategory',selected = character(0))
+  #shinyWidgets::updateCheckboxGroupButtons(session, inputId = 'esvCategory',selected = character(0))
   
   #reset Source Temporal Section
   updateNumericInput(session,inputId = 'sourceStartYear',value = 2021)
@@ -396,7 +396,7 @@ submitSourceConfirmDataTable <- reactive({
              Abstract=input$sourceAbstract,
              GeographicDescription=input$sourceGeographicDescription,
              # KNBURI=input$sourceURI,
-             # metadataAlternateURI=input$sourceALTURI,
+             # metadataAltURI=input$sourceALTURI,
              # metadataCreatorORCID=input$sourceCreatorORCID,
              # metadataCoverageStartYear=input$sourceStartYear,
              # metadataCoverageEndYear=input$sourceEndYear,
@@ -590,7 +590,7 @@ observeEvent(input$confirmSubmitNewDataSource, {
                                      "',status:'pendingQC'}]->(:Metadata{metadataTitle:'",sanitiseFreeTextInputs(input$sourceTitle),
                                      "',metadataCreator:'",sanitiseFreeTextInputs(input$sourceCreator),
                                      "',metadataKNBURI:'",input$sourceURI,
-                                     "',metadataAlternateURI:'",sanitiseFreeTextInputs(input$sourceALTURI),
+                                     "',metadataAltURI:'",sanitiseFreeTextInputs(input$sourceALTURI),
                                      "',metadataOrganisation:'",sanitiseFreeTextInputs(input$sourceOrganisation),
                                      "',metadataAbstract:'",sanitiseFreeTextInputs(input$sourceAbstract),
                                      "',metadataAvailableOnline:",input$sourceAvailableOnline,
@@ -599,13 +599,13 @@ observeEvent(input$confirmSubmitNewDataSource, {
                                      "',metadataGeographicDescription:'",sanitiseFreeTextInputs(input$sourceGeographicDescription),
                                      "',metadataCreatorEmail:'",sanitiseFreeTextInputs(input$sourceCreatorEmail),
                                      "',metadataCreatorORCID:'",sanitiseFreeTextInputs(input$sourceCreatorORCID),
-                                     "',metadataCoverageStartYear:'",input$sourceStartYear,
-                                     "',metadataCoverageEndYear:'",input$sourceEndYear,
+                                     "',metadataCoverageStartYear:'",sanitiseFreeTextInputs(input$sourceStartYear),
+                                     "',metadataCoverageEndYear:'",sanitiseFreeTextInputs(input$sourceEndYear),
                                      "',metadataCoverageMonthsOfYear:'",paste(input$monthsOfYear,collapse = ","),#collapse months of year into csv string
-                                     "',metadataCoverageNorth:'",input$submitNorth,
-                                     "',metadataCoverageSouth:'",input$submitSouth,
-                                     "',metadataCoverageEast:'",input$submitEast,
-                                     "',metadataCoverageWest:'",input$submitWest,
+                                     "',metadataCoverageNorth:'",sanitiseFreeTextInputs(input$submitNorth),
+                                     "',metadataCoverageSouth:'",sanitiseFreeTextInputs(input$submitSouth),
+                                     "',metadataCoverageEast:'",sanitiseFreeTextInputs(input$submitEast),
+                                     "',metadataCoverageWest:'",sanitiseFreeTextInputs(input$submitWest),
                                      "',metadataMaintenance:'",input$sourceMaintenance,
                                      "',metadataQCCheck:",FALSE,
                                      ",metadataCoverageCentroid:'",paste0("POINT (",lngCenter," ",latCenter,")"),
@@ -672,6 +672,8 @@ observeEvent(input$confirmSubmitNewDataSource, {
   # requires transposed to fit log file
   resultCreateMetadataNodeTransform <- data.frame(t(resultCreateMetadataNode),row.names = NULL)[2,]
   names(resultCreateMetadataNodeTransform) <- resultCreateMetadataNode$type
+  # reduce result columns to required information
+  resultCreateMetadataNodeTransform <- resultCreateMetadataNodeTransform[,neo4rResultFields]
   
   # create user feedback table
   userSubmitSourceFeedback(data.frame(date = Sys.time(),user = user_info()$user_info$email, Title = input$sourceTitle,File = filename,UUID = sessionUUID()))
@@ -681,7 +683,7 @@ observeEvent(input$confirmSubmitNewDataSource, {
   # send log to AWS, append to existing file
   # get current logfile
   # TODO - THis process can cause a collision if two people submit at the exact same time, add some collision avoidance
-  logfile <- readr::read_csv(aws.s3::get_object(object = "userSubmit.log",bucket = "likelysuspects-datastore/logs"),col_types = 'Tcccccccccccccccccc')
+  logfile <- readr::read_csv(aws.s3::get_object(object = "userSubmit.log",bucket = "likelysuspects-datastore/logs"),col_types = 'Tcccccccccccc')
   # append new log item
   logfile <- dplyr::bind_rows(logfile,logFileDataFrame)
   # create temp area in memory to write to
