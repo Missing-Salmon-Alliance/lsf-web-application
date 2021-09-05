@@ -1,8 +1,40 @@
 # function to load all
 # TODO: REMEMBER TO ADD ANY NEW INPUTS HERE!
 
+# reactive value to hold the current database state of the selected metadata node
 qcDatabaseMetadata <- reactiveVal()
 
+# log update function
+qcLogUpdate <- function(resultList,qcAreaVal){
+  #### add entry to log (QC log)
+  # Create log for submissions
+  # result requires transposed to fit log file
+  resultTransform <- data.frame(t(resultList),row.names = NULL)[2,]
+  names(resultTransform) <- resultList$type
+  # reduce result columns to required information
+  resultTransform <- resultTransform[,neo4rResultFields]
+  
+  # create QC base info, date,user,UUID of metadata node
+  qcLogBase <- data.frame(date = Sys.time(),user = user_info()$user_info$email,UUID = qcDatabaseMetadata()$m$metadataUUID,qcArea = qcAreaVal)
+  # combine the columns into a single row
+  logFileDataFrame <- dplyr::bind_cols(qcLogBase,resultTransform)
+  # send log to AWS, append to existing file
+  # get current logfile
+  # TODO - THis process can cause a collision if two people submit at the exact same time, add some collision avoidance
+  logfile <- readr::read_csv(aws.s3::get_object(object = "qualityControl.log",bucket = "likelysuspects-datastore/logs"),col_types = 'Tccccccccccc')
+  # append new log item
+  logfile <- dplyr::bind_rows(logfile,logFileDataFrame)
+  # create temp area in memory to write to
+  rc <- rawConnection(raw(0), 'r+')
+  # write csv to temp area
+  readr::write_csv(logfile,rc)
+  # send csv object from temp area to S3
+  aws.s3::put_object(file = rawConnectionValue(rc),bucket = "likelysuspects-datastore/logs",object = "qualityControl.log")
+  # close and remove temp area
+  close(rc)
+}
+
+# load values in to metadata fields
 qcLoadMetadata <- function(){
   
   #reset Source Details Section
@@ -18,11 +50,12 @@ qcLoadMetadata <- function(){
   updateTextInput(session,inputId = 'qcCreatorORCID',value = qcDatabaseMetadata()$m$metadataCreatorORCID)
   updateSelectInput(session, inputId = 'qcMaintenance', selected = qcDatabaseMetadata()$m$metadataMaintenance)
   updateCheckboxInput(session, inputId = 'qcAvailableOnline', value = qcDatabaseMetadata()$m$metadataAvailableOnline)
-  updateCheckboxInput(session,inputId = 'embargoEndToggle',value = qcDatabaseMetadata()$m$metadataEmbargoed)
-  updateTextInput(session,inputId = 'embargoEnd',value = qcDatabaseMetadata()$m$metadataEmbargoEnd)
+  updateCheckboxInput(session,inputId = 'qcEmbargoEndToggle',value = qcDatabaseMetadata()$m$metadataEmbargoed)
+  updateTextInput(session,inputId = 'qcEmbargoEnd',value = qcDatabaseMetadata()$m$metadataEmbargoEnd)
 
 }
 
+# load values in to geo temporal fields
 qcLoadGeoTemporal <- function(){
   #reset Source Temporal Section
   updateNumericInput(session,inputId = 'qcStartYear',value = qcDatabaseMetadata()$m$metadataCoverageStartYear)
@@ -44,6 +77,8 @@ qcLoadGeoTemporal <- function(){
   
 }
 
+
+# load values in to variable classes and domains
 qcLoadDomainESV <- function(){
   #reset Source Domain/ESV Section
   shinyWidgets::updateCheckboxGroupButtons(session, inputId = 'qcDomainNodeList',selected = character(0))
@@ -83,8 +118,20 @@ observeEvent(input$QCidSelector,{
   qcLoadDomainESV()
 })
 
-# Observe User Reset to DB values - Action: Reload values from database
+# Observe Prev/Next click
+observeEvent(input$QCpreviousID,{
+  x <- match(input$QCidSelector,LSFMetadataTibble$id)
+  y <- LSFMetadataTibble$id[x-1]
+  updateSelectizeInput(session,inputId = 'QCidSelector',selected = y)
+})
+observeEvent(input$QCnextID,{
+  x <- match(input$QCidSelector,LSFMetadataTibble$id)
+  y <- LSFMetadataTibble$id[x+1]
+  updateSelectizeInput(session,inputId = 'QCidSelector',selected = y)
+})
 
+# Observe User Reset to DB values - Action: Reload values from database
+# separate button for each input area therefore three
 observeEvent(input$resetQCMetadata,{
   qcDatabaseMetadata(neo4r::call_neo4j(paste0("MATCH (m:Metadata) WHERE id(m) = ",input$QCidSelector," RETURN m;"),con = neo_con, type = 'row'))
   qcLoadMetadata()
@@ -97,6 +144,80 @@ observeEvent(input$resetQCDomainESV,{
   qcDatabaseMetadata(neo4r::call_neo4j(paste0("MATCH (m:Metadata) WHERE id(m) = ",input$QCidSelector," RETURN m;"),con = neo_con, type = 'row'))
   qcLoadDomainESV()
 })
+
+# Observe User Update to DB values - Action: Apply new values to database
+# separate button for each input area therefore three
+observeEvent(input$submitQCMetadata,{
+  # match metadata node
+  # update metadata fields to values in form
+  # update lastModified value in [:HAS_SUBMITTED] relationship set to Sys.time()
+  # update status in [:HAS_SUBMITTED] relationship set to startedQC to signify that QC has begun
+  updateMetadataNodeQuery <- paste0("MATCH (m:Metadata)-[r:HAS_SUBMITTED]-() WHERE id(m) = ",input$QCidSelector,
+                                    " SET m.metadataTitle = '",sanitiseFreeTextInputs(input$qcTitle),
+                                    "', m.metadataCreator = '",sanitiseFreeTextInputs(input$qcCreator),
+                                    "', m.metadataOrganisation = '",sanitiseFreeTextInputs(input$qcOrganisation),
+                                    "', m.metadataAbstract = '",sanitiseFreeTextInputs(input$qcAbstract),
+                                    "', m.metadataCreatorEmail = '",sanitiseFreeTextInputs(input$qcCreatorEmail),
+                                    "', m.metadataAltURI = '",sanitiseFreeTextInputs(input$qcALTURI),
+                                    "', m.metadataCreatorORCID = '",sanitiseFreeTextInputs(input$qcCreatorORCID),
+                                    "', m.metadataMaintenance = '",input$qcMaintenance,
+                                    "', m.metadataAvailableOnline = ",input$qcAvailableOnline,
+                                    ", m.metadataEmbargoed = ",input$qcEmbargoEndToggle,
+                                    ", m.metadataEmbargoEnd = '",sanitiseFreeTextInputs(input$qcEmbargoEnd),
+                                    "', m.metadataLastModified = '",Sys.time(),
+                                    "', r.status = 'startedQC', r.lastModified = '",Sys.time(),"';")
+  
+  resultUpdateMetadataNode <- neo4r::call_neo4j(updateMetadataNodeQuery,neo_con,type = 'row',include_stats = T,include_meta = T)
+  qcLogUpdate(resultList = resultUpdateMetadataNode,qcAreaVal = 'metadata')
+
+})
+
+observeEvent(input$submitQCGeoTemporal,{
+  # match metadata node
+  # update geotemporal fields to values in form
+  # update lastModified value in [:HAS_SUBMITTED] relationship set to Sys.time()
+  # update status in [:HAS_SUBMITTED] relationship set to startedQC to signify that QC has begun
+  updateMetadataNodeQuery <- paste0("MATCH (m:Metadata)-[r:HAS_SUBMITTED]-() WHERE id(m) = ",input$QCidSelector,
+                                    " SET m.metadataGeographicDescription = '",sanitiseFreeTextInputs(input$qcGeographicDescription),
+                                    "', m.metadataCoverageNorth = '",sanitiseFreeTextInputs(input$qcNorth),
+                                    "', m.metadataCoverageEast = '",sanitiseFreeTextInputs(input$qcEast),
+                                    "', m.metadataCoverageSouth = '",sanitiseFreeTextInputs(input$qcSouth),
+                                    "', m.metadataCoverageWest = '",sanitiseFreeTextInputs(input$qcWest),
+                                    "', m.metadataCoverageStartYear = '",sanitiseFreeTextInputs(input$qcStartYear),
+                                    "', m.metadataCoverageEndYear = '",sanitiseFreeTextInputs(input$qcEndYear),
+                                    "', m.metadataCoverageMonthsOfYear = '",paste(input$qcMonthsOfYear,collapse = ","),
+                                    "', m.metadataLastModified = '",Sys.time(),
+                                    "', r.status = 'startedQC', r.lastModified = '",Sys.time(),"';")
+  
+  resultUpdateMetadataNode <- neo4r::call_neo4j(updateMetadataNodeQuery,neo_con,type = 'row',include_stats = T,include_meta = T)
+  qcLogUpdate(resultList = resultUpdateMetadataNode,qcAreaVal = 'geotemporal')
+  
+})
+
+observeEvent(input$qcConfirmComplete,{
+  # TODO: Apply these changes only when user clicks QC Completed button
+  # set QC person as current user, new relationship HAS_QCED
+  # set metadataQCCheck = TRUE
+  #updateMetadataNodeQuery <- paste0("MATCH (m:Metadata)-[r:HAS_SUBMITTED]-() WHERE id(m) = ",input$QCidSelector,
+                                    # " SET m.metadataTitle = '",sanitiseFreeTextInputs(input$qcTitle),
+                                    # "', m.metadataCreator = '",sanitiseFreeTextInputs(input$qcCreator ),
+                                    # "', m.metadataOrganisation = '",sanitiseFreeTextInputs(input$qcOrganisation),
+                                    # "', m.metadataAbstract = '",sanitiseFreeTextInputs(input$qcAbstract),
+                                    # "', m.metadataCreatorEmail = '",sanitiseFreeTextInputs(input$qcCreatorEmail),
+                                    # "', m.metadataAltURI = '",sanitiseFreeTextInputs(input$qcALTURI),
+                                    # "', m.metadataCreatorORCID = '",sanitiseFreeTextInputs(input$qcCreatorORCID),
+                                    # "', m.metadataMaintenance = ",input$qcMaintenance,
+                                    # ", m.metadataAvailableOnline = ",input$qcAvailableOnline,
+                                    # ", m.metadataEmbargoed = ",input$qcEmbargoEndToggle,
+                                    # ", m.metadataEmbargoEnd = '",sanitiseFreeTextInputs(input$qcEmbargoEnd),
+                                    # "', m.metadataLastModified = '",Sys.time(),
+                                    # "', r.status = 'startedQC', r.lastModified = '",Sys.time(),"';")
+  
+})
+
+  
+
+
 
 # Observer to pass file upload details to sessionFile reactive value
 # This is passed to a reactiveVal so that it can be cleared out once user has submitted the form.
@@ -127,7 +248,7 @@ observeEvent(input$resetQCDomainESV,{
 #                                      "',status:'pendingQC'}]->(:Metadata{metadataTitle:'",sanitiseFreeTextInputs(input$sourceTitle),
 #                                      "',metadataCreator:'",sanitiseFreeTextInputs(input$sourceCreator),
 #                                      "',metadataKNBURI:'",input$sourceURI,
-#                                      "',metadataAlternateURI:'",sanitiseFreeTextInputs(input$sourceALTURI),
+#                                      "',metadataAltURI:'",sanitiseFreeTextInputs(input$sourceALTURI),
 #                                      "',metadataOrganisation:'",sanitiseFreeTextInputs(input$sourceOrganisation),
 #                                      "',metadataAbstract:'",sanitiseFreeTextInputs(input$sourceAbstract),
 #                                      "',metadataAvailableOnline:",input$sourceAvailableOnline,
