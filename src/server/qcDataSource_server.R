@@ -181,12 +181,19 @@ observeEvent(input$submitQCGeoTemporal,{
   # update geotemporal fields to values in form
   # update lastModified value in [:HAS_SUBMITTED] relationship set to Sys.time()
   # update status in [:HAS_SUBMITTED] relationship set to startedQC to signify that QC has begun
+  
+  # Create metadata node based on user input
+  # Quick center point calcs
+  lngCenter <- (input$qcWest+input$qcEast)/2
+  latCenter <- (input$qcSouth+input$qcNorth)/2
+  
   updateMetadataNodeQuery <- paste0("MATCH (m:Metadata)-[r:HAS_SUBMITTED]-() WHERE id(m) = ",input$QCidSelector,
                                     " SET m.metadataGeographicDescription = '",sanitiseFreeTextInputs(input$qcGeographicDescription),
                                     "', m.metadataCoverageNorth = '",sanitiseFreeTextInputs(input$qcNorth),
                                     "', m.metadataCoverageEast = '",sanitiseFreeTextInputs(input$qcEast),
                                     "', m.metadataCoverageSouth = '",sanitiseFreeTextInputs(input$qcSouth),
                                     "', m.metadataCoverageWest = '",sanitiseFreeTextInputs(input$qcWest),
+                                    "', m.metadataCoverageCentroid:'",paste0("POINT (",lngCenter," ",latCenter,")"),
                                     "', m.metadataCoverageStartYear = '",sanitiseFreeTextInputs(input$qcStartYear),
                                     "', m.metadataCoverageEndYear = '",sanitiseFreeTextInputs(input$qcEndYear),
                                     "', m.metadataCoverageMonthsOfYear = '",paste(input$qcMonthsOfYear,collapse = ","),
