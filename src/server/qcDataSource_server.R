@@ -193,7 +193,7 @@ observeEvent(input$submitQCGeoTemporal,{
                                     "', m.metadataCoverageEast = '",sanitiseFreeTextInputs(input$qcEast),
                                     "', m.metadataCoverageSouth = '",sanitiseFreeTextInputs(input$qcSouth),
                                     "', m.metadataCoverageWest = '",sanitiseFreeTextInputs(input$qcWest),
-                                    "', m.metadataCoverageCentroid:'",paste0("POINT (",lngCenter," ",latCenter,")"),
+                                    "', m.metadataCoverageCentroid = '",paste0("POINT (",lngCenter," ",latCenter,")"),
                                     "', m.metadataCoverageStartYear = '",sanitiseFreeTextInputs(input$qcStartYear),
                                     "', m.metadataCoverageEndYear = '",sanitiseFreeTextInputs(input$qcEndYear),
                                     "', m.metadataCoverageMonthsOfYear = '",paste(input$qcMonthsOfYear,collapse = ","),
