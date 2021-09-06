@@ -12,7 +12,7 @@ require(neo4r)
 source("./src/secrets.R",local = TRUE)
 
 # Custom functions
-source("./src/gisOperations.R",local = TRUE)
+source("./src/custom_functions.R",local = TRUE)
 
 #########################
 # Pull data from SQL database using function from gisOperations
@@ -23,7 +23,7 @@ nafoDivisionsSF <- loadFullWKBData("nafo_divisions")
 
 icesStatEcoSF <- loadFullWKBData("ices_stat_rect_eco")
 
-migrationSF <- loadFullWKBData("buffered_seasalar_migration")
+migrationSF <- loadFullWKBData("proposed_migration_routes")
 
 feedingSF <- loadFullWKBData("feeding_zones")
 ##########################
