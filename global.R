@@ -85,15 +85,6 @@ hypothesisSubHypothesisESVRelationships <- dplyr::bind_rows(hypothesisSubhypothe
 #tidyup
 rm(metadataESV,esvDomain,hypothesisSubhypothesis,subhypothesisESV)
 
-# Convert some columns to numeric
-# TODO: These could be natively numeric in the graph rather than converting them here
-LSFMetadataTibble$metadataCoverageStartYear <- as.numeric(LSFMetadataTibble$metadataCoverageStartYear)
-LSFMetadataTibble$metadataCoverageEndYear <- as.numeric(LSFMetadataTibble$metadataCoverageEndYear)
-LSFMetadataTibble$metadataCoverageWest <- as.numeric(LSFMetadataTibble$metadataCoverageWest)
-LSFMetadataTibble$metadataCoverageNorth <- as.numeric(LSFMetadataTibble$metadataCoverageNorth)
-LSFMetadataTibble$metadataCoverageEast <- as.numeric(LSFMetadataTibble$metadataCoverageEast)
-LSFMetadataTibble$metadataCoverageSouth <- as.numeric(LSFMetadataTibble$metadataCoverageSouth)
-
 # Conversion to GIS enabled dataframe using pre-calculated centroids (see nightly intersection routine)
 LSFMetadataTibble <- sf::st_as_sf(LSFMetadataTibble, wkt = "metadataCoverageCentroid", crs = 4326, na.fail = FALSE)
 

@@ -189,14 +189,14 @@ observeEvent(input$submitQCGeoTemporal,{
   
   updateMetadataNodeQuery <- paste0("MATCH (m:Metadata)-[r:HAS_SUBMITTED]-() WHERE id(m) = ",input$QCidSelector,
                                     " SET m.metadataGeographicDescription = '",sanitiseFreeTextInputs(input$qcGeographicDescription),
-                                    "', m.metadataCoverageNorth = '",sanitiseFreeTextInputs(input$qcNorth),
-                                    "', m.metadataCoverageEast = '",sanitiseFreeTextInputs(input$qcEast),
-                                    "', m.metadataCoverageSouth = '",sanitiseFreeTextInputs(input$qcSouth),
-                                    "', m.metadataCoverageWest = '",sanitiseFreeTextInputs(input$qcWest),
-                                    "', m.metadataCoverageCentroid = '",paste0("POINT (",lngCenter," ",latCenter,")"),
-                                    "', m.metadataCoverageStartYear = '",sanitiseFreeTextInputs(input$qcStartYear),
-                                    "', m.metadataCoverageEndYear = '",sanitiseFreeTextInputs(input$qcEndYear),
-                                    "', m.metadataCoverageMonthsOfYear = '",paste(input$qcMonthsOfYear,collapse = ","),
+                                    "', m.metadataCoverageNorth = ",sanitiseFreeTextInputs(input$qcNorth),
+                                    ", m.metadataCoverageEast = ",sanitiseFreeTextInputs(input$qcEast),
+                                    ", m.metadataCoverageSouth = ",sanitiseFreeTextInputs(input$qcSouth),
+                                    ", m.metadataCoverageWest = ",sanitiseFreeTextInputs(input$qcWest),
+                                    ", m.metadataCoverageCentroid = '",paste0("POINT (",lngCenter," ",latCenter,")"),
+                                    "', m.metadataCoverageStartYear = ",sanitiseFreeTextInputs(input$qcStartYear),
+                                    ", m.metadataCoverageEndYear = ",sanitiseFreeTextInputs(input$qcEndYear),
+                                    ", m.metadataCoverageMonthsOfYear = '",paste(input$qcMonthsOfYear,collapse = ","),
                                     "', m.metadataLastModified = '",Sys.time(),
                                     "', r.status = 'startedQC', r.lastModified = '",Sys.time(),"';")
   
