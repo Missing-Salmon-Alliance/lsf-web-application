@@ -33,16 +33,10 @@ feedingSF <- loadFullWKBData("feeding_zones")
 neo_con <- neo4j_api$new(url = paste("http://",NEO4J_HOST,":",NEO4J_PORT,sep = ""),
                          user = NEO4J_USER,
                          password = NEO4J_PASSWD) 
-LSFMetadata <- call_neo4j("MATCH (m:Metadata) RETURN m,id(m) as id ORDER BY id;",neo_con,type = 'row')
+LSFMetadata <- neo4r::call_neo4j("MATCH (m:Metadata) RETURN m,id(m) as id ORDER BY id;",neo_con,type = 'row')
 LSFMetadataTibble <- LSFMetadata$m
 LSFMetadataTibble$id <- LSFMetadata$id$value
-# CONVERT LON/LATS to INTEGERS
-# TODO make these data integers within the graph
-LSFMetadataTibble$metadataCoverageSouth <- as.double(LSFMetadataTibble$metadataCoverageSouth)
-LSFMetadataTibble$metadataCoverageNorth <- as.double(LSFMetadataTibble$metadataCoverageNorth)
-LSFMetadataTibble$metadataCoverageWest <- as.double(LSFMetadataTibble$metadataCoverageWest)
-LSFMetadataTibble$metadataCoverageEast <- as.double(LSFMetadataTibble$metadataCoverageEast)
-#
+
 ##############################
 
 #############################
