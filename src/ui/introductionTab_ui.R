@@ -7,15 +7,11 @@ tabItem('introduction',
           fluidRow(
             h1("Welcome to the Central Data Resource for Atlantic Salmon"),
             br(),
-            h4("Brought to you by the ",
-               a(href="https://missingsalmonalliance.org/","Missing Salmon Alliance",target="_blank"),
-               "as part of the",
-               a(href="https://missingsalmonalliance.org/likely-suspects-framework","Likely Suspects Framework,",target="_blank"),
-               "this portal aims to guide researchers to data sources for testing hypotheses, 
-                                        informing management activities, and ultimately improving Atlantic salmon populations."),
+            h3("A web application that aims to guide researchers to data sources for testing hypotheses,
+               informing management activities, and ultimately improving Atlantic salmon populations."),
             
-            tags$b("This resource is ready for use but may change in appearance and functionality as our user base and knowledge base grows. 
-                                    Development suggestions are always welcome and can be directed to the team via",a(href="mailto: data.admin@missingsalmonalliance.org","email."),"It is best viewed in a modern browser, at a zoom level of 100% or less and is not designed to be viewed on a mobile device.")
+            tags$b("This resource is ready for use but may change in appearance and functionality as our user base and knowledge base grows.
+                   Development suggestions are always welcome and can be directed to the team via",a(href="mailto: data.admin@missingsalmonalliance.org","email."),"It is best viewed in a modern browser, at a zoom level of 100% or less and is not designed to be viewed on a mobile device.")
           ),
           fluidRow(
             hr(style="border-color: purple")
