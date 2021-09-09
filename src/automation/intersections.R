@@ -86,6 +86,9 @@ migrationrouteIntersects <- sf::st_intersects(LSFMetadataTibble,migrationSF)
 ######################
 ######################
 # Calculate nearest polygon where intersect length = 0
+# NOTES: nearest polygons for us/canada and greenland rivers should all be NAFO divisions, the rest should be ICES EcoRegions
+# This can be done by separating the metadata by longitude
+
 
 
 
