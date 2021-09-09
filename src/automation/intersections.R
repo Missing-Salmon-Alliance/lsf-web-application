@@ -40,7 +40,10 @@ LSFMetadataTibble$id <- LSFMetadata$id$value
 ##############################
 
 #############################
-# Create polygons for each row in LSFMetadataTibble
+# This section does two things:
+# Create polygons for each row in LSFMetadataTibble for use in intersection code in the next step
+# Create calculated centroids for each polygon for delivery back to metadataCoverageCentroid in the DB and use in the web application map
+# Development note: Is it better to store the polygons in the graph as WKT? WOuld this make operations faster on the web application?
 
 #set up a geometry column with dummy polygon to house the soon to be created real polygons
 LSFMetadataTibble$geometry <- st_sfc(st_polygon(list(rbind(c(0,0),c(1,0),c(1,-1),c(0,-1),c(0,0)))))
@@ -61,12 +64,12 @@ for(i in 1:nrow(LSFMetadataTibble)){
   # pass in to replace dummy entry in geometry column
   LSFMetadataTibble$geometry[i] <- thispolygon
   LSFMetadataTibble$centre[i] <- st_as_text(st_centroid(thispolygon)) # Calculate centroids
-  # Return calculated centroids to graph
-  query <- paste0("MATCH (m:Metadata) WHERE id(m) = ",LSFMetadataTibble$id[i]," SET m.metadataCoverageCentroid = '",LSFMetadataTibble$centre[i],"';")
-  call_neo4j(query,neo_con,type = 'row')
+  # Return calculated centroids to graph (note polygons are not written back to the graph db)
+  #query <- paste0("MATCH (m:Metadata) WHERE id(m) = ",LSFMetadataTibble$id[i]," SET m.metadataCoverageCentroid = '",LSFMetadataTibble$centre[i],"';")
+  #call_neo4j(query,neo_con,type = 'row')
 }
 
-# convert full tibble to sf object and set CRS
+# convert full tibble to sf object and set CRS - by default this operation uses the 'geometry' column as the sf geometry column
 LSFMetadataTibble <- sf::st_as_sf(LSFMetadataTibble,crs=4326)
 
 ######################
@@ -77,25 +80,30 @@ LSFMetadataTibble <- sf::st_as_sf(LSFMetadataTibble,crs=4326)
 # and as wide as the second, with varying row width based on how many intersects occur
 ecoregionIntersects <- sf::st_intersects(LSFMetadataTibble,ICES_Ecoregions)
 nafodivisionIntersects <- sf::st_intersects(LSFMetadataTibble,nafoDivisionsSF)
-icesrectanglesIntersects <- sf::st_intersects(LSFMetadataTibble,icesStatEcoSF)
+#icesrectanglesIntersects <- sf::st_intersects(LSFMetadataTibble,icesStatEcoSF)
 migrationrouteIntersects <- sf::st_intersects(LSFMetadataTibble,migrationSF)
+
+######################
+######################
+# Calculate nearest polygon where intersect length = 0
+
 
 
 # Visualize some Overlaps and Intersections
 
-leaflet () %>%
-  addProviderTiles(leaflet::providers$Esri.OceanBasemap) %>%
-  addPolygons(data = LSFMetadataTibble[1,],
-              color = "green", weight = 1)  %>%
-  addPolygons(data = ICES_Ecoregions[ecoregionIntersects[[1]],],
-              color = "red", weight = 1)
-
-leaflet () %>%
-  addProviderTiles(leaflet::providers$Esri.OceanBasemap) %>%
-  addPolygons(data = LSFMetadataTibble[34,],
-              color = "green", weight = 1)  %>%
-  addPolygons(data = nafoDivisionsSF[nafodivisionIntersects[[34]],],
-              color = "red", weight = 1)
+# leaflet () %>%
+#   addProviderTiles(leaflet::providers$Esri.OceanBasemap) %>%
+#   addPolygons(data = LSFMetadataTibble[1,],
+#               color = "green", weight = 1)  %>%
+#   addPolygons(data = ICES_Ecoregions[ecoregionIntersects[[1]],],
+#               color = "red", weight = 1)
+# 
+# leaflet () %>%
+#   addProviderTiles(leaflet::providers$Esri.OceanBasemap) %>%
+#   addPolygons(data = LSFMetadataTibble[34,],
+#               color = "green", weight = 1)  %>%
+#   addPolygons(data = nafoDivisionsSF[nafodivisionIntersects[[34]],],
+#               color = "red", weight = 1)
 
 
 ###############################
@@ -133,14 +141,14 @@ for(i in 1:nrow(migrationrouteIntersects)){
 }
 #MIGRATIONROUTES_BUFFERED - combined current/month
 # create bodged column with current and month combined
-migrationSF$currentMonth <- paste(migrationSF$current," (",migrationSF$month,")",sep = "")
-for(i in 1:nrow(migrationrouteIntersects)){
-  query <- paste0("MATCH (m:Metadata) WHERE id(m) = ",
-                  LSFMetadataTibble$id[i],
-                  " SET m.metadataCoverageIntersectMigrationRoutes = '",
-                  paste0(unique(migrationSF$currentMonth[migrationrouteIntersects[[i]]]),collapse = ','),
-                  "';")
-  #print(query)
-  call_neo4j(query,neo_con,type = 'row')
-}
+# migrationSF$currentMonth <- paste(migrationSF$current," (",migrationSF$month,")",sep = "")
+# for(i in 1:nrow(migrationrouteIntersects)){
+#   query <- paste0("MATCH (m:Metadata) WHERE id(m) = ",
+#                   LSFMetadataTibble$id[i],
+#                   " SET m.metadataCoverageIntersectMigrationRoutes = '",
+#                   paste0(unique(migrationSF$currentMonth[migrationrouteIntersects[[i]]]),collapse = ','),
+#                   "';")
+#   #print(query)
+#   call_neo4j(query,neo_con,type = 'row')
+# }
 
