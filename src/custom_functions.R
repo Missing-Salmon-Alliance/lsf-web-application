@@ -1,7 +1,11 @@
 ######################
 # General functions used throughout the app
 ######################
-
+# required to capture checkboxGroupInput output cleanly, as a comma sep string
+formatLSFCategories <- function(categories){
+  x <- paste(categories,collapse = ", ")
+  return(x)
+}
 # SQL GIS Loader function
 
 loadFullWKBData <- function(tblname) {
@@ -117,6 +121,64 @@ adminCreateNewUser <- function(fullname,pw,email,affiliation,acceptDSA,promoteOR
   
 }
 
+
+
+# save data to local csv function
+# https://shiny.rstudio.com/articles/persistent-data-storage.html
+saveData <- function(activity,person,theme,focus) {
+  conn <- neo4r::neo4j_api$new(url = paste0("http://",NEO4J_HOST,":",NEO4J_PORT),user = NEO4J_USER,password = NEO4J_PASSWD)
+  # process user submitted data in to graph
+  # create new Activity node and pass in properties
+  newActivityQuery <- paste0("CREATE ",
+                             neo4r::vec_to_cypher_with_var(as.list(activity),'Activity','a'),
+                             " SET a.activityLabel = 'temporaryLabel', a.activityCreated = '",
+                             format(Sys.time(),"%Y-%m-%d %H:%M:%S"),
+                             "';")
+  neo4r::call_neo4j(newActivityQuery,conn,type='row')
+  ####
+  # create relationships to new Activity node and existing themes
+  for(i in theme){
+    query <- stringr::str_replace("MATCH (a:Activity{activityLabel:'temporaryLabel'}),(t:Theme{themeLabel:'xyz'}) CREATE (a)-[:HAS_THEME]->(t);",
+                                  "xyz",
+                                  i)
+    neo4r::call_neo4j(query,conn,type='row')
+  }
+  ####
+  # create relationships to new Activity node and existing focus
+  for(i in focus){
+    query <- stringr::str_replace("MATCH (a:Activity{activityLabel:'temporaryLabel'}),(f:Focus{focusLabel:'xyz'}) CREATE (a)-[:HAS_FOCUS]->(f);",
+                                  "xyz",
+                                  i)
+    neo4r::call_neo4j(query,conn,type='row')
+  }
+  ####
+  # create new person (will create duplicates but these can be cleaned up by a human later)
+  newPersonQuery <- paste0("CREATE ",
+                           neo4r::vec_to_cypher_with_var(as.list(person),'Person','p'),
+                           " SET p.personSource = 'researchInv', p.created = '",
+                           format(Sys.time(),"%Y-%m-%d %H:%M:%S"),
+                           "', p.personNew = true;")
+  neo4r::call_neo4j(newPersonQuery,conn,type='row')
+  # relate person and activity AND remove unique references activityLabel and personNew properties
+  neo4r::call_neo4j("MATCH (p:Person{personNew:true}),(a:Activity{activityLabel:'temporaryLabel'}) CREATE (a)-[:HAS_PERSON]->(p) SET a.activityLabel = '' REMOVE p.personNew;",
+                    conn,
+                    type = 'row')
+  
+  # close connection
+  rm(conn)
+}
+
+# load data from local csv function
+# https://shiny.rstudio.com/articles/persistent-data-storage.html
+loadData <- function() {
+  
+  conn <- neo4r::neo4j_api$new(url = paste0("http://",NEO4J_HOST,":",NEO4J_PORT),user = NEO4J_USER,password = NEO4J_PASSWD)
+  
+  dataDF <- neo4r::call_neo4j("MATCH (a:Activity) RETURN a;",conn,type='row')$a
+  
+  return(dataDF)
+  
+}
 
 #######################################################################
 # Functions no longer in use
