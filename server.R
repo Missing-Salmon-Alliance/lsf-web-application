@@ -106,6 +106,16 @@ server <- function(input, output, session) {
   ############################
   
   ############################
+  # submitResearchActivity_server.R START
+  ############################
+  
+  source("./src/server/submitResearchActivity_server.R", local = TRUE)$value
+  
+  ############################
+  # submitResearchActivity_server.R END
+  ############################
+  
+  ############################
   # metadataNodeReport_server.R START
   ############################
   

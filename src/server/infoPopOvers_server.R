@@ -110,3 +110,20 @@ shinyBS::addPopover(session, id = 'temporalSlider',title = "Date Range",
                     options = list(container = "body")
                     
 )
+
+
+shinyBS::addPopover(session, id = "researchProjectTheme",title = "Theme Detail",
+           content = HTML(paste0(strong("Method development"),em(" - Developing and enhancing models in support of modelling ecosystem impacts and hypotheses testing"),p(),
+                                 strong("Carryover effects"),em(" - Influences during freshwater phase that have carry-over penalty (mortality loading) in the marine phase"),p(),
+                                 strong("Local/regional mortality drivers"),em(" - Domains transited early in the post smolt phase, approx first 3 months, including transitional waters. Include return phase to homewaters/river"),p(),
+                                 strong("Ocean basin scale drivers of marine mortality"),em(" - Common domains occupied by salmon in later phase at sea, associated with feeding areas common to many stocks (e.g. Norwegian Sea, Labrador Sea, W. Greenland)"),p(),
+                                 strong("Demographic mechanisms"),em(" - Drivers of key life history traits, such as maturation schedule"),p(),
+                                 strong("Eco-evolutionary processes"),em(" - Evolutionary and demographic consequences of multiple stressors, using e.g. IBASM. The LSF virtual domain"),p(),
+                                 strong("Getting the data together"),em(" - Availability and structuring of data supporting the above topics. e.g. ICES Index rivers, tracking studies, environmental and ecosystem data. Essential for hypotheses testing"),p(),
+                                 strong("Guidance to managers"),em(" - Development of guidance to managers, such as Decision Support Tools (complementary to quantitative catch advice)")
+           )
+           
+           ),
+           placement = 'top',
+           options = list(container = "body")
+)

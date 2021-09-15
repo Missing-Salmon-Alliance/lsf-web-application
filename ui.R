@@ -104,7 +104,7 @@ ui <- dashboardPage(skin = "blue",
                         
                         source("./src/ui/metadataNodeReport_ui.R", local = TRUE)$value, # tabItem metadataNodeReport
                         
-                        source("./src/ui/submitResearchActivity_ui.R",local = TRUE)$value, #tabItem submit research
+                        source("./src/ui/researchInventoryUI/submitResearchActivity_ui.R",local = TRUE)$value, #tabItem submit research
                         
                         source("./src/ui/administratorArea_ui.R",local = TRUE)$value #tabItem Admin Area
                       ) # tabItems close
