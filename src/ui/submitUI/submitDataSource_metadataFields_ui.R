@@ -31,7 +31,7 @@ box(title = p("Data Source Details (* required field)",actionLink(inputId = 'met
                            fluidRow(
                              column(
                                width = 4,
-                               checkboxInput("sourceMaintenanceToggle",label = "Part of an ongoing survey?", value = FALSE)
+                               checkboxInput("sourceMaintenanceToggle",label = "Are updates expected?", value = FALSE)
                              ),
                              column(
                                width = 8,
