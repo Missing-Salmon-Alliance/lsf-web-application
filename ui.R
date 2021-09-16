@@ -107,7 +107,8 @@ ui <- dashboardPage(skin = "blue",
                         source("./src/ui/researchInventoryUI/submitResearchActivity_ui.R",local = TRUE)$value, #tabItem submit research
                         
                         source("./src/ui/administratorArea_ui.R",local = TRUE)$value #tabItem Admin Area
-                      ) # tabItems close
+                      ),# tabItems close
+                      bsPopover("test","test")# tabItems close
                     ) # dashboardBody close
                     
                     # Some example code, footer and right hand sidebar
