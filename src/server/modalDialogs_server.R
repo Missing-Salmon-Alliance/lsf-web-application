@@ -90,7 +90,8 @@ observeEvent(input$geogTimeFields,{
       em("Provide a brief description of the geographic location of where the data was collected e.g. The River Bush, Northern Ireland, and define a rectangular box that covers all the data points in decimal degrees.
       A single point can be defined by using the same values for East/West and North/South.
       Clicking a location on the map will autocomplete the inputs to give you an idea of starting points. 
-      The inputs can then be modified manually to fine tune. Decimal degrees to an accuracy of 4 decimal places is ~ 6-10 metres."),
+      The inputs can then be modified manually to fine tune. Decimal degrees EAST of meridian and NORTH of equator to an accuracy of 4 decimal places is ~ 6-10 metres resolution.
+         Negative values should be used for WEST of meridian and SOUTH of equator."),
       hr(),
       h3("Temporal Coverage"),
       em("Provide information of the temporal extents of the data. Use the slider to define which years the data were collected over, and the buttons to identify during which months data were collected if applicable")

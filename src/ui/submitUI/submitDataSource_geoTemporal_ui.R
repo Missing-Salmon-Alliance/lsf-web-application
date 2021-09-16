@@ -7,9 +7,9 @@ box(title = p("Geographic Coverage and Temporal Coverage",actionLink(inputId = "
                          column(
                            width = 3,
                            textAreaInput(inputId = "sourceGeographicDescription", label = "Short Geographic Description",value = ""),
-                           hr(),
                            tags$b("Define a Rectangular Bounding Box"),
-                           p("Enter the min/max extents the data cover (decimal degrees). Click map to autofill, adjust inputs as required."),
+                           p("Enter the min/max extents the data cover (decimal degrees EAST and NORTH). Click map to autofill, adjust inputs as required.
+                             Negative values should be used for WEST of meridian and SOUTH of equator."),
                            column(
                              width = 6,
                              numericInput(inputId = 'submitWest', label = "West",min=-180,max=180,value = -15,step = 0.0001)
