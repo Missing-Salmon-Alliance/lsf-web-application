@@ -318,6 +318,7 @@ observeEvent(input$sourceMaintenanceToggle,{
                                                                           "daily",
                                                                           "weekly",
                                                                           "monthly",
+                                                                          "biannually",
                                                                           "annually",
                                                                           "irregular",
                                                                           "unknown"),

@@ -104,10 +104,11 @@ ui <- dashboardPage(skin = "blue",
                         
                         source("./src/ui/metadataNodeReport_ui.R", local = TRUE)$value, # tabItem metadataNodeReport
                         
-                        source("./src/ui/submitResearchActivity_ui.R",local = TRUE)$value, #tabItem submit research
+                        source("./src/ui/researchInventoryUI/submitResearchActivity_ui.R",local = TRUE)$value, #tabItem submit research
                         
                         source("./src/ui/administratorArea_ui.R",local = TRUE)$value #tabItem Admin Area
-                      ) # tabItems close
+                      ),# tabItems close
+                      shinyBS::bsPopover("test","test") # bit of a bodge, server defined popovers don't seem to work without this line
                     ) # dashboardBody close
                     
                     # Some example code, footer and right hand sidebar
