@@ -585,8 +585,12 @@ observeEvent(input$confirmSubmitNewDataSource, {
 
     # Create query that creates a metadata node with all the properties supplied in the form
     # Also creates a relationship to the logged on user
-    metadataNodeCreateQuery <- paste("MATCH (p:Person{personEmail:'",user_info()$user_info$email,
-                                     "'}) CREATE (p)-[:HAS_SUBMITTED{created:'",Sys.time(),
+    # NOTE: Creates as many new metadata nodes as there are users with matching email!
+    # Ensure Person matching is unique to the logged on user
+    # user_info() reactive value is created from the function checkUserCredentials which already verifies the user and contains unique id
+    # WHERE id(p) = ",user_info()$user_info$id,"
+    metadataNodeCreateQuery <- paste("MATCH (p:Person) WHERE id(p) = ",user_info()$user_info$id,
+                                     " CREATE (p)-[:HAS_SUBMITTED{created:'",Sys.time(),
                                      "',lastModified:'",Sys.time(),
                                      "',status:'pendingQC'}]->(:Metadata{metadataTitle:'",sanitiseFreeTextInputs(input$sourceTitle),
                                      "',metadataCreator:'",sanitiseFreeTextInputs(input$sourceCreator),
