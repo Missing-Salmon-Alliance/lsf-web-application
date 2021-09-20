@@ -101,7 +101,7 @@ uniqueMonths <- unique(str_split(paste0(LSFMetadataTibble$metadataCoverageMonths
 redrawFilteredMarkers <- function(filteredTibble,session){
   leaflet::leafletProxy("map", session) %>%
     leaflet::addMarkers(data = filteredTibble,
-               #label = ~metadataTitle,
+               label = ~metadataTitle,
                layerId = ~id,
                group = 'Data Source',
                popup = ~paste("<h3>More Information</h3>",
