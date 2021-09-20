@@ -85,28 +85,26 @@ migrationrouteIntersects <- sf::st_intersects(LSFMetadataTibble,migrationSF)
 
 ######################
 ######################
+# NOTE ST_DISTANCE REQUIRED SOME NEW PACKAGES - liblwgeom-2.5-0 base and lwgeom R
 # Calculate nearest polygon where intersect length = 0
 # NOTES: nearest polygons for us/canada and greenland rivers should all be NAFO divisions, the rest should be ICES EcoRegions
-# This can be done by separating the metadata by longitude
+# This can be done by separating the metadata by longitude -44 degree East
 
+# set up a tibble to capture results
+nonIntersectingMetadata <- dplyr::tibble(nodeID = integer(0),nearestEco = character(0),nearestNafo = character(0))
 
-
-
-# Visualize some Overlaps and Intersections
-
-# leaflet () %>%
-#   addProviderTiles(leaflet::providers$Esri.OceanBasemap) %>%
-#   addPolygons(data = LSFMetadataTibble[1,],
-#               color = "green", weight = 1)  %>%
-#   addPolygons(data = ICES_Ecoregions[ecoregionIntersects[[1]],],
-#               color = "red", weight = 1)
-# 
-# leaflet () %>%
-#   addProviderTiles(leaflet::providers$Esri.OceanBasemap) %>%
-#   addPolygons(data = LSFMetadataTibble[34,],
-#               color = "green", weight = 1)  %>%
-#   addPolygons(data = nafoDivisionsSF[nafodivisionIntersects[[34]],],
-#               color = "red", weight = 1)
+for(i in 1:nrow(LSFMetadataTibble)){
+  # for loop to identify non intersecting metadata i.e. 0 length results in the intersect lists above
+  if(length(ecoregionIntersects[[i]]) == 0 & length(nafodivisionIntersects[[i]]) == 0){
+    if(LSFMetadataTibble$metadataCoverageEast[i] <= -44){ # assign all metadata that is west of -44 to a nafo division
+      test <- sf::st_distance(LSFMetadataTibble[i,],nafoDivisionsSF)
+      nonIntersectingMetadata <- bind_rows(nonIntersectingMetadata,dplyr::tibble(nodeID = LSFMetadataTibble$id[i],nearestEco = "",nearestNafo = nafoDivisionsSF$zone[which.min(test)]))
+    }else{ # assign all the rest to a ecoregion
+      test <- sf::st_distance(LSFMetadataTibble[i,],ICES_Ecoregions)
+      nonIntersectingMetadata <- bind_rows(nonIntersectingMetadata,dplyr::tibble(nodeID = LSFMetadataTibble$id[i],nearestEco = ICES_Ecoregions$ecoregion[which.min(test)],nearestNafo = ""))
+    }
+  }
+}# pass these back to the graph AFTER the intersects, otherwise intersects will overwrite
 
 
 ###############################
@@ -142,16 +140,16 @@ for(i in 1:nrow(migrationrouteIntersects)){
   #print(query)
   call_neo4j(query,neo_con,type = 'row')
 }
-#MIGRATIONROUTES_BUFFERED - combined current/month
-# create bodged column with current and month combined
-# migrationSF$currentMonth <- paste(migrationSF$current," (",migrationSF$month,")",sep = "")
-# for(i in 1:nrow(migrationrouteIntersects)){
-#   query <- paste0("MATCH (m:Metadata) WHERE id(m) = ",
-#                   LSFMetadataTibble$id[i],
-#                   " SET m.metadataCoverageIntersectMigrationRoutes = '",
-#                   paste0(unique(migrationSF$currentMonth[migrationrouteIntersects[[i]]]),collapse = ','),
-#                   "';")
-#   #print(query)
-#   call_neo4j(query,neo_con,type = 'row')
-# }
+
+for(i in 1:nrow(nonIntersectingMetadata)){
+  query <- paste0("MATCH (m:Metadata) WHERE id(m) = ",
+                  nonIntersectingMetadata$nodeID[i],
+                  " SET m.metadataCoverageIntersectNAFODivision = '",
+                  nonIntersectingMetadata$nearestNafo[i],
+                  "', m.metadataCoverageIntersectICESEcoRegion = '",
+                  nonIntersectingMetadata$nearestEco[i],
+                  "';")
+  #print(query)
+  call_neo4j(query,neo_con,type = 'row')
+}
 
