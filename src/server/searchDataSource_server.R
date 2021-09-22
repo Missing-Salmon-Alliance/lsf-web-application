@@ -14,6 +14,16 @@ output$searchFilterResetUI <- renderUI(actionButton('searchFilterReset',"Reset F
 metadataFilterReactive <- reactiveVal()
 metadataFilterReactive(LSFMetadataTibble)
 
+observeEvent(input$sendRequest,{
+  shinyBS::addPopover(session, id = 'sendRequest',title = "Send Data Request",
+                      content = "This feature is still under development.",
+                      placement = 'top',
+                      options = list(container = "body")
+                      
+  )
+  shinyjs::disable(id = 'sendRequest') # disable user Send Data Request for now
+},ignoreNULL = FALSE, ignoreInit = FALSE)
+
 
 # bookmarks modal
 # TODO: Move all modals defined in UI files to observers in SERVER files
@@ -38,7 +48,7 @@ observeEvent(input$bookmarks,{
                     #selectInput("requestProvision", "Do you intend to provide data to the Central Data Resource?", choices = c("Yes", "No", "In the Future")),
                     textAreaInput('requestIntention', "Please describe the intended use for the data. Please include information on the project, time scale of usage and expected number of users.", width = "1000px", height = "50px"),
                     actionButton('sendRequest', "Send Data Request")
-                    
+
                 )
                 
     )
@@ -141,11 +151,10 @@ output$map <- leaflet::renderLeaflet({
                layerId = ~id,
                group = 'Data Source',
                popup = ~paste("<h3>More Information</h3>",
-                              "<b>Title:</b>",metadataTitle,"<br>","<br>",
-                              "<b>Abstract:</b>",metadataAbstract,"<br>","<br>",
-                              #"<b>Creator:</b>",metadataCreator,"<br>","<br>",
-                              "<b>Organisation:</b>", metadataOrganisation,"<br>","<br>",
-                              #"<b>Creator Email:</b>",metadataCreatorEmail,"<br>","<br>",
+                              "<b>Title:</b>",stringr::str_trunc(metadataTitle,width = 90,side = 'right',ellipsis = '...'),"<br>","<br>",
+                              "<b>Abstract:</b>",stringr::str_trunc(metadataAbstract,width = 200,side = 'right',ellipsis = '...'),"<br>","<br>",
+                              "<b>Organisation:</b>",metadataOrganisation,"<br>","<br>",
+                              "<b>URL (if available):</b>",metadataAltURI,"<br>","<br>",
                               "&nbsp;",actionButton("showmodal", "View more...", onclick = 'Shiny.onInputChange(\"button_click\",  Math.random())'),
                               sep =" "),
                # enable clustering for spiderfy, set freezeAtZoom so that full clustering does not occur
@@ -301,12 +310,10 @@ observeEvent(input$button_click, {
     em("Title:   "), paste(LSFMetadataTibble[LSFMetadataTibble$id == click[1],]$metadataTitle),
     br(),br(),
     em("Abstract:   "),paste(LSFMetadataTibble[LSFMetadataTibble$id == click[1],]$metadataAbstract),
-    #br(), br(),
-    #em("Creator:   "), paste(LSFMetadataTibble[LSFMetadataTibble$id == click[1],]$metadataCreator),
     br(), br(),
     em("Organisation:   "),paste(LSFMetadataTibble[LSFMetadataTibble$id == click[1],]$metadataOrganisation),
-    #br(),br(),
-    #em("Contact Email:   "), paste(LSFMetadataTibble[LSFMetadataTibble$id == click[1],]$metadataCreatorEmail),
+    br(),br(),
+    em("URL (if available):   "), tags$a(href = LSFMetadataTibble[LSFMetadataTibble$id == click[1],]$metadataAltURI,LSFMetadataTibble[LSFMetadataTibble$id == click[1],]$metadataAltURI, target = '_blank'),
     br(),br(),
     em("Update Frequency:   "), paste(LSFMetadataTibble[LSFMetadataTibble$id == click[1],]$metadataMaintenance),
     br(),br(),
