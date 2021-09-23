@@ -620,7 +620,7 @@ observeEvent(input$confirmSubmitNewDataSource, {
                                      "',metadataUUID:'",sessionUUID(),
                                      "',metadataFilename:'",filename,
                                      "',metadataTimestamp:'",Sys.time(),
-                                     "'});",sep = "")
+                                     "',metadataKeywords:''});",sep = "")
     
     resultCreateMetadataNode <- neo4r::call_neo4j(metadataNodeCreateQuery,neo_con,type = 'row',include_stats = T,include_meta = T)
     #results$value <- results$value + resultCreateMetadataNode$value
