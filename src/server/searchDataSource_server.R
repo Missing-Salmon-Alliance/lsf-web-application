@@ -14,17 +14,6 @@ output$searchFilterResetUI <- renderUI(actionButton('searchFilterReset',"Reset F
 metadataFilterReactive <- reactiveVal()
 metadataFilterReactive(LSFMetadataTibble)
 
-observeEvent(input$sendRequest,{
-  shinyBS::addPopover(session, id = 'sendRequest',title = "Send Data Request",
-                      content = "This feature is still under development.",
-                      placement = 'top',
-                      options = list(container = "body")
-                      
-  )
-  shinyjs::disable(id = 'sendRequest') # disable user Send Data Request for now
-},ignoreNULL = FALSE, ignoreInit = FALSE)
-
-
 # bookmarks modal
 # TODO: Move all modals defined in UI files to observers in SERVER files
 # TODO: Alternatively all modals could reside in a single file such as searchDataSource_modals_server.R for easy access
@@ -39,42 +28,56 @@ observeEvent(input$bookmarks,{
                 ),
                 column(
                   width = 12,
-                    h4("Request Bookmarked Data"),
-                    textInput('requestName', "Name:", value = user_info()$user_info$fullname),
-                    textInput('requestOrganisation', "Organisation:", value = user_info()$user_info$affiliation),
-                    #selectInput("requestPosition", "Position/Occupation:", choices = c("Researcher","Database Manager","Government Official", "Conservationist", "Student", "Lecturer", "Other")),
-                    #selectInput("requestDataUse", "What will the data be used for?", choices = c("Independent Research", "Conservation", "Guidance to Managers", "Other")),
-                    #textInput("requestOther","Please describe what is meant, if you selected other"),
-                    #selectInput("requestProvision", "Do you intend to provide data to the Central Data Resource?", choices = c("Yes", "No", "In the Future")),
-                    textAreaInput('requestIntention', "Please describe the intended use for the data. Please include information on the project, time scale of usage and expected number of users.", width = "1000px", height = "50px"),
-                    actionButton('sendRequest', "Send Data Request")
+                  h4("Request Bookmarked Data - Under Development"),
+                  p("When you fill out and submit this form the data manager will attempt to arrange access to the requested data. Note that not all sources have guaranteed availability."),
+                  br(),
+                  textInput('requestName', "Name:", value = user_info()$user_info$fullname),
+                  textInput('requestOrganisation', "Organisation:", value = user_info()$user_info$affiliation),
+                  #selectInput("requestPosition", "Position/Occupation:", choices = c("Researcher","Database Manager","Government Official", "Conservationist", "Student", "Lecturer", "Other")),
+                  #selectInput("requestDataUse", "What will the data be used for?", choices = c("Independent Research", "Conservation", "Guidance to Managers", "Other")),
+                  #textInput("requestOther","Please describe what is meant, if you selected other"),
+                  #selectInput("requestProvision", "Do you intend to provide data to the Central Data Resource?", choices = c("Yes", "No", "In the Future")),
+                  textAreaInput('requestIntention', "Please describe the intended use for the data. Please include information on the project, time scale of usage and expected number of users.", width = "1000px", height = "50px"),
+                  
+                  actionButton('sendRequest', "Send Data Request")
 
                 )
                 
     )
   )
 })
+# UNDER DEVELOPMENT - Add popover and disable submit button for the sendRequest routine
+# NOTE, when no longer under dev, remember to uncomment the sendRequest observer!
+observeEvent(input$bookmarks,{
+  shinyBS::addPopover(session, id = 'sendRequest',title = "Send Data Request",
+                      content = "This feature is under development.",
+                      placement = 'top',
+                      options = list(container = "body")
+                      
+  )
+  shinyjs::disable(id = 'sendRequest') # disable user Send Data Request for now
+},ignoreNULL = FALSE, ignoreInit = FALSE)
 
-observeEvent(input$sendRequest,{
-  
-  # save csv file directly to AWS S3 storage
-  # create temp area in memory to write to
-  rc <- rawConnection(raw(0), 'r+')
-  # write csv to temp area
-  write_file(paste(paste(unique(sessionUserBookmarks()),collapse = ','),input$requestIntention,sep = ','),rc)
-  # send csv object from temp area to S3
-  aws.s3::put_object(file = rawConnectionValue(rc),bucket = "likelysuspects-datastore/userRequests",object = paste0("user_",user_info()$user_info$id,"_",as.character(Sys.time()),".txt"))
-  # close and remove temp area
-  close(rc)
-  # create requested source relationships in graph
-  neo4r::call_neo4j(paste0("MATCH (p:Person{personEmail:'",user_info()$user_info$email,"'}),(m:Metadata) WHERE id(m) IN [",formatNumericList(sessionUserBookmarks()),"] CREATE (p)-[:HAS_REQUESTED{created:'",Sys.time(),"',lastModified:'",Sys.time(),"',status:'pendingReview'}]->(m)"),con = neo_con,type = 'row')
-  # clear bookmarks
-  sessionUserBookmarks(c())
-  shiny::updateTextAreaInput(session, inputId = 'requestIntention', value = "")
-  showModal(modalDialog(title = "Request Received",
-                        p("Thank you for submitting a request for data!"),
-                        p("The Data Manager will process your request soon.")))
-})
+# observeEvent(input$sendRequest,{
+#   
+#   # save csv file directly to AWS S3 storage
+#   # create temp area in memory to write to
+#   rc <- rawConnection(raw(0), 'r+')
+#   # write csv to temp area
+#   write_file(paste(paste(unique(sessionUserBookmarks()),collapse = ','),input$requestIntention,sep = ','),rc)
+#   # send csv object from temp area to S3
+#   aws.s3::put_object(file = rawConnectionValue(rc),bucket = "likelysuspects-datastore/userRequests",object = paste0("user_",user_info()$user_info$id,"_",as.character(Sys.time()),".txt"))
+#   # close and remove temp area
+#   close(rc)
+#   # create requested source relationships in graph
+#   neo4r::call_neo4j(paste0("MATCH (p:Person{personEmail:'",user_info()$user_info$email,"'}),(m:Metadata) WHERE id(m) IN [",formatNumericList(sessionUserBookmarks()),"] CREATE (p)-[:HAS_REQUESTED{created:'",Sys.time(),"',lastModified:'",Sys.time(),"',status:'pendingReview'}]->(m)"),con = neo_con,type = 'row')
+#   # clear bookmarks
+#   sessionUserBookmarks(c())
+#   shiny::updateTextAreaInput(session, inputId = 'requestIntention', value = "")
+#   showModal(modalDialog(title = "Request Received",
+#                         p("Thank you for submitting a request for data!"),
+#                         p("The Data Manager will process your request soon.")))
+# })
 
 #refresh button action
 observeEvent(input$searchRefresh,{
