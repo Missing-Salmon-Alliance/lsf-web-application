@@ -367,6 +367,8 @@ observeEvent(input$Request, {
   click = input$map_marker_click
   sourceIDString <- paste0(LSFMetadataTibble[LSFMetadataTibble$id == click[1],]$id)
   sessionUserBookmarks(append(sessionUserBookmarks(),sourceIDString))
+  # update database bookmark list
+  neo4r::call_neo4j(query = paste0("MATCH (p:Person) WHERE id(p) = ",user_info()$user_info$id," SET p.personBookmarks = '",formatNumericList(sessionUserBookmarks()),"';"),con = neo_con, type = 'row')
   })
 
 # # A system for Creator Feedback to see the bookmarks - NOT REQUIRED
@@ -404,6 +406,8 @@ observeEvent(input$clearRows,{
     rowToBeRemoved <- input$bookmarkContentsTable_rows_selected
     idToBeRemoved <- LSFMetadataTibble[LSFMetadataTibble$id %in% sessionUserBookmarks(),]$id[rowToBeRemoved]
     sessionUserBookmarks(sessionUserBookmarks()[sessionUserBookmarks() != idToBeRemoved])
+    # update database bookmarks
+    neo4r::call_neo4j(query = paste0("MATCH (p:Person) WHERE id(p) = ",user_info()$user_info$id," SET p.personBookmarks = '",formatNumericList(sessionUserBookmarks()),"';"),con = neo_con, type = 'row')
   }
 })
 
@@ -411,6 +415,8 @@ observeEvent(input$clearRows,{
 # Clear the Bookmark using Action Button
 observeEvent(input$clearBookmarks, {
   sessionUserBookmarks(c())
+  # update database bookmarks
+  neo4r::call_neo4j(query = paste0("MATCH (p:Person) WHERE id(p) = ",user_info()$user_info$id," SET p.personBookmarks = '",formatNumericList(sessionUserBookmarks()),"';"),con = neo_con, type = 'row')
 })
 
 # Bookmark Count 
