@@ -351,7 +351,10 @@ output$submitMap <- leaflet::renderLeaflet({
 })
 # observer for 4 numeric inputs lat/lon - action update userRectangle on submitMap, change zoom and centre
 observeEvent(input$submitEast | input$submitWest | input$submitNorth | input$submitSouth,{
-  req(input$submitEast && input$submitWest && input$submitNorth && input$submitSouth) # catch empty value, prevent crash?
+  req(input$submitEast)
+  req(input$submitWest)
+  req(input$submitNorth)
+  req(input$submitSouth) # catch empty value, prevent crash?
   leaflet::leafletProxy('submitMap') %>%
     leaflet::clearGroup(group = 'userRectangle') %>%
     leaflet::addRectangles(input$submitWest,input$submitNorth,input$submitEast,input$submitSouth,group = 'userRectangle') %>%
@@ -365,6 +368,33 @@ observeEvent(input$submitMap_click,{
   updateNumericInput(session,inputId = 'submitSouth',value = round(input$submitMap_click$lat,digits = 4))
   updateNumericInput(session,inputId = 'submitWest',value = round(input$submitMap_click$lng,digits = 4))
 })
+
+# Pre-defined Rectangles
+# observe user click Full Range button - action: update the 4 coordinates
+observeEvent(input$salmonRangeExtents,{
+  updateNumericInput(session,inputId = 'submitNorth',value = round(salmosalarExtents[['ymax']],digits = 4))
+  updateNumericInput(session,inputId = 'submitEast',value = round(salmosalarExtents[['xmax']],digits = 4))
+  updateNumericInput(session,inputId = 'submitSouth',value = round(salmosalarExtents[['ymin']],digits = 4))
+  updateNumericInput(session,inputId = 'submitWest',value = round(salmosalarExtents[['xmin']],digits = 4))
+  updateTextAreaInput(session,inputId = 'sourceGeographicDescription',value = "Commonly accepted SALMO SALAR range.")
+})
+# observe user click Global button - action: update the 4 coordinates
+observeEvent(input$predefinedRectangleGlobal,{
+  updateNumericInput(session,inputId = 'submitNorth',value = 90)
+  updateNumericInput(session,inputId = 'submitEast',value = 180)
+  updateNumericInput(session,inputId = 'submitSouth',value = -90)
+  updateNumericInput(session,inputId = 'submitWest',value = -180)
+  updateTextAreaInput(session,inputId = 'sourceGeographicDescription',value = "Global")
+})
+# observe user click Full Range button - action: update the 4 coordinates
+observeEvent(input$predefinedRectangleNorthernHemi,{
+  updateNumericInput(session,inputId = 'submitNorth',value = 90)
+  updateNumericInput(session,inputId = 'submitEast',value = 180)
+  updateNumericInput(session,inputId = 'submitSouth',value = 0)
+  updateNumericInput(session,inputId = 'submitWest',value = -180)
+  updateTextAreaInput(session,inputId = 'sourceGeographicDescription',value = "Northern Hemisphere")
+})
+
 
 # Observer to pass file upload details to sessionFile reactive value
 # This is passed to a reactiveVal so that it can be cleared out once user has submitted the form.

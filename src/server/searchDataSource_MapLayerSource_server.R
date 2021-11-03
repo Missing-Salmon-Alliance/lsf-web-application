@@ -43,6 +43,9 @@ migrationSF <- loadFullWKBData("proposed_migration_routes")
 riversDBSF <- loadFullWKBData('rivers_db')
 nascoRiversDBSF <- riversDBSF[riversDBSF$nasco_rivers_db == TRUE,] # subset of rivers that were sourced from the original NASCO DB
 indexRiversSF <- riversDBSF[riversDBSF$ices_index == TRUE,] # subset of rivers that are ICES index rivers
+salmosalarRange <- loadFullWKBData('atlantic_salmon_range')
+salmosalarExtents <- sf::st_bbox(salmosalarRange)
+
 #icesStatEcoSF <- loadFullWKBData("ices_stat_rect_eco")
 #feedingSF <- loadFullWKBData("feeding_zones")
 

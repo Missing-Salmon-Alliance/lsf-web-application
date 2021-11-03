@@ -206,6 +206,14 @@ output$map <- leaflet::renderLeaflet({
                 color = "green", group = "ICES Ecoregions", weight = 1,
                 highlightOptions = leaflet::highlightOptions(color = "yellow", weight = 3,
                                                     bringToFront = TRUE))  %>%
+    
+    leaflet::addPolygons(data = salmosalarRange,
+                         label = ~name,
+                         layerId = paste0("range_",salmosalarRange$ogc_fid),
+                         color = "pink", group = "Commonly Accepted Range", weight = 1,
+                         highlightOptions = leaflet::highlightOptions(color = "purple", weight = 3,
+                                                                      bringToFront = TRUE))  %>%
+    
     # 
     # leaflet::addPolygons(data = icesStatEcoSF,
     #             label = ~name,
@@ -239,12 +247,14 @@ output$map <- leaflet::renderLeaflet({
                                                                      "NAFO Divisions",
                                                                      #"ICES Stat Squares",
                                                                      "Proposed Outward Migration",
+                                                                     "Commonly Accepted Range",
                                                                      "NASCO Rivers DB"),
                      options = leaflet::layersControlOptions(collapsed = FALSE)) %>%
     leaflet::hideGroup(c("ICES Ecoregions",
                          "NAFO Divisions",
                          #"ICES Stat Squares",
                          "Proposed Outward Migration",
+                         "Commonly Accepted Range",
                          "NASCO Rivers DB")) %>%
 
     htmlwidgets::onRender("
