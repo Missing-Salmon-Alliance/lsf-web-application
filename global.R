@@ -30,18 +30,6 @@ require(tidyverse)
 
 source("./src/secrets.R",local = TRUE)
 
-# DataONE settings
-# SET ENVIRONMENT
-# Production
-# cn <- dataone::CNode("PROD")
-# mn <- dataone::getMNode(cn, "urn:node:KNB")
-# d1c <- dataone::D1Client(cn, mn)
-# Staging
-# cn <- dataone::CNode("STAGING2")
-# mn <- dataone::getMNode(cn, "urn:node:mnTestKNB") # note command 'unlist(lapply(listNodes(cn), function(x) x@subject))' from dataone-federation vignette
-# d1c <- dataone::D1Client(cn, mn)
-#am <- dataone::AuthenticationManager()
-
 # Custom functions
 source("./src/custom_functions.R",local = TRUE)
 

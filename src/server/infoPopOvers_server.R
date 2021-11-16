@@ -32,15 +32,6 @@ shinyBS::addPopover(session, id = 'clearSubmitFormUI',title = "Reset Form Data",
            options = list(container = "body")
 )
 
-shinyBS::addPopover(session, id = 'sourceKNBURIUI',title = "Enter a KNB URN or DOI",
-           content = HTML(paste0(em("If the data you would like to register is already within the "),a(href="https://knb.ecoinformatics.org/","Knowledge Network for Biocomplexity"),em(" (KNB) then this can be loaded into the form via the URN or DOI of the KNB data package."),
-                                 p(),em("This will automatically populate the fields within 'Data Source Details', 'Temporal Coverage' and 'Geographic Coverage', as far as the equivalent information exists in KNB."),
-                                 p(),em("For example enter a URN:UUID:xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx or DOI:10.5063/xxxxxx and press 'Load...'"),
-                                 p(),em("If the KNB object is set to private, you may use your KNB access token below."))),
-           placement = 'top',
-           options = list(container = "body")
-)
-
 
 # shinyBS::addPopover(session, id = 'domainNodeList',title = "Life-Stage Domains",
 #                     content = HTML(paste0(strong("Life-Stage Domains"),em(paste0(" - ",domainsDescriptionCopy)))),
