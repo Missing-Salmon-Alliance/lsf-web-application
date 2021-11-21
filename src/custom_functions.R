@@ -180,6 +180,19 @@ loadData <- function() {
   
 }
 
+###########################
+# Misc functions
+# function used to create a csv formatted string from shiny multi-select inputs (converts R vector to single csv string)
+formatCheckboxGroupCategories <- function(categories){
+  x <- paste("'",paste(categories,collapse = "', '"),"'",sep = '')
+  return(x)
+}
+
+formatNumericList <- function(categories){
+  x <- paste(categories,collapse = ",")
+  return(x)
+}
+
 #######################################################################
 # Functions no longer in use
 #######################################################################

@@ -1,6 +1,6 @@
-################################
-# Logon and Logout observers
-################################
+##############################################################
+# Logon and Logout observers + Header Item Rendered UI and Observers
+##############################################################
 
 # reactive that triggers conditionalPanels throughout the site, hiding elements if user is not logged on
 output$logonTrue <- reactive({
@@ -14,8 +14,8 @@ outputOptions(output, 'logonTrue', suspendWhenHidden = FALSE)
 #https://rstudio.github.io/shinydashboard/appearance.html
 # Create an indication who the current logged in user is
 output$userpanel <- renderUI({
-  req(user_info())
-  if (user_info()$result) { # note div in label string. This is used to change the order of text and icon
+  req(user_info()) # only action if user_info has been created
+  if (user_info()$result) { # if user logon is true:
   actionLink('userInfoModal',label = str_to_title(user_info()$user_info$fullname),icon = icon('id-card'),style='padding:5px; font-size:120%; color:white;float:right;')
   }
 })
@@ -68,9 +68,14 @@ observeEvent(input$loginSubmit, {
     if(user_info()$user_info$bookmarks != ""){
       sessionUserBookmarks(stringr::str_split(user_info()$user_info$bookmarks,",",simplify = T)[1,])
     }else{
-      sessionUserBookmarks(NULL)
+      sessionUserBookmarks(c())
     }
     removeModal()
+    
+    # Load database information upon successful log on
+    
+    source("./src/server/dataLoad_server.R",local = TRUE)
+    
   }else{
     # logon fail, add red fail text to modal
     user_info(NULL)
@@ -139,4 +144,84 @@ output$submitHistory <- DT::renderDT({
   user_info()$user_info$submitted
   #TODO: include submission status e.g. QC pending and created/lastModified dates
   
+})
+
+# Creation of a DT which shows the contents of the Bookmarks
+output$bookmarkContentsTable <- DT::renderDT({
+  LSFMetadataTibble[LSFMetadataTibble$id %in% sessionUserBookmarks(),c("id","metadataTitle","metadataCoverageCentroid")]
+},
+selection = 'single',
+rownames = FALSE,
+editable = FALSE,
+colnames = c("ID","Title","Centroid"),
+options = list(pageLength = 7,
+               searching = F,
+               lengthChange = F,
+               info = FALSE,
+               columnDefs = list(list(visible=FALSE, targets=c(2)))
+)
+
+)
+
+# Remove a Single Bookmark Item using Tables_Rows_selected
+
+observeEvent(input$clearRows,{
+  
+  if (!is.null(input$bookmarkContentsTable_rows_selected)) {
+    rowToBeRemoved <- input$bookmarkContentsTable_rows_selected
+    idToBeRemoved <- LSFMetadataTibble[LSFMetadataTibble$id %in% sessionUserBookmarks(),]$id[rowToBeRemoved]
+    sessionUserBookmarks(sessionUserBookmarks()[sessionUserBookmarks() != idToBeRemoved])
+    # update database bookmarks
+    neo4r::call_neo4j(query = paste0("MATCH (p:Person) WHERE id(p) = ",user_info()$user_info$id," SET p.personBookmarks = '",formatNumericList(sessionUserBookmarks()),"';"),con = neo_con, type = 'row')
+  }
+})
+
+# Clear the Bookmark using Action Button
+observeEvent(input$clearBookmarks, {
+  sessionUserBookmarks(c())
+  # update database bookmarks
+  neo4r::call_neo4j(query = paste0("MATCH (p:Person) WHERE id(p) = ",user_info()$user_info$id," SET p.personBookmarks = '",formatNumericList(sessionUserBookmarks()),"';"),con = neo_con, type = 'row')
+})
+
+# Render UI which includes both an action link, and a count of the Bookmark Length. 
+
+output$bookmarkUI <- renderUI({
+  req(user_info())
+  if (user_info()$result) {
+    dynamicLabel <- paste("Bookmarks:",length(unique(sessionUserBookmarks())))
+    actionLink(inputId = "bookmarks", label = dynamicLabel ,icon = icon("bookmark"),style='padding:5px; font-size:120%; color:white;float:right;')
+  }
+})
+
+# bookmarks modal
+# TODO: Move all modals defined in UI files to observers in SERVER files
+# TODO: Alternatively all modals could reside in a single file such as searchDataSource_modals_server.R for easy access
+observeEvent(input$bookmarks,{
+  showModal(
+    modalDialog(title = "Your Bookmarks", size = "l",
+                column(width = 12,
+                       DT::DTOutput('bookmarkContentsTable'),
+                       column(width = 6,actionButton('clearBookmarks', "Clear All Bookmarked Sources")),
+                       column(width = 5,actionButton('clearRows', "Delete Selected Row")),
+                       hr()
+                ),
+                column(
+                  width = 12,
+                  h4("Request Bookmarked Data - Under Development"),
+                  p("When you fill out and submit this form the data manager will attempt to arrange access to the requested data. Note that not all sources have guaranteed availability."),
+                  br(),
+                  textInput('requestName', "Name:", value = user_info()$user_info$fullname),
+                  textInput('requestOrganisation', "Organisation:", value = user_info()$user_info$affiliation),
+                  #selectInput("requestPosition", "Position/Occupation:", choices = c("Researcher","Database Manager","Government Official", "Conservationist", "Student", "Lecturer", "Other")),
+                  #selectInput("requestDataUse", "What will the data be used for?", choices = c("Independent Research", "Conservation", "Guidance to Managers", "Other")),
+                  #textInput("requestOther","Please describe what is meant, if you selected other"),
+                  #selectInput("requestProvision", "Do you intend to provide data to the Central Data Resource?", choices = c("Yes", "No", "In the Future")),
+                  textAreaInput('requestIntention', "Please describe the intended use for the data. Please include information on the project, time scale of usage and expected number of users.", width = "1000px", height = "50px"),
+                  
+                  actionButton('sendRequest', "Send Data Request")
+                  
+                )
+                
+    )
+  )
 })

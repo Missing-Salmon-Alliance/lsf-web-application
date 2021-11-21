@@ -30,6 +30,24 @@ output$submitNewDataSourceSidebarUI <- renderUI({
   actionButton(inputId = 'submitNewDataSourceSidebar',label = "Submit New Data Source", class = 'btn-success')
 })
 
+output$submitTabUI <- renderUI({
+  req(user_info()) # only action if user_info has been created
+  if (user_info()$result) { # if user logon is true:
+    fluidRow(
+      source("./src/ui/submitUI/submitDataSource_metadataFields_ui.R",local = TRUE)$value,
+      source("./src/ui/submitUI/submitDataSource_geoTemporal_ui.R",local = TRUE)$value,
+      source("./src/ui/submitUI/submitDataSource_domainsESV_ui.R",local = TRUE)$value,
+      # second submit button at the bottom of the page for user convenience
+      uiOutput('submitNewDataSourceBodyUI')
+    )
+  }else{
+    fluidRow(
+      h1("Central Data Resource Knowledge Submit Area"),
+      h3("Please authenticate to access this area")
+    )
+  }
+})
+
 # KNB User Interface Inputs COMMENTED OUT FOR NOW AS FUNCTIONALITY NOT FULLED DESCRIBED ON SITE INFORMATION
 # output$sourceKNBURIUI <- renderUI({
 #   textInput(inputId = 'sourceKNBURI', label = "",placeholder = "Enter a KNB URN or DOI")

@@ -9,6 +9,7 @@ server <- function(input, output, session) {
   sessionUUID <- reactiveVal(NULL)
   sessionFile <- reactiveVal(NULL)
   sessionXML <- reactiveVal(NULL)
+  sessionUserBookmarks <- reactiveVal(NULL)
   #KNB Token
   token_info <- reactiveVal(NULL)
   # logged on user information
@@ -66,36 +67,6 @@ server <- function(input, output, session) {
   ############################
   
   ############################
-  # DataSearch_server.R START
-  ############################
-
-  source("./src/server/searchDataSource_server.R", local = TRUE)$value
-  
-  ############################
-  # DataSearch_server.R END
-  ############################
-  
-  ############################
-  # hypothesisExplore_server.R START
-  ############################
-  
-  source("./src/server/hypothesisExplore_server.R", local = TRUE)$value
-  
-  ############################
-  # hypothesisExplore_server.R END
-  ############################
-  
-  ############################
-  # domainExplore_server.R START
-  ############################
-  
-  source("./src/server/domainExplore_server.R", local = TRUE)$value
-  
-  ############################
-  # domainExplore_server.R END
-  ############################
-  
-  ############################
   # submitDataSource_server.R START
   ############################
   
@@ -103,36 +74,6 @@ server <- function(input, output, session) {
   
   ############################
   # submitDataSource_server.R END
-  ############################
-  
-  ############################
-  # submitResearchActivity_server.R START
-  ############################
-  
-  source("./src/server/submitResearchActivity_server.R", local = TRUE)$value
-  
-  ############################
-  # submitResearchActivity_server.R END
-  ############################
-  
-  ############################
-  # metadataNodeReport_server.R START
-  ############################
-  
-  source("./src/server/metadataNodeReport_server.R", local = TRUE)$value
-  
-  ############################
-  # metadataNodeReport_server.R END
-  ############################
-  
-  ############################
-  # administrationArea_server.R START
-  ############################
-  
-  source("./src/server/administrationArea_server.R", local = TRUE)$value
-  source("./src/server/qcDataSource_server.R", local = TRUE)$value
-  ############################
-  # administrationArea_server.R END
   ############################
   
   #modalDialogs!
