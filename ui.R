@@ -28,9 +28,17 @@ ui <- dashboardPage(skin = "blue",
                       ##############################################
                       # Introduction Conditional Sidebar Items
                       ##############################################
-                      source("./src/ui/introductionTab_Sidebar_ui.R",local = TRUE)$value
+                      source("./src/ui/introductionTab_Sidebar_ui.R",local = TRUE)$value,
                       ##############################################
                       # Introduction Conditional Sidebar Items
+                      ##############################################
+                      
+                      ##############################################
+                      # Submit Data Source Conditional Sidebar Items
+                      ##############################################
+                      source("./src/ui/submitDataSource_Sidebar_ui.R",local = TRUE)$value
+                      ##############################################
+                      # Submit Data Source Conditional Sidebar Items
                       ##############################################
 
                     ),

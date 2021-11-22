@@ -57,10 +57,6 @@ observeEvent(input$loginSubmit, {
     # logon success
     shinyjs::hideElement('loginModal')
     shinyjs::showElement('logoutModal')
-    # Autofill some fields in the submit page
-    updateTextInput(session, 'sourceCreator', value = user_info()$user_info$fullname)
-    updateTextInput(session, 'sourceCreatorEmail', value = user_info()$user_info$email)
-    updateTextInput(session, 'sourceOrganisation', value = user_info()$user_info$affiliation)
     # Autofill some fileds in the checkout page
     updateTextInput(session, 'requestName', value = user_info()$user_info$fullname)
     updateTextInput(session, 'requestOrganisation', value = user_info()$user_info$affiliation)

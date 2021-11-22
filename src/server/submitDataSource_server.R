@@ -30,6 +30,8 @@ output$submitNewDataSourceSidebarUI <- renderUI({
   actionButton(inputId = 'submitNewDataSourceSidebar',label = "Submit New Data Source", class = 'btn-success')
 })
 
+# render the main tab content only once the user has logged in
+# TODO: Due to dependency on user_info existing the else condition does not appear
 output$submitTabUI <- renderUI({
   req(user_info()) # only action if user_info has been created
   if (user_info()$result) { # if user logon is true:
@@ -47,6 +49,8 @@ output$submitTabUI <- renderUI({
     )
   }
 })
+
+
 
 # KNB User Interface Inputs COMMENTED OUT FOR NOW AS FUNCTIONALITY NOT FULLED DESCRIBED ON SITE INFORMATION
 # output$sourceKNBURIUI <- renderUI({
