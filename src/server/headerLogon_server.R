@@ -144,7 +144,7 @@ output$submitHistory <- DT::renderDT({
 
 # Creation of a DT which shows the contents of the Bookmarks
 output$bookmarkContentsTable <- DT::renderDT({
-  LSFMetadataTibble[LSFMetadataTibble$id %in% sessionUserBookmarks(),c("id","metadataTitle","metadataCoverageCentroid")]
+  lsfMetadata()[lsfMetadata()$id %in% sessionUserBookmarks(),c("id","metadataTitle","metadataCoverageCentroid")]
 },
 selection = 'single',
 rownames = FALSE,
@@ -154,7 +154,7 @@ options = list(pageLength = 7,
                searching = F,
                lengthChange = F,
                info = FALSE,
-               columnDefs = list(list(visible=FALSE, targets=c(2)))
+               columnDefs = list(list(visible=FALSE, targets=c(2))) # hides Centroid column (column 2)
 )
 
 )

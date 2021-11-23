@@ -136,21 +136,21 @@ output$esvPerDomain <- renderUI({
     textOutput('domainSelectionCheck')
   }else{
     lapply(1:length(input$domainNodeList), function(i) {
-      domainName <- input$domainNodeList[i]
-      esvNodeListResultPhys <- neo4r::call_neo4j(paste0("MATCH (n:EssentialSalmonVariable{esvCategory:'Physical'})-[:HAS_DOMAIN]-(m:Domain{domainTitle:'",domainName,"'}) RETURN n.esvTitle;"),neo_con, type = 'row')
-      esvNodeListResultBiol <- neo4r::call_neo4j(paste0("MATCH (n:EssentialSalmonVariable{esvCategory:'Biological'})-[:HAS_DOMAIN]-(m:Domain{domainTitle:'",domainName,"'}) RETURN n.esvTitle;"),neo_con, type = 'row')
-      esvNodeListResultTrait <- neo4r::call_neo4j(paste0("MATCH (n:EssentialSalmonVariable{esvCategory:'Salmon Trait'})-[:HAS_DOMAIN]-(m:Domain{domainTitle:'",domainName,"'}) RETURN n.esvTitle;"),neo_con, type = 'row')
+      domainID <- input$domainNodeList[i]
+      esvNodeListResultPhys <- neo4r::call_neo4j(paste0("MATCH (n:EssentialSalmonVariable{esvCategory:'Physical'})-[:HAS_DOMAIN]-(m:Domain) WHERE id(m) = ",domainID," RETURN n.esvTitle;"),neo_con, type = 'row')
+      esvNodeListResultBiol <- neo4r::call_neo4j(paste0("MATCH (n:EssentialSalmonVariable{esvCategory:'Biological'})-[:HAS_DOMAIN]-(m:Domain) WHERE id(m) = ",domainID," RETURN n.esvTitle;"),neo_con, type = 'row')
+      esvNodeListResultTrait <- neo4r::call_neo4j(paste0("MATCH (n:EssentialSalmonVariable{esvCategory:'Salmon Trait'})-[:HAS_DOMAIN]-(m:Domain) WHERE id(m) = ",domainID," RETURN n.esvTitle;"),neo_con, type = 'row')
       # UI code
       # Note dynamic input_ids created from domain name and 3 variable categories physical, biological and salmon trait
       # These dynamic id's are used later on in the server logic when the user presses submit and the selected
       # variable classes are passed back to the database. 
       box(
         width = 12,
-        title = domainName,
+        title = lsfDomains()[lsfDomains()$id == domainID,]$domainTitle,
         status = 'warning',
         column(
           width = 4,
-          shinyWidgets::checkboxGroupButtons(paste0(domainName,"_physical"),"Physical",choices = sort(esvNodeListResultPhys$n.esvTitle$value),
+          shinyWidgets::checkboxGroupButtons(paste0(domainID,"_physical"),"Physical",choices = sort(esvNodeListResultPhys$n.esvTitle$value),
                                              justified = F,
                                              individual = T,
                                              status = "default",
@@ -160,7 +160,7 @@ output$esvPerDomain <- renderUI({
         ),
         column(
           width = 4,
-          shinyWidgets::checkboxGroupButtons(paste0(domainName,"_biological"),"Biological",choices = sort(esvNodeListResultBiol$n.esvTitle$value),
+          shinyWidgets::checkboxGroupButtons(paste0(domainID,"_biological"),"Biological",choices = sort(esvNodeListResultBiol$n.esvTitle$value),
                                              justified = F,
                                              individual = T,
                                              status = "default",
@@ -170,7 +170,7 @@ output$esvPerDomain <- renderUI({
         ),
         column(
           width = 4,
-          shinyWidgets::checkboxGroupButtons(paste0(domainName,"_salmontrait"),"Salmon Trait",choices = sort(esvNodeListResultTrait$n.esvTitle$value),
+          shinyWidgets::checkboxGroupButtons(paste0(domainID,"_salmontrait"),"Salmon Trait",choices = sort(esvNodeListResultTrait$n.esvTitle$value),
                                              justified = F,
                                              individual = T,
                                              status = "default",
@@ -337,31 +337,25 @@ submitSourceConfirmDataTable <- reactive({
 })
 
 submitSourceConfirmESVDomains <- reactive({
-  # DEVELOPMENT - Build a table of Life-Stage Domains and Variable Classes chosen by user
-  domainVector <- c(
-    "River Rearing",
-    "River Migration Smolt",
-    "Estuary Migration Post-Smolt",
-    "Coastal Migration Post-Smolt",
-    "Ocean Migration",
-    "Coastal Migration Adult",
-    "Estuary Migration Adult",
-    "River Migration Adult")
+
   selectedClasses <- c()
-  for(dom in domainVector){
-    categoryCollapse <- formatCheckboxGroupCategories(c(input[[paste0(dom,"_physical")]],
-                                                        input[[paste0(dom,"_biological")]],
-                                                        input[[paste0(dom,"_salmontrait")]]))
+  for(i in 1:nrow(lsfDomains())){
+    id <- lsfDomains()$id[i]
+    categoryCollapse <- formatCheckboxGroupCategories(c(input[[paste0(id,"_physical")]],
+                                                        input[[paste0(id,"_biological")]],
+                                                        input[[paste0(id,"_salmontrait")]]))
     selectedClasses <- append(selectedClasses,categoryCollapse)
   }
-  tibble(Domains = domainVector,
+  tibble(Domains = lsfDomains()$domainTitle,
       `Selected Variable Classes` = selectedClasses
       )
 })
 
 # render confirmation table as Table
 output$submitSourceConfirmModalDataFrame <- shiny::renderTable({t(submitSourceConfirmDataTable())}, rownames = TRUE, colnames = FALSE)
-output$submitSourceConfirmESVDomainsDataframe <- shiny::renderTable(submitSourceConfirmESVDomains()[submitSourceConfirmESVDomains()$Domains %in% input$domainNodeList,])
+output$submitSourceConfirmESVDomainsDataframe <- shiny::renderTable(submitSourceConfirmESVDomains()[submitSourceConfirmESVDomains()$Domains %in% lsfDomains()[lsfDomains()$id %in% input$domainNodeList,]$domainTitle,])
+
+
 #output$submitSourceConfirmESVDomainsDataframe <- shiny::renderText(submitSourceConfirmESVDomains())
 # Map to be rendered within confirmation modal
 output$submitSourceConfirmMap <- leaflet::renderLeaflet({
@@ -560,16 +554,17 @@ observeEvent(input$confirmSubmitNewDataSource, {
     # create base query elements
     queryBase <- c("MATCH (esv:EssentialSalmonVariable{esvTitle:'","'}),(md:Metadata{metadataUUID:'","'}) CREATE (esv)<-[:HAS_ESV{domain:'","'}]-(md);")
     # cycle through all the selected ESV for each domain IS THIS EFFICIENT?
-    for(domain in input$domainNodeList){
+    for(domainID in input$domainNodeList){
+      domainName <- lsfDomains()[lsfDomains()$id == domainID,]$domainTitle
       # create basic relationship between metadata and domain (capture even if user selects no ESV's)
-      addDomainQuery <- paste0("MATCH (d:Domain{domainTitle:'",domain,"'}),(md:Metadata{metadataUUID:'",sessionUUID(),"'}) CREATE (md)-[:HAS_DOMAIN]->(d);")
+      addDomainQuery <- paste0("MATCH (d:Domain),(md:Metadata{metadataUUID:'",sessionUUID(),"'}) WHERE id(d) = ",domainID," CREATE (md)-[:HAS_DOMAIN]->(d);")
       queryMasterList <- append(queryMasterList,addDomainQuery)
       
       # build full ESV list for domain (collapse from 3 categories presented in the UI)
-      variableClassesForDomain <- c(input[[paste0(domain,"_biological")]],input[[paste0(domain,"_physical")]],input[[paste0(domain,"_salmontrait")]])
+      variableClassesForDomain <- c(input[[paste0(domainID,"_biological")]],input[[paste0(domainID,"_physical")]],input[[paste0(domainID,"_salmontrait")]])
       for(esv in variableClassesForDomain){
         # create sub query for single esv-metadata
-        querySubMaster <- paste(queryBase[1],esv,queryBase[2],sessionUUID(),queryBase[3],domain,queryBase[4],sep = "")
+        querySubMaster <- paste(queryBase[1],esv,queryBase[2],sessionUUID(),queryBase[3],domainName,queryBase[4],sep = "")
         # add sub query to master query list
         queryMasterList <- append(queryMasterList,querySubMaster)
       }

@@ -14,6 +14,11 @@ server <- function(input, output, session) {
   token_info <- reactiveVal(NULL)
   # logged on user information
   user_info <- reactiveVal(NULL)
+  
+  # drop-down menu lists 
+  
+  lsfDomains <- reactiveVal(NULL)
+  lsfMetadata <- reactiveVal(NULL)
   ############################
   # Reactive Values END
   ############################
