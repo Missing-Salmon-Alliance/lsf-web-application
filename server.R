@@ -10,6 +10,8 @@ server <- function(input, output, session) {
   sessionFile <- reactiveVal(NULL)
   sessionXML <- reactiveVal(NULL)
   sessionUserBookmarks <- reactiveVal(NULL)
+  # Define reactive value for reactive filtering on search tabs
+  metadataFilterReactive <- reactiveVal()
   #KNB Token
   token_info <- reactiveVal(NULL)
   # logged on user information
@@ -79,6 +81,36 @@ server <- function(input, output, session) {
   
   ############################
   # submitDataSource_server.R END
+  ############################
+  
+  ############################
+  # DataSearch_server.R START
+  ############################
+  
+  source("./src/server/searchDataSource_server.R", local = TRUE)$value
+  
+  ############################
+  # DataSearch_server.R END
+  ############################
+  
+  ############################
+  # hypothesisExplore_server.R START
+  ############################
+  
+  source("./src/server/hypothesisExplore_server.R", local = TRUE)$value
+  
+  ############################
+  # hypothesisExplore_server.R END
+  ############################
+  
+  ############################
+  # domainExplore_server.R START
+  ############################
+  
+  source("./src/server/domainExplore_server.R", local = TRUE)$value
+  
+  ############################
+  # domainExplore_server.R END
   ############################
   
   #modalDialogs!

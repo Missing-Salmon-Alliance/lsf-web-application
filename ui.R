@@ -36,9 +36,17 @@ ui <- dashboardPage(skin = "blue",
                       ##############################################
                       # Submit Data Source Conditional Sidebar Items
                       ##############################################
-                      source("./src/ui/submitDataSource_Sidebar_ui.R",local = TRUE)$value
+                      source("./src/ui/submitDataSource_Sidebar_ui.R",local = TRUE)$value,
                       ##############################################
                       # Submit Data Source Conditional Sidebar Items
+                      ##############################################
+                      
+                      ##############################################
+                      # Search Data Source Conditional Sidebar Items
+                      ##############################################
+                      source("./src/ui/searchDataSource_Sidebar_ui.R",local = TRUE)$value
+                      ##############################################
+                      # Search Data Source Conditional Sidebar Items
                       ##############################################
 
                     ),
@@ -52,7 +60,13 @@ ui <- dashboardPage(skin = "blue",
                         
                         source("./src/ui/newUserRegistrationTab_ui.R", local = TRUE)$value, # HIDDEN TAB ITEM
                         
-                        source("./src/ui/submitDataSource_ui.R",local = TRUE)$value # tabItem submit data
+                        source("./src/ui/submitDataSource_ui.R",local = TRUE)$value, # tabItem submit data
+                        
+                        source("./src/ui/searchDataSource_ui.R", local = TRUE)$value, # tabItem general search view
+                        
+                        source("./src/ui/hypothesisUI/hypothesisExplore_ui.R", local = TRUE)$value, #tabItem hypothesis explore
+                        
+                        source("./src/ui/domainExploreUI/domainExplore_ui.R", local = TRUE)$value # tabItem domain explore
                       ),
                       
                       shinyBS::bsPopover("test","test") # bit of a bodge, server defined popovers don't seem to work without this line

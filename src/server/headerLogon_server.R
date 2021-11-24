@@ -57,10 +57,10 @@ observeEvent(input$loginSubmit, {
     # logon success
     shinyjs::hideElement('loginModal')
     shinyjs::showElement('logoutModal')
-    # Autofill some fileds in the checkout page
+    # Autofill some fields in the checkout page
     updateTextInput(session, 'requestName', value = user_info()$user_info$fullname)
     updateTextInput(session, 'requestOrganisation', value = user_info()$user_info$affiliation)
-    # Pull in users saved bookmarks (saved on logout) and populate bookmarks list
+    # Pull in users saved bookmarks and populate bookmarks list
     if(user_info()$user_info$bookmarks != ""){
       sessionUserBookmarks(stringr::str_split(user_info()$user_info$bookmarks,",",simplify = T)[1,])
     }else{
@@ -165,7 +165,7 @@ observeEvent(input$clearRows,{
   
   if (!is.null(input$bookmarkContentsTable_rows_selected)) {
     rowToBeRemoved <- input$bookmarkContentsTable_rows_selected
-    idToBeRemoved <- LSFMetadataTibble[LSFMetadataTibble$id %in% sessionUserBookmarks(),]$id[rowToBeRemoved]
+    idToBeRemoved <- lsfMetadata()[lsfMetadata()$id %in% sessionUserBookmarks(),]$id[rowToBeRemoved]
     sessionUserBookmarks(sessionUserBookmarks()[sessionUserBookmarks() != idToBeRemoved])
     # update database bookmarks
     neo4r::call_neo4j(query = paste0("MATCH (p:Person) WHERE id(p) = ",user_info()$user_info$id," SET p.personBookmarks = '",formatNumericList(sessionUserBookmarks()),"';"),con = neo_con, type = 'row')

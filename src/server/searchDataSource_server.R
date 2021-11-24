@@ -8,12 +8,63 @@
 output$searchRefreshUI <- renderUI(actionButton('searchRefresh',"Refresh"))
 output$searchFilterResetUI <- renderUI(actionButton('searchFilterReset',"Reset Filter"))
 ###########
-
-# Define reactive value for reactive filtering
-
-metadataFilterReactive <- reactiveVal()
-metadataFilterReactive(LSFMetadataTibble)
-
+# MAP Tab Conditional UI
+output$searchMapTabUI <- renderUI({
+  req(user_info()) # only action if user_info has been created
+  if (user_info()$result) { # if user logon is true:
+    #div(style="float:left",actionLink(inputId = "searchDescript", label = "Help", icon = icon("question-circle"))),
+    #br(),
+    # hiding until temporal filter works better
+    # absolutePanel(id = 'searchFiltersAbsPanel',
+    #               top = "110px",
+    #               right = "10px",
+    #               width = "35%",
+    #               style="z-index:1000;",
+    #               shinyBS::bsCollapse(id = "mapSearchFilters", open = NULL,
+    #                                   # new location to be determined for geographic filters
+    #                          #source("./src/ui/searchDataSource_geographicFilters_ui.R",local = TRUE)$value,
+    #                          source("./src/ui/searchDataSource_temporalFilters_ui.R",local = TRUE)$value
+    #               )
+    # ),
+    fluidRow(
+      shiny::tabsetPanel(id = "maptable",selected = "Map View",
+                         tabPanel(title = "Map View",
+                                  leaflet::leafletOutput('searchTabMap', height = "85vh"),
+                                  # debugging mode only
+                                  conditionalPanel(
+                                    condition = "input.debug",
+                                    textOutput('clickOutput'),
+                                    textOutput('clickMarkerOutput'),
+                                    textOutput('clickShapeOutput'),
+                                    textOutput('clickBoundsOutput')
+                                  )
+                                  
+                         ),
+                         tabPanel(title = "Table View",
+                                  column(
+                                    width = 12,
+                                    p("This is a more searchable alternative to the map view. Use the search
+                                      box at the top right of the table for free-text searches of the resources.
+                                      This search covers resource Title and Abstract, plus other fields such as
+                                      tags that may exist in the database but do not appear in the table.",
+                                      tags$b("Functionality is limited at the moment, development is underway
+                                      to integrate this view more closely with the map view to allow cross
+                                      over of search results."))
+                                  ),
+                                  column(
+                                    width = 7,
+                                    DT::DTOutput('table')
+                                  )
+                         )
+      )
+    )
+  }else{
+    fluidRow(
+      h1("Map Explore Area"),
+      h3("Please authenticate to access this area")
+    )
+  }
+})
 
 # UNDER DEVELOPMENT - Add popover and disable submit button for the sendRequest routine
 # NOTE, when no longer under dev, remember to uncomment the sendRequest observer!
@@ -50,22 +101,10 @@ observeEvent(input$bookmarks,{
 
 #refresh button action
 observeEvent(input$searchRefresh,{
-  metadataESV <- neo4r::call_neo4j("MATCH (:Metadata)-[r:HAS_ESV]->(:EssentialSalmonVariable) RETURN r;",neo_con,type='graph')
-  #esvDomain <- neo4r::call_neo4j("MATCH (:EssentialSalmonVariable)-[r:HAS_DOMAIN]->(:Domain) RETURN r;",neo_con,type='graph')
+  lsfMetadata(neo4r::call_neo4j("MATCH (m:Metadata) RETURN m;",neo_con,type='graph')$nodes %>% neo4r::unnest_nodes('all'))
+  lsfMetadata(sf::st_as_sf(lsfMetadata(), wkt = "metadataCoverageCentroid", crs = 4326, na.fail = FALSE))
   
-  metadataESV$nodes <- metadataESV$nodes %>% neo4r::unnest_nodes('all')
-  #metadataESV$relationships <- metadataESV$relationships %>% neo4r::unnest_relationships()
-  #esvDomain$nodes <- esvDomain$nodes %>% neo4r::unnest_nodes('all')
-  #esvDomain$relationships <- esvDomain$relationships %>% neo4r::unnest_relationships()
-  
-  LSFMetadataTibble <- metadataESV$nodes[metadataESV$nodes$value == "Metadata",] %>% select(matches("^(id|metadata*)"))
-  
-  #metadataESVDomainRelationships <- bind_rows(metadataESV$relationships,esvDomain$relationships)
-  
-  # Conversion to GIS enabled dataframe using pre-calculated centroids (see nightly intersection routine)
-  LSFMetadataTibble <- sf::st_as_sf(LSFMetadataTibble, wkt = "metadataCoverageCentroid", crs = 4326, na.fail = FALSE)
-  
-  metadataFilterReactive(LSFMetadataTibble)
+  metadataFilterReactive(lsfMetadata())
   # clear existing markers
   leaflet::leafletProxy("map", session) %>%
     leaflet::clearGroup(group = 'Data Source')
@@ -74,7 +113,7 @@ observeEvent(input$searchRefresh,{
 })
 
 observeEvent(input$searchFilterReset,{
-  metadataFilterReactive(LSFMetadataTibble)
+  metadataFilterReactive(lsfMetadata())
   activeGeographicFilterReactive("No Filter Selected")
   # clear existing markers
   leaflet::leafletProxy("map", session) %>%
@@ -91,10 +130,6 @@ filterAppliedInformation <- reactiveValues()
 filterAppliedInformation$filterType <- "None"
 filterAppliedInformation$filterName <- "None"
 
-#####################
-# Load map layers from SQL and CSV
-source('./src/server/searchDataSource_MapLayerSource_server.R',local = TRUE)
-
 ###################################################
 # Write a HTML Legend (As have used HTML ICONS and no gradient)
 
@@ -109,7 +144,7 @@ html_legend <- "<img src='https://img.icons8.com/ios-filled/50/4a90e2/marker.png
 # "
 
 # TODO: improve visual information in markers, colour index rivers or use river icon, check out the IYS icons
-output$map <- leaflet::renderLeaflet({ 
+output$searchTabMap <- leaflet::renderLeaflet({ 
   leaflet::leaflet (options = leaflet::leafletOptions(minZoom = 3,maxZoom = 10))%>%
     leaflet::setView(lng = 10,lat = 60,zoom = 3) %>% 
     leaflet::setMaxBounds( lng1 = -130
@@ -117,26 +152,6 @@ output$map <- leaflet::renderLeaflet({
                   , lng2 = 210
                   , lat2 = 90 ) %>%
     leaflet::addProviderTiles(leaflet::providers$Esri.OceanBasemap) %>%
-    # NOTE, CHANGES HERE SHOULD ALSO BE MADE TO THE FUNCTION DEFINED FOR THE leafletProxy UPDATES 'redrawFilteredMarkers' in global.R
-    leaflet::addMarkers(data = LSFMetadataTibble,
-               label = ~metadataTitle,
-               layerId = ~id,
-               group = 'Data Source',
-               popup = ~paste("<h3>More Information</h3>",
-                              "<b>Title:</b>",stringr::str_trunc(metadataTitle,width = 90,side = 'right',ellipsis = '...'),"<br>","<br>",
-                              "<b>Abstract:</b>",stringr::str_trunc(metadataAbstract,width = 200,side = 'right',ellipsis = '...'),"<br>","<br>",
-                              "<b>Organisation:</b>",metadataOrganisation,"<br>","<br>",
-                              "<b>URL (if available):</b>",metadataAltURI,"<br>","<br>",
-                              "&nbsp;",actionButton("showmodal", "View more...", onclick = 'Shiny.onInputChange(\"button_click\",  Math.random())'),
-                              sep =" "),
-               # enable clustering for spiderfy, set freezeAtZoom so that full clustering does not occur
-               clusterOptions = leaflet::markerClusterOptions(
-                 showCoverageOnHover = FALSE,
-                 zoomToBoundsOnClick = FALSE,
-                 spiderfyOnMaxZoom = TRUE,
-                 removeOutsideVisibleBounds = TRUE,
-                 spiderLegPolylineOptions = list(weight = 1.5, color = "#222", opacity = 0.5),
-                 freezeAtZoom = 10)) %>%
     # 
     # On map search box
     # leaflet.extras::addSearchFeatures(
@@ -236,6 +251,30 @@ output$map <- leaflet::renderLeaflet({
 })
 
 
+# Create standard metadata map marker popup information
+redrawFilteredMarkers <- function(filteredTibble,session){
+  leaflet::leafletProxy('searchTabMap', session) %>%
+    leaflet::addMarkers(data = filteredTibble,
+                        label = ~metadataTitle,
+                        layerId = ~id,
+                        group = 'Data Source',
+                        popup = ~paste("<h3>More Information</h3>",
+                                       "<b>Title:</b>",stringr::str_trunc(metadataTitle,width = 90,side = 'right',ellipsis = '...'),"<br>","<br>",
+                                       "<b>Abstract:</b>",stringr::str_trunc(metadataAbstract,width = 200,side = 'right',ellipsis = '...'),"<br>","<br>",
+                                       "<b>Organisation:</b>",metadataOrganisation,"<br>","<br>",
+                                       "<b>URL (if available):</b>",metadataAltURI,"<br>","<br>",
+                                       "&nbsp;",actionButton("showmodal", "View more...", onclick = 'Shiny.onInputChange(\"button_click\",  Math.random())'),
+                                       sep =" "),
+                        # enable clustering for spiderfy, set freezeAtZoom so that actual clustering does not occur
+                        clusterOptions = leaflet::markerClusterOptions(
+                          showCoverageOnHover = FALSE,
+                          zoomToBoundsOnClick = FALSE,
+                          spiderfyOnMaxZoom = TRUE,
+                          removeOutsideVisibleBounds = TRUE,
+                          spiderLegPolylineOptions = list(weight = 1.5, color = "#222", opacity = 0.5),
+                          freezeAtZoom = 10))
+}
+
 output$table <- DT::renderDT({
   sf::st_set_geometry(metadataFilterReactive()[,c('metadataTitle','metadataAbstract','metadataKeywords')],NULL)
 
@@ -261,54 +300,54 @@ source("./src/server/searchDataSource_GeographicFilters_server.R",local = TRUE)$
 
 ###############################################
 # Temporal Filters
-source("./src/server/searchDataSource_temporalFilters_server.R",local = TRUE)$value
+#source("./src/server/searchDataSource_temporalFilters_server.R",local = TRUE)$value
 
 
 # Observer for Search Map Click - Action: When user clicks a marker add the extents of the marker data source as rectangle to the map
-observeEvent(input$map_marker_click,{
-    leaflet::leafletProxy("map") %>%
+observeEvent(input$searchTabMap_marker_click,{
+    leaflet::leafletProxy('searchTabMap') %>%
     leaflet::clearGroup(group = 'markerRectangle') %>%
-    leaflet::addRectangles(LSFMetadataTibble[LSFMetadataTibble$id == input$map_marker_click[1],]$metadataCoverageWest,
-                  LSFMetadataTibble[LSFMetadataTibble$id == input$map_marker_click[1],]$metadataCoverageNorth,
-                  LSFMetadataTibble[LSFMetadataTibble$id == input$map_marker_click[1],]$metadataCoverageEast,
-                  LSFMetadataTibble[LSFMetadataTibble$id == input$map_marker_click[1],]$metadataCoverageSouth
-                  ,group = 'markerRectangle', color = "blue", weight = 1, stroke = TRUE)
+    leaflet::addRectangles(lsfMetadata()[lsfMetadata()$id == input$searchTabMap_marker_click[1],]$metadataCoverageWest,
+                           lsfMetadata()[lsfMetadata()$id == input$searchTabMap_marker_click[1],]$metadataCoverageNorth,
+                           lsfMetadata()[lsfMetadata()$id == input$searchTabMap_marker_click[1],]$metadataCoverageEast,
+                           lsfMetadata()[lsfMetadata()$id == input$searchTabMap_marker_click[1],]$metadataCoverageSouth,
+                           group = 'markerRectangle', color = "blue", weight = 1, stroke = TRUE)
   }
 )
 
 # Observer for Search Map Click - Action: clear rectangle on background click
-observeEvent(input$map_click,{
-  leaflet::leafletProxy("map") %>%
+observeEvent(input$searchTabMap_click,{
+  leaflet::leafletProxy('searchTabMap') %>%
     leaflet::clearGroup(group = 'markerRectangle')
 })
 ############################################## 
 # Observer for Search Map Click - Action: Modal pop-up on each marker_click
 
 observeEvent(input$button_click, {
-  click = input$map_marker_click
+  click = input$searchTabMap_marker_click
   showModal(modalDialog(
     title = "Information on Selected Data Source",
     h4("More Information"),
-    em("Title:   "), paste(LSFMetadataTibble[LSFMetadataTibble$id == click[1],]$metadataTitle),
+    em("Title:   "), paste(lsfMetadata()[lsfMetadata()$id == click[1],]$metadataTitle),
     br(),br(),
-    em("Abstract:   "),paste(LSFMetadataTibble[LSFMetadataTibble$id == click[1],]$metadataAbstract),
+    em("Abstract:   "),paste(lsfMetadata()[lsfMetadata()$id == click[1],]$metadataAbstract),
     br(), br(),
-    em("Organisation:   "),paste(LSFMetadataTibble[LSFMetadataTibble$id == click[1],]$metadataOrganisation),
+    em("Organisation:   "),paste(lsfMetadata()[lsfMetadata()$id == click[1],]$metadataOrganisation),
     br(),br(),
-    em("URL (if available):   "), tags$a(href = LSFMetadataTibble[LSFMetadataTibble$id == click[1],]$metadataAltURI,LSFMetadataTibble[LSFMetadataTibble$id == click[1],]$metadataAltURI, target = '_blank'),
+    em("URL (if available):   "), tags$a(href = lsfMetadata()[lsfMetadata()$id == click[1],]$metadataAltURI,lsfMetadata()[lsfMetadata()$id == click[1],]$metadataAltURI, target = '_blank'),
     br(),br(),
-    em("Update Frequency:   "), paste(LSFMetadataTibble[LSFMetadataTibble$id == click[1],]$metadataMaintenance),
+    em("Update Frequency:   "), paste(lsfMetadata()[lsfMetadata()$id == click[1],]$metadataMaintenance),
     br(),br(),
     h4("Spatial Information"),
-    em("North:"), paste(LSFMetadataTibble[LSFMetadataTibble$id == click[1],]$metadataCoverageNorth),br(),
-    em("East:"),paste(LSFMetadataTibble[LSFMetadataTibble$id == click[1],]$metadataCoverageEast),br(),
-    em("South:"), paste(LSFMetadataTibble[LSFMetadataTibble$id == click[1],]$metadataCoverageSouth),br(),
-    em("West:"), paste(LSFMetadataTibble[LSFMetadataTibble$id == click[1],]$metadataCoverageWest),br(),
+    em("North:"), paste(lsfMetadata()[lsfMetadata()$id == click[1],]$metadataCoverageNorth),br(),
+    em("East:"),paste(lsfMetadata()[lsfMetadata()$id == click[1],]$metadataCoverageEast),br(),
+    em("South:"), paste(lsfMetadata()[lsfMetadata()$id == click[1],]$metadataCoverageSouth),br(),
+    em("West:"), paste(lsfMetadata()[lsfMetadata()$id == click[1],]$metadataCoverageWest),br(),
     br(),br(),
-    em("Geographical Description:"), paste(LSFMetadataTibble[LSFMetadataTibble$id == click[1],]$metadataGeographicDescription),
+    em("Geographical Description:"), paste(lsfMetadata()[lsfMetadata()$id == click[1],]$metadataGeographicDescription),
     br(),br(),
     h4("Temporal Information"),
-    em("Start Year: "), paste(LSFMetadataTibble[LSFMetadataTibble$id == click[1],]$metadataCoverageStartYear), br(), em("End Year: ", paste(LSFMetadataTibble[LSFMetadataTibble$id == click[1],]$metadataCoverageEndYear)),
+    em("Start Year: "), paste(lsfMetadata()[lsfMetadata()$id == click[1],]$metadataCoverageStartYear), br(), em("End Year: ", paste(lsfMetadata()[lsfMetadata()$id == click[1],]$metadataCoverageEndYear)),
     br(),br(),
     # dynamic content based on user activity and history
     uiOutput('addToBookmarksUI'),
@@ -322,29 +361,29 @@ observeEvent(input$button_click, {
 # Bookmark System
 
 output$addToBookmarksUI <- renderUI({
-  click = input$map_marker_click
-  if(LSFMetadataTibble[LSFMetadataTibble$id == click[1],]$id %in% sessionUserBookmarks()){
+  click = input$searchTabMap_marker_click
+  if(lsfMetadata()[lsfMetadata()$id == click[1],]$id %in% sessionUserBookmarks()){
     h4("This resource is in your bookmarks.")
-  }else if(LSFMetadataTibble[LSFMetadataTibble$id == click[1],]$id %in% neo4r::call_neo4j(paste0("MATCH (p:Person)-[r:HAS_REQUESTED]-(m:Metadata) WHERE id(p) = ",user_info()$user_info$id," RETURN id(m) as id;"),con = neo_con, type = 'row')$id$value){
+  }else if(lsfMetadata()[lsfMetadata()$id == click[1],]$id %in% neo4r::call_neo4j(paste0("MATCH (p:Person)-[r:HAS_REQUESTED]-(m:Metadata) WHERE id(p) = ",user_info()$user_info$id," RETURN id(m) as id;"),con = neo_con, type = 'row')$id$value){
     box(
       headerBorder = F,
       status = 'warning',
       title = "You have requested this resource already.",
-      p("Request Date:",neo4r::call_neo4j(paste0("MATCH (p:Person)-[r:HAS_REQUESTED]-(m:Metadata) WHERE id(p) = ",user_info()$user_info$id," AND id(m) = ",LSFMetadataTibble[LSFMetadataTibble$id == click[1],]$id," RETURN r.created as date;"),con = neo_con, type = 'row')$date$value),
-      p("Request Status:",neo4r::call_neo4j(paste0("MATCH (p:Person)-[r:HAS_REQUESTED]-(m:Metadata) WHERE id(p) = ",user_info()$user_info$id," AND id(m) = ",LSFMetadataTibble[LSFMetadataTibble$id == click[1],]$id," RETURN r.status as status;"),con = neo_con, type = 'row')$status$value)
+      p("Request Date:",neo4r::call_neo4j(paste0("MATCH (p:Person)-[r:HAS_REQUESTED]-(m:Metadata) WHERE id(p) = ",user_info()$user_info$id," AND id(m) = ",lsfMetadata()[lsfMetadata()$id == click[1],]$id," RETURN r.created as date;"),con = neo_con, type = 'row')$date$value),
+      p("Request Status:",neo4r::call_neo4j(paste0("MATCH (p:Person)-[r:HAS_REQUESTED]-(m:Metadata) WHERE id(p) = ",user_info()$user_info$id," AND id(m) = ",lsfMetadata()[lsfMetadata()$id == click[1],]$id," RETURN r.status as status;"),con = neo_con, type = 'row')$status$value)
     )
   }else{
     actionButton('Request', "Add to Bookmarks")
   }
 })
 
-# Action button uses information from the map_marker_click to update the bookmarks list 
+# Action button uses information from the searchTabMap_marker_click to update the bookmarks list 
 observeEvent(input$Request, {
   # when user adds to bookmark disable request button and change label to indicate action completed
   shinyjs::disable(id = 'Request')
   updateActionButton(session, inputId = 'Request',label = "Added to bookmarks!")
-  click = input$map_marker_click
-  sourceIDString <- paste0(LSFMetadataTibble[LSFMetadataTibble$id == click[1],]$id)
+  click = input$searchTabMap_marker_click
+  sourceIDString <- paste0(lsfMetadata()[lsfMetadata()$id == click[1],]$id)
   sessionUserBookmarks(append(sessionUserBookmarks(),sourceIDString))
   # update database bookmark list
   neo4r::call_neo4j(query = paste0("MATCH (p:Person) WHERE id(p) = ",user_info()$user_info$id," SET p.personBookmarks = '",formatNumericList(sessionUserBookmarks()),"';"),con = neo_con, type = 'row')
@@ -360,14 +399,14 @@ output$No_Data <- renderInfoBox({
   infoBox(title = "Available Data",
           icon = icon("database"),
           subtitle = "datasets are recognised as available by the LSF",
-          value = nrow(LSFMetadataTibble),
+          value = nrow(lsfMetadata()),
           fill = T, color = "blue")
 })
 #   
 # # output$No_River <- renderInfoBox({
 # #   infoBox(title = "River Data",
 # #           subtitle = "rivers across the North Atlantic have data assosciated with them",
-# #           value = length(unique(LSFMetadataTibble$Index_River)))
+# #           value = length(unique(lsfMetadata()$Index_River)))
 # # })
 
 output$NAFO_Div <- renderInfoBox({
@@ -387,10 +426,10 @@ output$No_Eco <- renderInfoBox({
 
 
 # Debugging Information
-output$clickMarkerOutput <- renderText({paste0("Marker: ",input$map_marker_click,collapse = ",")})
-output$clickOutput <- renderText({paste0("Click: ",input$map_click,collapse = ",")})
-output$clickShapeOutput <- renderText({paste0("Shape: ",input$map_shape_click,collapse = ",")})
-output$clickBoundsOutput <- renderText({paste0("Bounds: ",input$map_bounds,collapse = ",")})
+output$clickMarkerOutput <- renderText({paste0("Marker: ",input$searchTabMap_marker_click,collapse = ",")})
+output$clickOutput <- renderText({paste0("Click: ",input$searchTabMap_click,collapse = ",")})
+output$clickShapeOutput <- renderText({paste0("Shape: ",input$searchTabMap_shape_click,collapse = ",")})
+output$clickBoundsOutput <- renderText({paste0("Bounds: ",input$searchTabMap_bounds,collapse = ",")})
 ############################
 # DataSearch_server.R END
 ############################
