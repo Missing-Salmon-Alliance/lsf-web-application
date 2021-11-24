@@ -12,6 +12,8 @@ server <- function(input, output, session) {
   sessionUserBookmarks <- reactiveVal(NULL)
   # Define reactive value for reactive filtering on search tabs
   metadataFilterReactive <- reactiveVal()
+  hypothesisExploreReactive <- reactiveVal()
+  
   #KNB Token
   token_info <- reactiveVal(NULL)
   # logged on user information
@@ -21,6 +23,7 @@ server <- function(input, output, session) {
   
   lsfDomains <- reactiveVal(NULL)
   lsfMetadata <- reactiveVal(NULL)
+  lsfHypotheses <- reactiveVal(NULL)
   ############################
   # Reactive Values END
   ############################

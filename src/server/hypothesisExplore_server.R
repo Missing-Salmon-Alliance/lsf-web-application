@@ -23,7 +23,8 @@ output$hypothesisExploreTabUI <- renderUI({
           width = 12,
           selectizeInput('hypothesisFilter',
                          "Select a Mortality Hypothesis...",
-                         choices = c("",lsfHypotheses()$hypothesisTitle),
+                         choiceNames = c("",lsfHypotheses()$hypothesisTitle),
+                         choiceVa
                          selected = "",
                          multiple = FALSE,
                          width = '100%'),
@@ -74,7 +75,6 @@ output$hypothesisExploreTabUI <- renderUI({
   }
 })
 
-hypothesisExploreReactive <- reactiveVal()
 # observe Mortality Hypothesis Filter - Action: populate Sub-Hypothesis filter
 observeEvent(input$hypothesisFilter,{
   
