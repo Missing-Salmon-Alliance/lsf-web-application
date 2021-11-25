@@ -37,6 +37,9 @@ neo_con <- neo4r::neo4j_api$new(url = paste("http://",NEO4J_HOST,":",NEO4J_PORT,
                                 user = NEO4J_USER,
                                 password = NEO4J_PASSWD)
 
+# neo4r query results are sometimes passed to log files. This is a list of the desired columns/fields that need captured
+neo4rResultFields <<- c('contains_updates','nodes_created','nodes_deleted','properties_set','relationships_created','relationship_deleted','labels_added','labels_removed')
+
 # Check box group button icon options
 #checkboxGroupButtonsIcons <- list(yes = icon("ok",lib = "glyphicon"),no = icon("remove",lib = "glyphicon"))
 # Alternative design - Keep for an example
