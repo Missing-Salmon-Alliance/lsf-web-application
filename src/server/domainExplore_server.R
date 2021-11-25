@@ -1,3 +1,41 @@
+output$domainExploreTabUI <- renderUI({
+  req(user_info()) # only action if user_info has been created
+  if (user_info()$result) { # if user logon is true:
+    fluidPage(
+      h4("Explore available data resources based on salmon life-stage domains."),
+      p("The life-stage domains represent a combination of salmon lifecycle and the environments within which they reside and transit.
+        Although marine phases are defined here at a low resolution, geographic information available within the resource can improve context."),
+      box(
+        width = 5,
+        status = 'primary',
+        title = "Step 1 - Life-Stage Domain (multi-select available)",
+        shinyWidgets::checkboxGroupButtons('domainFilter',"Select a Salmon Life-Stage Domain",choiceNames = lsfDomains()$domainTitle, choiceValues = lsfDomains()$id,
+                                           checkIcon = checkboxGroupButtonsIcons)
+      ),
+      box(
+        status = 'primary',
+        title = "Step 2 - Variable Classes Relevant to Selected Life-Stage Domains",
+        width = 7,
+        shinyWidgets::checkboxGroupButtons('esvFilterBioDom',"Biological Processes",choices = c("Please select a Domain"),selected = "Please select a Domain"),
+        shinyWidgets::checkboxGroupButtons('esvFilterPhysDom',"Physical Environment",choices = c("Please select a Domain"),selected = "Please select a Domain"),
+        shinyWidgets::checkboxGroupButtons('esvFilterTraitDom',"Salmon Traits",choices = c("Please select a Domain"),selected = "Please select a Domain")
+      ),
+      box(
+        status = 'success',
+        width = 12,
+        solidHeader = TRUE,
+        title = "Step 3 - Results",
+        DT::DTOutput('domainExploreTable')
+      )
+    )
+  }else{
+    fluidPage(
+      h1("Life-Stage Domain Explore Area"),
+      h3("Please authenticate to access this area")
+    )
+  }
+})
+
 ################################
 # Domain/Var Class filters
 ################################
@@ -18,18 +56,27 @@ observeEvent(input$domainFilter,{
                                              size = 'xs')
   }else{
     # capture filtered domain ID's as vector
-    filteredDomainIds <- LSFDomainTibble[LSFDomainTibble$domainTitle %in% input$domainFilter,]$id
-    # capture class ids (startNodes) from filtered Relationships as vector
-    filteredESVIds <- metadataESVDomainRelationships[metadataESVDomainRelationships$endNode %in% filteredDomainIds,]$startNode
+    filteredDomainIds <- input$domainFilter
+    # load variable classes from graph that have a relationship with selected domains
+    filteredVariableClasses <- neo4r::call_neo4j(paste0("MATCH (d)<-[:HAS_DOMAIN]-(esv:EssentialSalmonVariable) WHERE id(d) IN [",formatNumericList(input$domainFilter),"] RETURN esv;"),neo_con,type='graph')
+    filteredVariableClasses <- filteredVariableClasses$nodes %>% neo4r::unnest_nodes('all')
+    
     # update select input using filtered class Titles
-    shinyWidgets::updateCheckboxGroupButtons(session, 'esvFilterBioDom', choices = c(LSFEssentialSalmonVariableTibble[LSFEssentialSalmonVariableTibble$esvCategory == "Biological" & LSFEssentialSalmonVariableTibble$id %in% filteredESVIds,]$esvTitle),selected = character(0),
+    shinyWidgets::updateCheckboxGroupButtons(session, 'esvFilterBioDom',
+                                             choiceNames = filteredVariableClasses[filteredVariableClasses$esvCategory == "Biological",]$esvTitle,
+                                             choiceValues = filteredVariableClasses[filteredVariableClasses$esvCategory == "Biological",]$id,
+                                             selected = character(0),
                                              checkIcon = checkboxGroupButtonsIcons,
                                              size = 'xs')
-    shinyWidgets::updateCheckboxGroupButtons(session, 'esvFilterPhysDom', choices = c(LSFEssentialSalmonVariableTibble[LSFEssentialSalmonVariableTibble$esvCategory == "Physical" & LSFEssentialSalmonVariableTibble$id %in% filteredESVIds,]$esvTitle),selected = character(0),
-                                             checkIcon = checkboxGroupButtonsIcons,
+    shinyWidgets::updateCheckboxGroupButtons(session, 'esvFilterPhysDom',
+                                             choiceNames = filteredVariableClasses[filteredVariableClasses$esvCategory == "Physical",]$esvTitle,
+                                             choiceValues = filteredVariableClasses[filteredVariableClasses$esvCategory == "Physical",]$id,
+                                             selected = character(0),checkIcon = checkboxGroupButtonsIcons,
                                              size = 'xs')
-    shinyWidgets::updateCheckboxGroupButtons(session, 'esvFilterTraitDom', choices = c(LSFEssentialSalmonVariableTibble[LSFEssentialSalmonVariableTibble$esvCategory == "Salmon Trait" & LSFEssentialSalmonVariableTibble$id %in% filteredESVIds,]$esvTitle),selected = character(0),
-                                             checkIcon = checkboxGroupButtonsIcons,
+    shinyWidgets::updateCheckboxGroupButtons(session, 'esvFilterTraitDom',
+                                             choiceNames = filteredVariableClasses[filteredVariableClasses$esvCategory == "Salmon Trait",]$esvTitle,
+                                             choiceValues = filteredVariableClasses[filteredVariableClasses$esvCategory == "Salmon Trait",]$id,
+                                             selected = character(0),checkIcon = checkboxGroupButtonsIcons,
                                              size = 'xs')
   }
 },ignoreNULL = FALSE)
@@ -37,9 +84,7 @@ observeEvent(input$domainFilter,{
 # Observe Var Class Filter - Action: Update metadata nodes displayed on map (filter by relationship to class selected)
 # BIOLOGICAL classes
 observeEvent(input$esvFilterBioDom,{
-  req(input$esvFilterBioDom)
-  
-  if("Please select a Domain" %in% input$esvFilterBioDom){
+  if("Please select a Domain" %in% input$esvFilterBioDom || is.null(input$esvFilterBioDom)){
     # Update table - clear results and do nothing else
     domainExploreReactive(NULL)
   }else{
@@ -51,20 +96,20 @@ observeEvent(input$esvFilterBioDom,{
     shinyWidgets::updateCheckboxGroupButtons(session,'esvFilterTraitDom',selected = character(0),
                                              checkIcon = checkboxGroupButtonsIcons,
                                              size = 'xs')
-    # leaflet update here - show filter
-    filteredESVId <- LSFEssentialSalmonVariableTibble[LSFEssentialSalmonVariableTibble$esvTitle %in% input$esvFilterBioDom,]$id
-    
-    filteredMetadataIds <- metadataESVDomainRelationships[(metadataESVDomainRelationships$endNode %in% filteredESVId & metadataESVDomainRelationships$domain %in% input$domainFilter),]$startNode
-    
-    domainExploreReactive(LSFMetadataTibble[LSFMetadataTibble$id %in% filteredMetadataIds,])
+    # filter
+    filteredMetadata <- neo4r::call_neo4j(paste0("MATCH (m)-[:HAS_ESV]-(esv) WHERE id(esv) IN [",formatNumericList(input$esvFilterBioDom),"] RETURN m;"),neo_con,type = 'graph')
+    if(paste0(class(filteredMetadata),collapse = ",") == 'neo,list'){ # test that returned item is a valid graph object, otherwise ignore empty result
+      filteredMetadata <- filteredMetadata$nodes %>% neo4r::unnest_nodes('all')
+      domainExploreReactive(filteredMetadata)
+    }else{
+      domainExploreReactive(NULL)
+    }
   }
 },ignoreNULL = FALSE)
 
 # PHYSICAL Classes
 observeEvent(input$esvFilterPhysDom,{
-  req(input$esvFilterPhysDom)
-  
-  if("Please select a Domain" %in% input$esvFilterPhysDom){
+  if("Please select a Domain" %in% input$esvFilterPhysDom || is.null(input$esvFilterPhysDom)){
     # Update table - clear results and do nothing else
     domainExploreReactive(NULL)
   }else{
@@ -76,20 +121,20 @@ observeEvent(input$esvFilterPhysDom,{
     shinyWidgets::updateCheckboxGroupButtons(session,'esvFilterBioDom',selected = character(0),
                                              checkIcon = checkboxGroupButtonsIcons,
                                              size = 'xs')
-    # leaflet update here - show filter
-    filteredESVId <- LSFEssentialSalmonVariableTibble[LSFEssentialSalmonVariableTibble$esvTitle %in% input$esvFilterPhysDom,]$id
-    
-    filteredMetadataIds <- metadataESVDomainRelationships[(metadataESVDomainRelationships$endNode %in% filteredESVId & metadataESVDomainRelationships$domain %in% input$domainFilter),]$startNode
-    
-    domainExploreReactive(LSFMetadataTibble[LSFMetadataTibble$id %in% filteredMetadataIds,])
+    # filter
+    filteredMetadata <- neo4r::call_neo4j(paste0("MATCH (m)-[:HAS_ESV]-(esv) WHERE id(esv) IN [",formatNumericList(input$esvFilterPhysDom),"] RETURN m;"),neo_con,type = 'graph')
+    if(paste0(class(filteredMetadata),collapse = ",") == 'neo,list'){ # test that returned item is a valid graph object, otherwise ignore empty result
+      filteredMetadata <- filteredMetadata$nodes %>% neo4r::unnest_nodes('all')
+      domainExploreReactive(filteredMetadata)
+    }else{
+      domainExploreReactive(NULL)
+    }
   }
 },ignoreNULL = FALSE)
 
 # SALMON TRAIT Classes
 observeEvent(input$esvFilterTraitDom,{
-  req(input$esvFilterTraitDom)
-  
-  if("Please select a Domain" %in% input$esvFilterTraitDom){
+  if("Please select a Domain" %in% input$esvFilterTraitDom || is.null(input$esvFilterTraitDom)){
     # Update table - clear results and do nothing else
     domainExploreReactive(NULL)
   }else{
@@ -101,19 +146,21 @@ observeEvent(input$esvFilterTraitDom,{
     shinyWidgets::updateCheckboxGroupButtons(session,'esvFilterBioDom',selected = character(0),
                                              checkIcon = checkboxGroupButtonsIcons,
                                              size = 'xs')
-    # leaflet update here - show filter
-    filteredESVId <- LSFEssentialSalmonVariableTibble[LSFEssentialSalmonVariableTibble$esvTitle %in% input$esvFilterTraitDom,]$id
-    
-    filteredMetadataIds <- metadataESVDomainRelationships[(metadataESVDomainRelationships$endNode %in% filteredESVId & metadataESVDomainRelationships$domain %in% input$domainFilter),]$startNode
-    
-    domainExploreReactive(LSFMetadataTibble[LSFMetadataTibble$id %in% filteredMetadataIds,])
+    # filter
+    filteredMetadata <- neo4r::call_neo4j(paste0("MATCH (m)-[:HAS_ESV]-(esv) WHERE id(esv) IN [",formatNumericList(input$esvFilterTraitDom),"] RETURN m;"),neo_con,type = 'graph')
+    if(paste0(class(filteredMetadata),collapse = ",") == 'neo,list'){ # test that returned item is a valid graph object, otherwise ignore empty result
+      filteredMetadata <- filteredMetadata$nodes %>% neo4r::unnest_nodes('all')
+      domainExploreReactive(filteredMetadata)
+    }else{
+      domainExploreReactive(NULL)
+    }
   }
   
 },ignoreNULL = FALSE)
 
 output$domainExploreTable <- DT::renderDT({
     if(!is.null(domainExploreReactive())){
-      sf::st_set_geometry(domainExploreReactive()[,c('metadataTitle','metadataAbstract','metadataKeywords')],NULL)
+      domainExploreReactive()[,c('metadataTitle','metadataAbstract','metadataKeywords')]
     }
   },
   selection = 'single',
