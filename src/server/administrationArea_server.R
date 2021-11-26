@@ -1,3 +1,36 @@
+output$adminTabUI <- renderUI({
+  req(user_info()) # only action if user_info has been created
+  if (user_info()$result) { # if user logon is true:
+    tabsetPanel(id = "useradmin",
+                selected = "User Administration",
+                tabPanel(
+                  id = 'useradmintabNewUser',
+                  title = "User Administration",
+                  box(title = "New User Form",
+                      status = 'warning',
+                      textInput('useradminFullname',label = "Fullname"),
+                      textInput('useradminEmail',label = "Email"),
+                      textInput('useradminAffiliation',label = "Affiliation"),
+                      passwordInput('useradminPassword',label = "Password"),
+                      checkboxInput('useradminAcceptDSA',label = "DSA Accepted?",value = FALSE),
+                      checkboxInput('useradminPromoteOrg',label = "Promote Organisation as DSG Member?",value = FALSE),
+                      checkboxInput('useradminAdmin',label = "Administrator?",value = FALSE)
+                  ),
+                  actionButton('addNewUser',"Add New User", icon = icon('user-check'))
+                ),
+                tabPanel(
+                  id = 'useradmintabQC',
+                  title = "Quality Control",
+                  fluidRow(
+                    source("./src/ui/qualityControlUI/qcDataSource_metadataFields_ui.R",local = TRUE)$value,
+                    source("./src/ui/qualityControlUI/qcDataSource_geoTemporal_ui.R",local = TRUE)$value,
+                    source("./src/ui/qualityControlUI/qcDataSource_domainsESV_ui.R",local = TRUE)$value
+                  )
+                )
+    ) # close tabsetPanel
+  }
+})
+
 observeEvent(input$addNewUser,{
   # send details to adminCreateNewUser function located in custom_functions.R
   adminCreateNewUser(fullname = input$useradminFullname,

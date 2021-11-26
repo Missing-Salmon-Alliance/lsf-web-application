@@ -116,6 +116,27 @@ server <- function(input, output, session) {
   # domainExplore_server.R END
   ############################
   
+  ############################
+  # submitResearchActivity_server.R START
+  ############################
+  
+  source("./src/server/submitResearchActivity_server.R", local = TRUE)$value
+  
+  ############################
+  # submitResearchActivity_server.R END
+  ############################
+  
+  ############################
+  # administrationArea_server.R START
+  ############################
+  
+  source("./src/server/administrationArea_server.R", local = TRUE)$value
+  source("./src/server/qcDataSource_server.R", local = TRUE)$value
+  
+  ############################
+  # administrationArea_server.R END
+  ############################
+  
   #modalDialogs!
   
   source("./src/server/modalDialogs_server.R", local = TRUE)$value

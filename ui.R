@@ -44,10 +44,14 @@ ui <- dashboardPage(skin = "blue",
                       ##############################################
                       # Search Data Source Conditional Sidebar Items
                       ##############################################
-                      source("./src/ui/searchDataSource_Sidebar_ui.R",local = TRUE)$value
+                      source("./src/ui/searchDataSource_Sidebar_ui.R",local = TRUE)$value,
                       ##############################################
                       # Search Data Source Conditional Sidebar Items
                       ##############################################
+                      conditionalPanel(
+                        condition = "input.menu1 == 'adminZone' && output.logonTrue",
+                        uiOutput('adminSidebarUI')
+                      )
 
                     ),
                     body = dashboardBody(
@@ -66,7 +70,11 @@ ui <- dashboardPage(skin = "blue",
                         
                         source("./src/ui/hypothesisUI/hypothesisExplore_ui.R", local = TRUE)$value, #tabItem hypothesis explore
                         
-                        source("./src/ui/domainExploreUI/domainExplore_ui.R", local = TRUE)$value # tabItem domain explore
+                        source("./src/ui/domainExploreUI/domainExplore_ui.R", local = TRUE)$value, # tabItem domain explore
+                        
+                        source("./src/ui/researchInventoryUI/submitResearchActivity_ui.R",local = TRUE)$value, #tabItem submit research
+                        
+                        source("./src/ui/administratorArea_ui.R",local = TRUE)$value #tabItem Admin Area
                       ),
                       
                       shinyBS::bsPopover("test","test") # bit of a bodge, server defined popovers don't seem to work without this line
