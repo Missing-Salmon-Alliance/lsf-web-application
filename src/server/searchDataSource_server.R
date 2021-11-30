@@ -106,7 +106,7 @@ observeEvent(input$searchRefresh,{
   
   metadataFilterReactive(lsfMetadata())
   # clear existing markers
-  leaflet::leafletProxy("map", session) %>%
+  leaflet::leafletProxy('searchTabMap', session) %>%
     leaflet::clearGroup(group = 'Data Source')
   # and redraw
   redrawFilteredMarkers(metadataFilterReactive(),session)
@@ -116,7 +116,7 @@ observeEvent(input$searchFilterReset,{
   metadataFilterReactive(lsfMetadata())
   activeGeographicFilterReactive("No Filter Selected")
   # clear existing markers
-  leaflet::leafletProxy("map", session) %>%
+  leaflet::leafletProxy('searchTabMap', session) %>%
     leaflet::clearGroup(group = 'Data Source')
   # and redraw
   redrawFilteredMarkers(metadataFilterReactive(),session)
@@ -152,6 +152,26 @@ output$searchTabMap <- leaflet::renderLeaflet({
                   , lng2 = 210
                   , lat2 = 90 ) %>%
     leaflet::addProviderTiles(leaflet::providers$Esri.OceanBasemap) %>%
+    
+    leaflet::addMarkers(data = lsfMetadata(),
+                        label = ~metadataTitle,
+                        layerId = ~id,
+                        group = 'Data Source',
+                        popup = ~paste("<h3>More Information</h3>",
+                                       "<b>Title:</b>",stringr::str_trunc(metadataTitle,width = 90,side = 'right',ellipsis = '...'),"<br>","<br>",
+                                       "<b>Abstract:</b>",stringr::str_trunc(metadataAbstract,width = 200,side = 'right',ellipsis = '...'),"<br>","<br>",
+                                       "<b>Organisation:</b>",metadataOrganisation,"<br>","<br>",
+                                       "<b>URL (if available):</b>",metadataAltURI,"<br>","<br>",
+                                       "&nbsp;",actionButton("showmodal", "View more...", onclick = 'Shiny.onInputChange(\"button_click\",  Math.random())'),
+                                       sep =" "),
+                        # enable clustering for spiderfy, set freezeAtZoom so that actual clustering does not occur
+                        clusterOptions = leaflet::markerClusterOptions(
+                          showCoverageOnHover = FALSE,
+                          zoomToBoundsOnClick = FALSE,
+                          spiderfyOnMaxZoom = TRUE,
+                          removeOutsideVisibleBounds = TRUE,
+                          spiderLegPolylineOptions = list(weight = 1.5, color = "#222", opacity = 0.5),
+                          freezeAtZoom = 10)) %>%
     # 
     # On map search box
     # leaflet.extras::addSearchFeatures(
