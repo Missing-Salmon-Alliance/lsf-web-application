@@ -66,11 +66,11 @@ checkUserCredentials <- function(user,pw){
     # web app has a Account Information section that shows user history of metadata requests and submissions
     # if user has no requested metadata yet pass in an empty tibble
     if(length(requested > 0)){
-      requestedTibble = results$nodes[results$nodes$id %in% requested,c('metadataTitle','metadataAbstract')]
+      requestedTibble = results$nodes[results$nodes$id %in% requested,]
     }else{requestedTibble = tibble(metadataTitle = character(),metadataAbstract = character())}
     # if user has no submitted metadata yet pass in an empty tibble
     if(length(submitted > 0)){
-      submittedTibble = results$nodes[results$nodes$id %in% submitted,c('metadataTitle','metadataAbstract')]
+      submittedTibble = results$nodes[results$nodes$id %in% submitted,]
     }else{submittedTibble = tibble(metadataTitle = character(),metadataAbstract = character())}
     # this is a quick double check that only 1 user was returned
     # TODO: add some error feedback if this is not true

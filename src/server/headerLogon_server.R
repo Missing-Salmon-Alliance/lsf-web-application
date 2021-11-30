@@ -57,6 +57,7 @@ observeEvent(input$loginSubmit, {
     # logon success
     shinyjs::hideElement('loginModal')
     shinyjs::showElement('logoutModal')
+    shinyjs::disable('introSideLogonButton')
     # Autofill some fields in the checkout page
     updateTextInput(session, 'requestName', value = user_info()$user_info$fullname)
     updateTextInput(session, 'requestOrganisation', value = user_info()$user_info$affiliation)
@@ -94,6 +95,7 @@ observeEvent(input$logoutModal, {
   # change logout button into login button
   shinyjs::hideElement('logoutModal')
   shinyjs::showElement('loginModal')
+  shinyjs::enable('introSideLogonButton')
   # goodbye message
   showModal(
     modalDialog(title = "Logged Out",
@@ -130,14 +132,14 @@ observeEvent(input$userInfoModal, {
 
 output$requestHistory <- DT::renderDT({
   req(user_info())
-  user_info()$user_info$requested
+  user_info()$user_info$requested[,c('metadataTitle','metadataAbstract')]
   #TODO: include request status e.g. fulfilled and created/lastModified dates
   
 })
 
 output$submitHistory <- DT::renderDT({
   req(user_info())
-  user_info()$user_info$submitted
+  user_info()$user_info$submitted[,c('metadataTitle','metadataAbstract')]
   #TODO: include submission status e.g. QC pending and created/lastModified dates
   
 })
