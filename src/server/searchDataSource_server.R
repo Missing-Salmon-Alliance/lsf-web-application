@@ -59,7 +59,7 @@ output$searchMapTabUI <- renderUI({
       )
     )
   }else{
-    fluidRow(
+    fluidPage(
       h1("Map Explore Area"),
       h3("Please authenticate to access this area")
     )

@@ -43,8 +43,8 @@ output$submitTabUI <- renderUI({
       uiOutput('submitNewDataSourceBodyUI')
     )
   }else{
-    fluidRow(
-      h1("Central Data Resource Knowledge Submit Area"),
+    fluidPage(
+      h1("Knowledge Submit Area"),
       h3("Please authenticate to access this area")
     )
   }

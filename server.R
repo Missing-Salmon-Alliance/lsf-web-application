@@ -18,6 +18,7 @@ server <- function(input, output, session) {
   token_info <- reactiveVal(NULL)
   # logged on user information
   user_info <- reactiveVal(NULL)
+  user_info(tibble::tibble(result = FALSE,admin = FALSE))
   
   # drop-down menu lists 
   
