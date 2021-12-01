@@ -27,36 +27,44 @@ output$searchMapTabUI <- renderUI({
     #               )
     # ),
     fluidRow(
-      shiny::tabsetPanel(id = "maptable",selected = "Map View",
-                         tabPanel(title = "Map View",
-                                  leaflet::leafletOutput('searchTabMap', height = "85vh"),
-                                  # debugging mode only
-                                  conditionalPanel(
-                                    condition = "input.debug",
-                                    textOutput('clickOutput'),
-                                    textOutput('clickMarkerOutput'),
-                                    textOutput('clickShapeOutput'),
-                                    textOutput('clickBoundsOutput')
-                                  )
-                                  
-                         ),
-                         tabPanel(title = "Table View",
-                                  column(
-                                    width = 12,
-                                    p("This is a more searchable alternative to the map view. Use the search
-                                      box at the top right of the table for free-text searches of the resources.
-                                      This search covers resource Title and Abstract, plus other fields such as
-                                      tags that may exist in the database but do not appear in the table.",
-                                      tags$b("Functionality is limited at the moment, development is underway
-                                      to integrate this view more closely with the map view to allow cross
-                                      over of search results."))
-                                  ),
-                                  column(
-                                    width = 7,
-                                    DT::DTOutput('table')
-                                  )
-                         )
+      column(
+        width = 7,
+        leaflet::leafletOutput('searchTabMap', height = "85vh")
+      ),
+      column(
+        width = 5,
+        DT::DTOutput('table')
       )
+      # shiny::tabsetPanel(id = "maptable",selected = "Map View",
+      #                    tabPanel(title = "Map View",
+      #                             leaflet::leafletOutput('searchTabMap', height = "85vh"),
+      #                             # debugging mode only
+      #                             conditionalPanel(
+      #                               condition = "input.debug",
+      #                               textOutput('clickOutput'),
+      #                               textOutput('clickMarkerOutput'),
+      #                               textOutput('clickShapeOutput'),
+      #                               textOutput('clickBoundsOutput')
+      #                             )
+      #                             
+      #                    ),
+      #                    tabPanel(title = "Table View",
+      #                             column(
+      #                               width = 12,
+      #                               p("This is a more searchable alternative to the map view. Use the search
+      #                                 box at the top right of the table for free-text searches of the resources.
+      #                                 This search covers resource Title and Abstract, plus other fields such as
+      #                                 tags that may exist in the database but do not appear in the table.",
+      #                                 tags$b("Functionality is limited at the moment, development is underway
+      #                                 to integrate this view more closely with the map view to allow cross
+      #                                 over of search results."))
+      #                             ),
+      #                             column(
+      #                               width = 7,
+      #                               DT::DTOutput('table')
+      #                             )
+      #                    )
+      # )
     )
   }else{
     fluidPage(
@@ -65,6 +73,14 @@ output$searchMapTabUI <- renderUI({
     )
   }
 })
+
+# observe the population of lsfMetadata reactive value and pass to initialise metadataFilterReactive
+# metadataFilterReactive is used as a subset of lsfMetadata on the map search tab
+observeEvent(lsfMetadata(),{
+  req(lsfMetadata())
+  metadataFilterReactive(lsfMetadata())
+})
+
 
 # UNDER DEVELOPMENT - Add popover and disable submit button for the sendRequest routine
 # NOTE, when no longer under dev, remember to uncomment the sendRequest observer!
@@ -172,7 +188,7 @@ output$searchTabMap <- leaflet::renderLeaflet({
                           removeOutsideVisibleBounds = TRUE,
                           spiderLegPolylineOptions = list(weight = 1.5, color = "#222", opacity = 0.5),
                           freezeAtZoom = 10)) %>%
-    # 
+
     # On map search box
     # leaflet.extras::addSearchFeatures(
     #   targetGroups = 'Data Source',
@@ -285,7 +301,7 @@ redrawFilteredMarkers <- function(filteredTibble,session){
                                        "<b>URL (if available):</b>",metadataAltURI,"<br>","<br>",
                                        "&nbsp;",actionButton("showmodal", "View more...", onclick = 'Shiny.onInputChange(\"button_click\",  Math.random())'),
                                        sep =" "),
-                        # enable clustering for spiderfy, set freezeAtZoom so that actual clustering does not occur
+                        # enable clustering for spiderfy, set freezeAtZoom so that actual clustering does not occur after zoom level 10
                         clusterOptions = leaflet::markerClusterOptions(
                           showCoverageOnHover = FALSE,
                           zoomToBoundsOnClick = FALSE,
