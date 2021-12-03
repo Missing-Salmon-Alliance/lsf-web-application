@@ -33,7 +33,7 @@ output$searchMapTabUI <- renderUI({
       ),
       column(
         width = 5,
-        DT::DTOutput('table')
+        DT::DTOutput('searchTabTable')
       )
       # shiny::tabsetPanel(id = "maptable",selected = "Map View",
       #                    tabPanel(title = "Map View",
@@ -61,7 +61,7 @@ output$searchMapTabUI <- renderUI({
       #                             ),
       #                             column(
       #                               width = 7,
-      #                               DT::DTOutput('table')
+      #                               DT::DTOutput('searchTabTable')
       #                             )
       #                    )
       # )
@@ -164,9 +164,9 @@ output$searchTabMap <- leaflet::renderLeaflet({
   leaflet::leaflet (options = leaflet::leafletOptions(minZoom = 3,maxZoom = 10))%>%
     leaflet::setView(lng = 10,lat = 60,zoom = 3) %>% 
     leaflet::setMaxBounds( lng1 = -130
-                  , lat1 = -20
-                  , lng2 = 210
-                  , lat2 = 90 ) %>%
+                           , lat1 = -20
+                           , lng2 = 210
+                           , lat2 = 90 ) %>%
     leaflet::addProviderTiles(leaflet::providers$Esri.OceanBasemap) %>%
     
     leaflet::addMarkers(data = lsfMetadata(),
@@ -188,7 +188,7 @@ output$searchTabMap <- leaflet::renderLeaflet({
                           removeOutsideVisibleBounds = TRUE,
                           spiderLegPolylineOptions = list(weight = 1.5, color = "#222", opacity = 0.5),
                           freezeAtZoom = 10)) %>%
-
+    
     # On map search box
     # leaflet.extras::addSearchFeatures(
     #   targetGroups = 'Data Source',
@@ -221,11 +221,11 @@ output$searchTabMap <- leaflet::renderLeaflet({
     # ) %>%
     
     leaflet::addPolygons(data = ICES_Ecoregions,
-                label = ~ecoregion,
-                layerId = paste0("eco_",ICES_Ecoregions$objectid),
-                color = "green", group = "ICES Ecoregions", weight = 1,
-                highlightOptions = leaflet::highlightOptions(color = "yellow", weight = 3,
-                                                    bringToFront = TRUE))  %>%
+                         label = ~ecoregion,
+                         layerId = paste0("eco_",ICES_Ecoregions$objectid),
+                         color = "green", group = "ICES Ecoregions", weight = 1,
+                         highlightOptions = leaflet::highlightOptions(color = "yellow", weight = 3,
+                                                                      bringToFront = TRUE))  %>%
     
     leaflet::addPolygons(data = salmosalarRange,
                          label = ~name,
@@ -243,17 +243,17 @@ output$searchTabMap <- leaflet::renderLeaflet({
     #                                                 bringToFront = TRUE))  %>%
     #  
     leaflet::addPolygons(data = nafoDivisionsSF,
-                label = ~zone,
-                layerId = paste0("div_",nafoDivisionsSF$ogc_fid),
-                color = "purple", group = "NAFO Divisions", weight = 1,
-                highlightOptions = leaflet::highlightOptions(color = "yellow", weight = 3,
-                                                    bringToFront = TRUE)) %>%
+                         label = ~zone,
+                         layerId = paste0("div_",nafoDivisionsSF$ogc_fid),
+                         color = "purple", group = "NAFO Divisions", weight = 1,
+                         highlightOptions = leaflet::highlightOptions(color = "yellow", weight = 3,
+                                                                      bringToFront = TRUE)) %>%
     leaflet::addPolygons(data = migrationSF,
-                label = ~icesname,
-                layerId = paste0("mig_",migrationSF$fid),
-                color = "blue", group = "Proposed Outward Migration", weight = 1,
-                highlightOptions = leaflet::highlightOptions(color = "yellow", weight = 3,
-                                                    bringToFront = TRUE)) %>%
+                         label = ~icesname,
+                         layerId = paste0("mig_",migrationSF$fid),
+                         color = "blue", group = "Proposed Outward Migration", weight = 1,
+                         highlightOptions = leaflet::highlightOptions(color = "yellow", weight = 3,
+                                                                      bringToFront = TRUE)) %>%
     
     # leaflet::addPolygons(data = feedingSF,
     #             label = feedingSF$name,
@@ -269,21 +269,21 @@ output$searchTabMap <- leaflet::renderLeaflet({
                                                                      "Proposed Outward Migration",
                                                                      "Commonly Accepted Range",
                                                                      "NASCO Rivers DB"),
-                     options = leaflet::layersControlOptions(collapsed = FALSE)) %>%
+                              options = leaflet::layersControlOptions(collapsed = FALSE)) %>%
     leaflet::hideGroup(c("ICES Ecoregions",
                          "NAFO Divisions",
                          #"ICES Stat Squares",
                          "Proposed Outward Migration",
                          "Commonly Accepted Range",
                          "NASCO Rivers DB")) %>%
-
+    
     htmlwidgets::onRender("
         function() {
             $('.leaflet-control-layers-overlays').prepend('<label style=\"text-align:left; font-size:16px;\">Layer Control</label>');
         }
     ")
-    # commenting out legend for now, the layer control in a way works as a legend and the screen was a bit cluttered with both
-    #leaflet::addControl(position = "bottomright", html = html_legend)
+  # commenting out legend for now, the layer control in a way works as a legend and the screen was a bit cluttered with both
+  #leaflet::addControl(position = "bottomright", html = html_legend)
 })
 
 
@@ -311,18 +311,18 @@ redrawFilteredMarkers <- function(filteredTibble,session){
                           freezeAtZoom = 10))
 }
 
-output$table <- DT::renderDT({
+output$searchTabTable <- DT::renderDT({
   sf::st_set_geometry(metadataFilterReactive()[,c('metadataTitle','metadataAbstract','metadataKeywords')],NULL)
-
-  },
-  selection = 'single',
-  rownames = FALSE,
-  editable = FALSE,
-  colnames = c('Title','Abstract','Keywords'),
-  options = list(pageLength = 20,
-                 columnDefs = list(list(visible=FALSE, targets=c(2)))
-                 )
   
+},
+selection = 'single',
+rownames = FALSE,
+editable = FALSE,
+colnames = c('Title','Abstract','Keywords'),
+options = list(pageLength = 20,
+               columnDefs = list(list(visible=FALSE, targets=c(2)))
+)
+
 )
 
 
@@ -331,24 +331,113 @@ output$table <- DT::renderDT({
 ###########################################
 
 ###############################################
-# Geograpic Filters
-source("./src/server/searchDataSource_GeographicFilters_server.R",local = TRUE)$value
+# Geograhpic Filters
+# Filter on polygon click section
+
+activeGeographicFilterReactive <- reactiveVal("No Filter Selected")
+
+# One observer for searchTabMap_shape_click, search based on layer id
+observeEvent(input$searchTabMap_shape_click,{
+  # first detect shape layer name and ignore if not one of the searchable layers
+  if(input$searchTabMap_shape_click[3] %in% c("ICES Ecoregions","NAFO Divisions")){
+    # if TRUE, next step clear all Data Source markers
+    leaflet::leafletProxy('searchTabMap', session) %>%
+      leaflet::clearGroup(group = 'Data Source')
+    # get name of area clicked using id and pass to filter metadata
+    if(input$searchTabMap_shape_click[3] == "ICES Ecoregions"){
+      layerID <- stringr::str_split(input$searchTabMap_shape_click[1],"_",simplify = T)[,2]
+      layerIDname <- ICES_Ecoregions[ICES_Ecoregions$objectid == layerID,]$ecoregion
+      metadataFilterReactive(lsfMetadata()[str_detect(lsfMetadata()$metadataCoverageIntersectICESEcoRegion,layerIDname),])
+      activeGeographicFilterReactive(paste0("ICES Ecoregions - ",layerIDname))
+    }else{
+      layerID <- stringr::str_split(input$searchTabMap_shape_click[1],"_",simplify = T)[,2]
+      layerIDname <- nafoDivisionsSF[nafoDivisionsSF$ogc_fid == layerID,]$zone
+      metadataFilterReactive(lsfMetadata()[str_detect(lsfMetadata()$metadataCoverageIntersectNAFODivision,layerIDname),])
+      activeGeographicFilterReactive(paste0("NAFO Divisions - ",layerIDname))
+    }
+    # redraw new filtered data
+    redrawFilteredMarkers(metadataFilterReactive(),session)
+  }
+  
+})
+
+
+output$activeGeographicFilter <- renderText(activeGeographicFilterReactive())
+
+
+# Eco regions based on pre-calculated intersects
+observeEvent(input$ecoregionFilter,{
+  leaflet::leafletProxy('searchTabMap', session) %>%
+    leaflet::clearGroup(group = 'Data Source')
+  if(input$ecoregionFilter == "All"){
+    metadataFilterReactive(lsfMetadata())
+  }else{
+    metadataFilterReactive(lsfMetadata()[str_detect(lsfMetadata()$metadataCoverageIntersectICESEcoRegion,input$ecoregionFilter),])
+  }
+  redrawFilteredMarkers(metadataFilterReactive(),session)
+})
+
+
+# NAFO divisions based on pre-calculated intersects
+observeEvent(input$nafodivisionFilter,{
+  leaflet::leafletProxy('searchTabMap', session) %>%
+    leaflet::clearGroup(group = 'Data Source')
+  if(input$nafodivisionFilter == "All"){
+    metadataFilterReactive(lsfMetadata())
+  }else{
+    metadataFilterReactive(lsfMetadata()[str_detect(lsfMetadata()$metadataCoverageIntersectNAFODivision,input$nafodivisionFilter),])
+  }
+  redrawFilteredMarkers(metadataFilterReactive(),session)
+})
+
+# migration routes based on pre-calculated intersects
+observeEvent(input$migrationRouteFilter,{
+  leaflet::leafletProxy('searchTabMap', session) %>%
+    leaflet::clearGroup(group = 'Data Source')
+  if(input$migrationRouteFilter == "All"){
+    metadataFilterReactive(lsfMetadata())
+  }else{
+    # apply regex escape
+    filterValue <- str_replace_all(str_replace_all(input$migrationRouteFilter,"\\(","\\\\("),"\\)","\\\\)")
+    metadataFilterReactive(lsfMetadata()[str_detect(lsfMetadata()$metadataCoverageIntersectMigrationRoutes,filterValue),])
+  }
+  redrawFilteredMarkers(metadataFilterReactive(),session)
+})
 
 ###############################################
 # Temporal Filters
-#source("./src/server/searchDataSource_temporalFilters_server.R",local = TRUE)$value
+# observeEvent(input$temporalSlider,{
+#   leaflet::leafletProxy('searchTabMap', session) %>%
+#     leaflet::clearGroup(group = 'Data Source')
+#   # double slider control - filter resources based on start and end year
+#   # filters resources with start date LESS THAN OR EQUAL TO first selection AND end date GREATER THAN OR EQUAL TO second selection
+#   metadataFilterReactive(lsfMetadata()[lsfMetadata()$metadataCoverageStartYear <= input$temporalSlider[1] & lsfMetadata()$metadataCoverageEndYear >= input$temporalSlider[2],])
+#   redrawFilteredMarkers(metadataFilterReactive(),session)
+# })
+# 
+# observeEvent(input$monthsSelect,{
+#   leaflet::leafletProxy('searchTabMap', session) %>%
+#     leaflet::clearGroup(group = 'Data Source')
+#   if(is.null(input$monthsSelect)){
+#     metadataFilterReactive(lsfMetadata())
+#   }else{
+#     targets <- paste0("[(",paste0(input$monthsSelect,collapse = ")|("),")]")
+#     metadataFilterReactive(lsfMetadata()[str_detect(lsfMetadata()$metadataCoverageMonthsOfYear,targets),])
+#   }
+#   redrawFilteredMarkers(metadataFilterReactive(),session)
+# },ignoreNULL = FALSE)
 
 
 # Observer for Search Map Click - Action: When user clicks a marker add the extents of the marker data source as rectangle to the map
 observeEvent(input$searchTabMap_marker_click,{
-    leaflet::leafletProxy('searchTabMap') %>%
+  leaflet::leafletProxy('searchTabMap') %>%
     leaflet::clearGroup(group = 'markerRectangle') %>%
     leaflet::addRectangles(lsfMetadata()[lsfMetadata()$id == input$searchTabMap_marker_click[1],]$metadataCoverageWest,
                            lsfMetadata()[lsfMetadata()$id == input$searchTabMap_marker_click[1],]$metadataCoverageNorth,
                            lsfMetadata()[lsfMetadata()$id == input$searchTabMap_marker_click[1],]$metadataCoverageEast,
                            lsfMetadata()[lsfMetadata()$id == input$searchTabMap_marker_click[1],]$metadataCoverageSouth,
                            group = 'markerRectangle', color = "blue", weight = 1, stroke = TRUE)
-  }
+}
 )
 
 # Observer for Search Map Click - Action: clear rectangle on background click
@@ -423,41 +512,6 @@ observeEvent(input$Request, {
   sessionUserBookmarks(append(sessionUserBookmarks(),sourceIDString))
   # update database bookmark list
   neo4r::call_neo4j(query = paste0("MATCH (p:Person) WHERE id(p) = ",user_info()$user_info$id," SET p.personBookmarks = '",formatNumericList(sessionUserBookmarks()),"';"),con = neo_con, type = 'row')
-  })
-
-
-
-
-###############################################
-# Information boxes
-
-output$No_Data <- renderInfoBox({
-  infoBox(title = "Available Data",
-          icon = icon("database"),
-          subtitle = "datasets are recognised as available by the LSF",
-          value = nrow(lsfMetadata()),
-          fill = T, color = "blue")
-})
-#   
-# # output$No_River <- renderInfoBox({
-# #   infoBox(title = "River Data",
-# #           subtitle = "rivers across the North Atlantic have data assosciated with them",
-# #           value = length(unique(lsfMetadata()$Index_River)))
-# # })
-
-output$NAFO_Div <- renderInfoBox({
-  infoBox(title = "NAFO Division Data",
-          subtitle = "NAFO Divisions across the North Atlantic are represented by data sources registered in the Central Data Resource",
-          value = length(uniqueNAFODivisions),
-          fill = T, color = "purple")
-})
-
-output$No_Eco <- renderInfoBox({
-  infoBox(title = "ICES Eco Regions",
-          icon = icon("globe-europe"),
-          subtitle = "ICES ecoregions across the North Atlantic are represented by data sources registered in the Central Data Resource",
-          value = length(uniqueICESEcoRegions),
-          fill = T, color = "green")
 })
 
 
