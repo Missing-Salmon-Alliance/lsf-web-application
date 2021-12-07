@@ -29,7 +29,15 @@ output$searchMapTabUI <- renderUI({
     fluidRow(
       column(
         width = 7,
-        leaflet::leafletOutput('searchTabMap', height = "85vh")
+        leaflet::leafletOutput('searchTabMap', height = "85vh"),
+        conditionalPanel(
+          condition = "input.debug",
+          textOutput('clickOutput'),
+          textOutput('clickMarkerOutput'),
+          textOutput('clickShapeOutput'),
+          textOutput('clickBoundsOutput'),
+          textOutput('clickTableRow')
+        )
       ),
       column(
         width = 5,
@@ -138,26 +146,8 @@ observeEvent(input$searchFilterReset,{
   redrawFilteredMarkers(metadataFilterReactive(),session)
 })
 
-
-
-# TODO: Create some kind of summary of the applied filters
-# e.g. "The data is currently filtered by Domain:River Rearing and ESV:Suspended Solids (freshwater)"
-filterAppliedInformation <- reactiveValues()
-filterAppliedInformation$filterType <- "None"
-filterAppliedInformation$filterName <- "None"
-
 ###################################################
 # Write a HTML Legend (As have used HTML ICONS and no gradient)
-
-html_legend <- "<img src='https://img.icons8.com/ios-filled/50/4a90e2/marker.png'style = 'width:30px;height:30px;'>Data Sources</img><br>
-<img src='https://img.icons8.com/cotton/64/000000/salmon--v1.png'style = 'width:30px;height:30px;'>Index Rivers</img><br>
-<img src='https://img.icons8.com/emoji/48/000000/black-circle-emoji.png'style = 'width:15px;height:15px;'>NASCO Rivers</img>"
-# <br>
-# <h4>Polygon Overlays</h4> 
-# <img src='https://img.icons8.com/emoji/48/26e07f/green-circle-emoji.png'style = 'width:30px;height:30px;'/> <b>ICES Ecoregions<br>
-# <img src='https://img.icons8.com/emoji/48/26e07f/purple-circle-emoji.png'style = 'width:30px;height:30px;'/> <b>NAFO Divisions<br>
-# <img src='https://img.icons8.com/emoji/48/4a90e2/blue-square-emoji.png'style = 'width:30px;height:30px;'/> <b>Areas of Migration<br/>
-# "
 
 # TODO: improve visual information in markers, colour index rivers or use river icon, check out the IYS icons
 output$searchTabMap <- leaflet::renderLeaflet({ 
@@ -189,21 +179,13 @@ output$searchTabMap <- leaflet::renderLeaflet({
                           spiderLegPolylineOptions = list(weight = 1.5, color = "#222", opacity = 0.5),
                           freezeAtZoom = 10)) %>%
     
-    # On map search box
-    # leaflet.extras::addSearchFeatures(
-    #   targetGroups = 'Data Source',
-    #   options = leaflet.extras::searchFeaturesOptions(zoom=12, openPopup = FALSE, firstTipSubmit = TRUE,
-    #     autoCollapse = TRUE, hideMarkerOnCollapse = TRUE
-    #   )
-    # ) %>%
-    
     leaflet::addMarkers(data = indexRiversSF,
                         label = ~paste("Salmon Index River: ",rivername),
                         group = "ICES Index Rivers",
                         icon = list(
                           iconUrl = "https://img.icons8.com/cotton/64/000000/salmon--v1.png",
                           iconSize = c(35, 35))) %>%
-    # 
+    
     leaflet::addCircleMarkers(data = nascoRiversDBSF,
                               label = ~rivername,
                               group = "NASCO Rivers DB",
@@ -261,7 +243,7 @@ output$searchTabMap <- leaflet::renderLeaflet({
     #             highlightOptions = leaflet::highlightOptions(color = "yellow", weight = 3,
     #                                                 bringToFront = TRUE)) %>%
     
-    leaflet::addLayersControl(position = 'topleft',overlayGroups = c("Data Source",
+    leaflet::addLayersControl(position = 'topright',overlayGroups = c("Data Source",
                                                                      "ICES Index Rivers",
                                                                      "ICES Ecoregions",
                                                                      "NAFO Divisions",
@@ -520,6 +502,7 @@ output$clickMarkerOutput <- renderText({paste0("Marker: ",input$searchTabMap_mar
 output$clickOutput <- renderText({paste0("Click: ",input$searchTabMap_click,collapse = ",")})
 output$clickShapeOutput <- renderText({paste0("Shape: ",input$searchTabMap_shape_click,collapse = ",")})
 output$clickBoundsOutput <- renderText({paste0("Bounds: ",input$searchTabMap_bounds,collapse = ",")})
+output$clickTableRow <- renderText({paste0("Row Info: ",input$searchTabTable_rows_selected,collapse = ",")})
 ############################
 # DataSearch_server.R END
 ############################
