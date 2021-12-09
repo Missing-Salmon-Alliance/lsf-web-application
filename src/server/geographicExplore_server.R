@@ -2,7 +2,6 @@
 # DataSearch_server.R START
 ############################
 
-
 ############
 # SIDEBAR Conditional UI
 output$searchRefreshUI <- renderUI(actionButton('searchRefresh',"Refresh"))
@@ -28,7 +27,7 @@ output$searchMapTabUI <- renderUI({
     # ),
     fluidRow(
       column(
-        width = 7,
+        width = 8,
         leaflet::leafletOutput('searchTabMap', height = "85vh"),
         conditionalPanel(
           condition = "input.debug",
@@ -36,11 +35,12 @@ output$searchMapTabUI <- renderUI({
           textOutput('clickMarkerOutput'),
           textOutput('clickShapeOutput'),
           textOutput('clickBoundsOutput'),
-          textOutput('clickTableRow')
+          textOutput('clickTableRow'),
+          textOutput('intersectVectorOut')
         )
       ),
       column(
-        width = 5,
+        width = 4,
         DT::DTOutput('searchTabTable')
       )
       # shiny::tabsetPanel(id = "maptable",selected = "Map View",
@@ -243,7 +243,7 @@ output$searchTabMap <- leaflet::renderLeaflet({
     #             highlightOptions = leaflet::highlightOptions(color = "yellow", weight = 3,
     #                                                 bringToFront = TRUE)) %>%
     
-    leaflet::addLayersControl(position = 'topright',overlayGroups = c("Data Source",
+    leaflet::addLayersControl(position = 'topleft',overlayGroups = c("Data Source",
                                                                      "ICES Index Rivers",
                                                                      "ICES Ecoregions",
                                                                      "NAFO Divisions",
@@ -293,16 +293,41 @@ redrawFilteredMarkers <- function(filteredTibble,session){
                           freezeAtZoom = 10))
 }
 
+# Geographic Search Tab Table Output
+# Note complexity due to relationship with leaflet map viewing pane bounding box.
+# The table only displays information on markers that are within the bounding box.
+# initialise reactive value for clearer code
+intersectVector <- reactiveVal()
+
 output$searchTabTable <- DT::renderDT({
-  sf::st_set_geometry(metadataFilterReactive()[,c('metadataTitle','metadataAbstract','metadataKeywords')],NULL)
-  
+  req(input$searchTabMap_bounds)
+  # Create Intersection vector to filter table
+  intersectVector(
+    as.vector(
+      st_intersects(
+        sf::st_polygon(
+          list(
+            rbind( # NOTE - build polygon clockwise AND WKT notation has longitude first, latitude second
+              as.numeric(input$searchTabMap_bounds[c(4,1)]),
+              as.numeric(input$searchTabMap_bounds[c(2,1)]),
+              as.numeric(input$searchTabMap_bounds[c(2,3)]),
+              as.numeric(input$searchTabMap_bounds[c(4,3)]),
+              as.numeric(input$searchTabMap_bounds[c(4,1)])
+            )
+          )
+        ),
+        metadataFilterReactive(),sparse = FALSE
+      )
+    )
+  )
+  sf::st_set_geometry(metadataFilterReactive()[intersectVector(),c('metadataTitle','metadataAbstract','metadataKeywords')],NULL)
 },
 selection = 'single',
 rownames = FALSE,
 editable = FALSE,
 colnames = c('Title','Abstract','Keywords'),
 options = list(pageLength = 20,
-               columnDefs = list(list(visible=FALSE, targets=c(2)))
+               columnDefs = list(list(visible=FALSE, targets=c(1,2)))
 )
 
 )
@@ -498,11 +523,12 @@ observeEvent(input$Request, {
 
 
 # Debugging Information
-output$clickMarkerOutput <- renderText({paste0("Marker: ",input$searchTabMap_marker_click,collapse = ",")})
-output$clickOutput <- renderText({paste0("Click: ",input$searchTabMap_click,collapse = ",")})
+output$clickMarkerOutput <- renderText({paste0("Marker: ",paste0(input$searchTabMap_marker_click,collapse = ","))})
+output$clickOutput <- renderText({paste0("Click: ",paste0(input$searchTabMap_click,collapse = ","))})
 output$clickShapeOutput <- renderText({paste0("Shape: ",input$searchTabMap_shape_click,collapse = ",")})
-output$clickBoundsOutput <- renderText({paste0("Bounds: ",input$searchTabMap_bounds,collapse = ",")})
+output$clickBoundsOutput <- renderText({paste0("Bounds: ",paste0(input$searchTabMap_bounds,collapse = ","))})
 output$clickTableRow <- renderText({paste0("Row Info: ",input$searchTabTable_rows_selected,collapse = ",")})
+output$intersectVectorOut <- renderText({paste0(intersectVector(),collapse = ",")})
 ############################
 # DataSearch_server.R END
 ############################
