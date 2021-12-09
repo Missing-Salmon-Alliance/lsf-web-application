@@ -304,7 +304,7 @@ output$searchTabTable <- DT::renderDT({
   # Create Intersection vector to filter table
   intersectVector(
     as.vector(
-      st_intersects(
+      sf::st_intersects(
         sf::st_polygon(
           list(
             rbind( # NOTE - build polygon clockwise AND WKT notation has longitude first, latitude second
@@ -326,7 +326,7 @@ selection = 'single',
 rownames = FALSE,
 editable = FALSE,
 colnames = c('Title','Abstract','Keywords'),
-options = list(pageLength = 20,
+options = list(pageLength = 15,
                columnDefs = list(list(visible=FALSE, targets=c(1,2)))
 )
 
