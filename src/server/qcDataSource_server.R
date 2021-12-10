@@ -77,13 +77,18 @@ qcLoadGeoTemporal <- function(){
   
 }
 
+# Observe ID change - Action: Load data from database and update all fields
+observeEvent(input$QCidSelector,{
+  qcDatabaseMetadata(neo4r::call_neo4j(paste0("MATCH (m:Metadata) WHERE id(m) = ",input$QCidSelector," RETURN m;"),con = neo_con, type = 'row'))
+  qcLoadMetadata()
+  qcLoadGeoTemporal()
+  qcLoadDomainESV()
+})
 
 # load values in to variable classes and domains
 qcLoadDomainESV <- function(){
   #reset Source Domain/ESV Section
   shinyWidgets::updateCheckboxGroupButtons(session, inputId = 'qcDomainNodeList',selected = character(0))
-  
-
 }
 
 # Geographic Detail Server
@@ -93,8 +98,10 @@ output$qcMap <- leaflet::renderLeaflet({
     leaflet::addRectangles(-15,61,-14,60,group = 'qcRectangle') %>% 
     leaflet::fitBounds(-15,61,-14,60,options = leaflet::leafletOptions(maxZoom = 5))
 })
+
 # observer for 4 numeric inputs lat/lon - action update userRectangle on submitMap, change zoom and centre
 observeEvent(input$qcEast | input$qcWest | input$qcNorth | input$qcSouth,{
+  req(input$QCidSelector) # require QCidSelector load to ensure NULL values do not trigger the event. Usually NULL doesn't trigger but I think the OR's above change this behaviour
   req(input$qcEast && input$qcWest && input$qcNorth && input$qcSouth) # catch empty value, prevent crash?
   leaflet::leafletProxy('qcMap') %>%
     leaflet::clearGroup(group = 'qcRectangle') %>%
@@ -110,26 +117,18 @@ observeEvent(input$qcMap_click,{
   updateNumericInput(session,inputId = 'qcWest',value = round(input$qcMap_click$lng,digits = 4))
 })
 
-# Observe ID change - Action: Load data from database and update all fields
-observeEvent(input$QCidSelector,{
-  qcDatabaseMetadata(neo4r::call_neo4j(paste0("MATCH (m:Metadata) WHERE id(m) = ",input$QCidSelector," RETURN m;"),con = neo_con, type = 'row'))
-  qcLoadMetadata()
-  qcLoadGeoTemporal()
-  qcLoadDomainESV()
-})
-
 # Observe Prev/Next click
 observeEvent(input$QCpreviousID,{
-  x <- match(input$QCidSelector,LSFMetadataTibble$id)
+  x <- match(input$QCidSelector,lsfMetadata()$id)
   if(x != 1){ # don't let prev button go less than 1
-    y <- LSFMetadataTibble$id[x-1]
+    y <- lsfMetadata()$id[x-1]
     updateSelectizeInput(session,inputId = 'QCidSelector',selected = y)
   }
 })
 observeEvent(input$QCnextID,{
-  x <- match(input$QCidSelector,LSFMetadataTibble$id)
-  if(x != length(LSFMetadataTibble$id)){
-    y <- LSFMetadataTibble$id[x+1]
+  x <- match(input$QCidSelector,lsfMetadata()$id)
+  if(x != length(lsfMetadata()$id)){
+    y <- lsfMetadata()$id[x+1]
     updateSelectizeInput(session,inputId = 'QCidSelector',selected = y)
   }
 })

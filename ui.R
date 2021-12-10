@@ -40,7 +40,7 @@ ui <- dashboardPage(skin = "blue",
                       ##############################################
                       # Submit Data Source Conditional Sidebar Items
                       ##############################################
-
+                      
                       ##############################################
                       # Search Data Source Conditional Sidebar Items
                       ##############################################
@@ -48,66 +48,35 @@ ui <- dashboardPage(skin = "blue",
                       ##############################################
                       # Search Data Source Conditional Sidebar Items
                       ##############################################
-                      
                       conditionalPanel(
                         condition = "input.menu1 == 'adminZone' && output.logonTrue",
-                        column(
-                          width = 12,
-                          br(),
-                          h4("Load and review"),
-                          selectizeInput('QCidSelector','Dropdown',choices = LSFMetadataTibble$id, width = '100%'),
-                          column(
-                            width = 6,
-                            actionLink('QCpreviousID',"Prev")
-                          ),
-                          column(
-                            width = 6,
-                            actionLink('QCnextID',"Next")
-                          ),
-                          br(),
-                          h6("...OR...",align = 'center'),
-                          textInput('QCcustomID','Manual input:'),
-                          actionButton('QCcustomIDButton',"Load from ID")
-                        )
+                        uiOutput('adminSidebarUI')
                       )
-                      
 
                     ),
                     body = dashboardBody(
                       shinyjs::useShinyjs(),
                       includeCSS('www/custom.css'),
                       
-                      # EXPERIMENTAL changing background colours and picture - don't work too well!
-                      #setBackgroundImage(src="https://www.transparenttextures.com/patterns/dark-mosaic.png", shinydashboard = TRUE),
-                      #setBackgroundColor(c('ghostwhite','#3c8dbc'),gradient = 'radial',direction = "top", shinydashboard = TRUE),
-
-                      # Fixed panel to display DEMO text
-                      # fixedPanel(style="z-index:10000;",
-                      #            top="0%", left="30%", width="50%",
-                      #            h1(span("DEMO",style="color:red")," - This interface is currently in development - ",span("DEMO",style="color:red")),
-                      #            p("For more information please contact: graeme@atlanticsalmontrust.org")
-                      # ),
-
                       # tabItems open
                       tabItems(
                         source("./src/ui/introductionTab_ui.R", local = TRUE)$value, # tabItem intro
-     
+                        
                         source("./src/ui/newUserRegistrationTab_ui.R", local = TRUE)$value, # HIDDEN TAB ITEM
                         
                         source("./src/ui/submitDataSource_ui.R",local = TRUE)$value, # tabItem submit data
-
+                        
                         source("./src/ui/searchDataSource_ui.R", local = TRUE)$value, # tabItem general search view
                         
                         source("./src/ui/hypothesisUI/hypothesisExplore_ui.R", local = TRUE)$value, #tabItem hypothesis explore
                         
                         source("./src/ui/domainExploreUI/domainExplore_ui.R", local = TRUE)$value, # tabItem domain explore
                         
-                        source("./src/ui/metadataNodeReport_ui.R", local = TRUE)$value, # tabItem metadataNodeReport
-                        
                         source("./src/ui/researchInventoryUI/submitResearchActivity_ui.R",local = TRUE)$value, #tabItem submit research
                         
                         source("./src/ui/administratorArea_ui.R",local = TRUE)$value #tabItem Admin Area
-                      ),# tabItems close
+                      ),
+                      
                       shinyBS::bsPopover("test","test") # bit of a bodge, server defined popovers don't seem to work without this line
                     ) # dashboardBody close
                     
