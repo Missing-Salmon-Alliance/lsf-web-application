@@ -10,4 +10,4 @@ Likely Suspects Framework Data Mobilisation Solution - Web Application to provid
 - None
 
 ### Deleted Branches
-- server-redesign - Moved the data load routine behind the user login routine and include some waiter displays for more positive UX.
+- server-redesign - Merged with Development. Moved the data load routine behind the user login routine and include some waiter displays for more positive UX.
