@@ -43,36 +43,6 @@ output$searchMapTabUI <- renderUI({
         width = 4,
         DT::DTOutput('searchTabTable')
       )
-      # shiny::tabsetPanel(id = "maptable",selected = "Map View",
-      #                    tabPanel(title = "Map View",
-      #                             leaflet::leafletOutput('searchTabMap', height = "85vh"),
-      #                             # debugging mode only
-      #                             conditionalPanel(
-      #                               condition = "input.debug",
-      #                               textOutput('clickOutput'),
-      #                               textOutput('clickMarkerOutput'),
-      #                               textOutput('clickShapeOutput'),
-      #                               textOutput('clickBoundsOutput')
-      #                             )
-      #                             
-      #                    ),
-      #                    tabPanel(title = "Table View",
-      #                             column(
-      #                               width = 12,
-      #                               p("This is a more searchable alternative to the map view. Use the search
-      #                                 box at the top right of the table for free-text searches of the resources.
-      #                                 This search covers resource Title and Abstract, plus other fields such as
-      #                                 tags that may exist in the database but do not appear in the table.",
-      #                                 tags$b("Functionality is limited at the moment, development is underway
-      #                                 to integrate this view more closely with the map view to allow cross
-      #                                 over of search results."))
-      #                             ),
-      #                             column(
-      #                               width = 7,
-      #                               DT::DTOutput('searchTabTable')
-      #                             )
-      #                    )
-      # )
     )
   }else{
     fluidPage(
