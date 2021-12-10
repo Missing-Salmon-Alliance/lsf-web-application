@@ -9,10 +9,22 @@ server <- function(input, output, session) {
   sessionUUID <- reactiveVal(NULL)
   sessionFile <- reactiveVal(NULL)
   sessionXML <- reactiveVal(NULL)
+  sessionUserBookmarks <- reactiveVal(NULL)
+  # Define reactive value for reactive filtering on search tabs
+  metadataFilterReactive <- reactiveVal()
+  hypothesisExploreReactive <- reactiveVal()
+  
   #KNB Token
   token_info <- reactiveVal(NULL)
   # logged on user information
   user_info <- reactiveVal(NULL)
+  user_info(tibble::tibble(result = FALSE,admin = FALSE))
+  
+  # drop-down menu lists 
+  
+  lsfDomains <- reactiveVal(NULL)
+  lsfMetadata <- reactiveVal(NULL)
+  lsfHypotheses <- reactiveVal(NULL)
   ############################
   # Reactive Values END
   ############################
@@ -22,6 +34,12 @@ server <- function(input, output, session) {
     query <- parseQueryString(session$clientData$url_search)
     if (!is.null(query[['register']])) {
       updateTabItems(session, 'menu1', 'newMemberRegistration')
+    }else if (!is.null(query[['search']])) {
+      updateTabItems(session, 'menu1', 'searchlsf')
+    }else if (!is.null(query[['submit']])) {
+      updateTabItems(session, 'menu1', 'newsource')
+    }else if (!is.null(query[['newproject']])) {
+      updateTabItems(session, 'menu1', 'newproject')
     }
   })
   
@@ -66,10 +84,20 @@ server <- function(input, output, session) {
   ############################
   
   ############################
+  # submitDataSource_server.R START
+  ############################
+  
+  source("./src/server/submitDataSource_server.R", local = TRUE)$value
+  
+  ############################
+  # submitDataSource_server.R END
+  ############################
+  
+  ############################
   # DataSearch_server.R START
   ############################
-
-  source("./src/server/searchDataSource_server.R", local = TRUE)$value
+  
+  source("./src/server/geographicExplore_server.R", local = TRUE)$value
   
   ############################
   # DataSearch_server.R END
@@ -96,16 +124,6 @@ server <- function(input, output, session) {
   ############################
   
   ############################
-  # submitDataSource_server.R START
-  ############################
-  
-  source("./src/server/submitDataSource_server.R", local = TRUE)$value
-  
-  ############################
-  # submitDataSource_server.R END
-  ############################
-  
-  ############################
   # submitResearchActivity_server.R START
   ############################
   
@@ -116,21 +134,12 @@ server <- function(input, output, session) {
   ############################
   
   ############################
-  # metadataNodeReport_server.R START
-  ############################
-  
-  source("./src/server/metadataNodeReport_server.R", local = TRUE)$value
-  
-  ############################
-  # metadataNodeReport_server.R END
-  ############################
-  
-  ############################
   # administrationArea_server.R START
   ############################
   
   source("./src/server/administrationArea_server.R", local = TRUE)$value
   source("./src/server/qcDataSource_server.R", local = TRUE)$value
+  
   ############################
   # administrationArea_server.R END
   ############################

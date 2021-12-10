@@ -10,10 +10,10 @@ box(title = p("Data Source Details (* required field)",actionLink(inputId = 'met
                          ),
                          column(
                            width = 4,
-                           textInput(inputId = 'sourceCreator', label = "Primary Contact Name*", width = '100%'),
-                           textInput(inputId = 'sourceCreatorEmail', label = "Primary Contact Email*", width = '100%'),
+                           textInput(inputId = 'sourceCreator', label = "Primary Contact Name*", value = user_info()$user_info$fullname, width = '100%'),
+                           textInput(inputId = 'sourceCreatorEmail', label = "Primary Contact Email*", value = user_info()$user_info$email, width = '100%'),
                            textInput(inputId = 'sourceCreatorORCID', label = "Primary Contact ORCID", value = "", width = '100%'),
-                           textInput(inputId = 'sourceOrganisation', label = "Organisation*", width = '100%')
+                           textInput(inputId = 'sourceOrganisation', label = "Organisation*", value = user_info()$user_info$affiliation, width = '100%')
                          ),
                          column(
                            width = 4,

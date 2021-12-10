@@ -51,7 +51,7 @@ tabItem('introduction',
                 ),
                 column(
                   width = 4,
-                  img(src = 'MSA_WebsiteLayout_lowres.png', height = '350vh')
+                  img(src = 'images/MSA_map_salmonRange.PNG', height = '350vh')
                 ),
                 column(
                   1
