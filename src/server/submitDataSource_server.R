@@ -633,6 +633,17 @@ observeEvent(input$confirmSubmitNewDataSource, {
   updateUserInfo$user_info$submitted <- neo4r::call_neo4j(paste0("MATCH (p)-[:HAS_SUBMITTED]-(m) where id(p) = ",user_info()$user_info$id," RETURN m;"),neo_con,type = 'row')$m
   user_info(updateUserInfo)
   
+  # refresh the map
+  lsfMetadata(neo4r::call_neo4j("MATCH (m:Metadata) RETURN m;",neo_con,type='graph')$nodes %>% neo4r::unnest_nodes('all'))
+  lsfMetadata(sf::st_as_sf(lsfMetadata(), wkt = "metadataCoverageCentroid", crs = 4326, na.fail = FALSE))
+  
+  metadataFilterReactive(lsfMetadata())
+  # clear existing markers
+  leaflet::leafletProxy('searchTabMap', session) %>%
+    leaflet::clearGroup(group = 'Data Source')
+  # and redraw
+  redrawFilteredMarkers(metadataFilterReactive(),session)
+  
   # show result
   showModal(submitSourceResultModal())
   
