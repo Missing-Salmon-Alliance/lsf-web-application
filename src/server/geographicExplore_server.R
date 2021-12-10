@@ -121,13 +121,14 @@ observeEvent(input$searchFilterReset,{
 
 # TODO: improve visual information in markers, colour index rivers or use river icon, check out the IYS icons
 output$searchTabMap <- leaflet::renderLeaflet({ 
-  leaflet::leaflet (options = leaflet::leafletOptions(minZoom = 3,maxZoom = 10))%>%
-    leaflet::setView(lng = 10,lat = 60,zoom = 3) %>% 
-    leaflet::setMaxBounds( lng1 = -130
-                           , lat1 = -20
+  leaflet::leaflet (options = leaflet::leafletOptions(minZoom = 3,maxZoom = 19))%>%
+    leaflet::setView(lng = -20,lat = 50,zoom = 3) %>% 
+    leaflet::setMaxBounds( lng1 = -180
+                           , lat1 = -90
                            , lng2 = 210
                            , lat2 = 90 ) %>%
-    leaflet::addProviderTiles(leaflet::providers$Esri.OceanBasemap) %>%
+    leaflet::addProviderTiles(leaflet::providers$Esri.OceanBasemap, options = leaflet::providerTileOptions(minZoom = 3, maxZoom =11)) %>%
+    leaflet::addProviderTiles(leaflet::providers$OpenStreetMap, options = leaflet::providerTileOptions(minZoom = 12, maxZoom = 19)) %>%
     
     leaflet::addMarkers(data = lsfMetadata(),
                         label = ~metadataTitle,
