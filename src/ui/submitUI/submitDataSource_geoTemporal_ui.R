@@ -11,26 +11,25 @@ box(title = p("Geographic Coverage and Temporal Coverage",actionLink(inputId = "
                            p("Enter the min/max extents the data cover (decimal degrees EAST and NORTH). Click map to autofill, adjust inputs as required.
                              Negative values should be used for WEST of meridian and SOUTH of equator."),
                            column(
-                             width = 6,
+                             width = 3,
+                             numericInput(inputId = 'submitNorth', label = "North",min=-90,max=90,value = 61,step = 0.0001),
+                             numericInput(inputId = 'submitSouth', label = "South",min=-90,max=90,value = 60,step = 0.0001)
+                           ),
+                           column(
+                             width = 3,
+                             numericInput(inputId = 'submitEast', label = "East",min=-180,max=180,value = -14,step = 0.0001),
                              numericInput(inputId = 'submitWest', label = "West",min=-180,max=180,value = -15,step = 0.0001)
                            ),
                            column(
                              width = 6,
-                             numericInput(inputId = 'submitEast', label = "East",min=-180,max=180,value = -14,step = 0.0001)
-                           ),
-                           column(
-                             width = 6,
-                             numericInput(inputId = 'submitNorth', label = "North",min=-90,max=90,value = 61,step = 0.0001)
-                           ),
-                           column(
-                             width = 6,
-                             numericInput(inputId = 'submitSouth', label = "South",min=-90,max=90,value = 60,step = 0.0001)
-                           ),
-                           tags$b("Pre-defined Bounding Boxes:"),
-                           br(),
-                           actionButton('salmonRangeExtents',label = "SALMO SALAR Range",class = "btn-default btn-sm"),
-                           actionButton('predefinedRectangleNorthernHemi',label = "Northern Hemisphere",class = "btn-default btn-sm"),
-                           actionButton('predefinedRectangleGlobal',label = "Global",class = "btn-default btn-sm")
+                             tags$b("Pre-defined Bounding Boxes:"),
+                             br(),
+                             actionButton('salmonRangeExtents',label = "SALMO SALAR Range",class = "btn-default btn-sm"),
+                             br(),
+                             actionButton('predefinedRectangleNorthernHemi',label = "Northern Hemisphere",class = "btn-default btn-sm"),
+                             br(),
+                             actionButton('predefinedRectangleGlobal',label = "Global",class = "btn-default btn-sm")
+                           )
                          ),
                          column(
                            width = 6,
