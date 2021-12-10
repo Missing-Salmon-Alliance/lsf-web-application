@@ -7,4 +7,7 @@ Likely Suspects Framework Data Mobilisation Solution - Web Application to provid
 - Staging branch - used to test development branch features on shiny server prior to promotion to production site - avoid directly committing to this branch, merge from development only.
 - Production Branch - Live Site https://shiny.missingsalmonalliance.org/framework - avoid directly committing to this branch, merge from staging only.
 ### Temporary Branches
-- server-redesign - The current design is poor because database data is loaded on application load. This means that site performance is slow for the landing page. I intend to move this data load to the user login routine and include some waiter displays for more positive UX.
+- None
+
+### Deleted Branches
+- server-redesign - Moved the data load routine behind the user login routine and include some waiter displays for more positive UX.
