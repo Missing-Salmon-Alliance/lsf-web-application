@@ -34,6 +34,12 @@ server <- function(input, output, session) {
     query <- parseQueryString(session$clientData$url_search)
     if (!is.null(query[['register']])) {
       updateTabItems(session, 'menu1', 'newMemberRegistration')
+    }else if (!is.null(query[['search']])) {
+      updateTabItems(session, 'menu1', 'searchlsf')
+    }else if (!is.null(query[['submit']])) {
+      updateTabItems(session, 'menu1', 'newsource')
+    }else if (!is.null(query[['newproject']])) {
+      updateTabItems(session, 'menu1', 'newproject')
     }
   })
   
