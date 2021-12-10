@@ -134,21 +134,20 @@ output$searchTabMap <- leaflet::renderLeaflet({
                         label = ~metadataTitle,
                         layerId = ~id,
                         group = 'Data Source',
-                        popup = ~paste("<h3>More Information</h3>",
+                        popup = ~paste("<h3>",id," - More Information</h3>",
                                        "<b>Title:</b>",stringr::str_trunc(metadataTitle,width = 90,side = 'right',ellipsis = '...'),"<br>","<br>",
                                        "<b>Abstract:</b>",stringr::str_trunc(metadataAbstract,width = 200,side = 'right',ellipsis = '...'),"<br>","<br>",
                                        "<b>Organisation:</b>",metadataOrganisation,"<br>","<br>",
                                        "<b>URL (if available):</b>",metadataAltURI,"<br>","<br>",
                                        "&nbsp;",actionButton("showmodal", "View more...", onclick = 'Shiny.onInputChange(\"button_click\",  Math.random())'),
                                        sep =" "),
-                        # enable clustering for spiderfy, set freezeAtZoom so that actual clustering does not occur
+                        # enable clustering for spiderfy
                         clusterOptions = leaflet::markerClusterOptions(
-                          showCoverageOnHover = FALSE,
+                          showCoverageOnHover = TRUE,
                           zoomToBoundsOnClick = FALSE,
                           spiderfyOnMaxZoom = TRUE,
                           removeOutsideVisibleBounds = TRUE,
-                          spiderLegPolylineOptions = list(weight = 1.5, color = "#222", opacity = 0.5),
-                          freezeAtZoom = 10)) %>%
+                          spiderLegPolylineOptions = list(weight = 1.5, color = "#222", opacity = 0.5))) %>%
     
     leaflet::addMarkers(data = indexRiversSF,
                         label = ~paste("Salmon Index River: ",rivername),
@@ -247,21 +246,20 @@ redrawFilteredMarkers <- function(filteredTibble,session){
                         label = ~metadataTitle,
                         layerId = ~id,
                         group = 'Data Source',
-                        popup = ~paste("<h3>More Information</h3>",
+                        popup = ~paste("<h3>",id," - More Information</h3>",
                                        "<b>Title:</b>",stringr::str_trunc(metadataTitle,width = 90,side = 'right',ellipsis = '...'),"<br>","<br>",
                                        "<b>Abstract:</b>",stringr::str_trunc(metadataAbstract,width = 200,side = 'right',ellipsis = '...'),"<br>","<br>",
                                        "<b>Organisation:</b>",metadataOrganisation,"<br>","<br>",
                                        "<b>URL (if available):</b>",metadataAltURI,"<br>","<br>",
                                        "&nbsp;",actionButton("showmodal", "View more...", onclick = 'Shiny.onInputChange(\"button_click\",  Math.random())'),
                                        sep =" "),
-                        # enable clustering for spiderfy, set freezeAtZoom so that actual clustering does not occur after zoom level 10
+                        # enable clustering for spiderfy
                         clusterOptions = leaflet::markerClusterOptions(
-                          showCoverageOnHover = FALSE,
+                          showCoverageOnHover = TRUE,
                           zoomToBoundsOnClick = FALSE,
                           spiderfyOnMaxZoom = TRUE,
                           removeOutsideVisibleBounds = TRUE,
-                          spiderLegPolylineOptions = list(weight = 1.5, color = "#222", opacity = 0.5),
-                          freezeAtZoom = 10))
+                          spiderLegPolylineOptions = list(weight = 1.5, color = "#222", opacity = 0.5)))
 }
 
 # Geographic Search Tab Table Output
