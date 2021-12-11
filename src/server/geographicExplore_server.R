@@ -141,7 +141,7 @@ output$searchTabMap <- leaflet::renderLeaflet({
                                        "<b>URL (if available):</b>",metadataAltURI,"<br>","<br>",
                                        "&nbsp;",actionButton("showmodal", "View more...", onclick = 'Shiny.onInputChange(\"button_click\",  Math.random())'),
                                        sep =" "),
-                        # enable clustering for spiderfy
+                        enable clustering for spiderfy
                         clusterOptions = leaflet::markerClusterOptions(
                           showCoverageOnHover = TRUE,
                           zoomToBoundsOnClick = FALSE,
@@ -233,7 +233,14 @@ output$searchTabMap <- leaflet::renderLeaflet({
         function() {
             $('.leaflet-control-layers-overlays').prepend('<label style=\"text-align:left; font-size:16px;\">Layer Control</label>');
         }
-    ")
+    ") %>% 
+  # assign the leaflet object to variable 'map'
+
+    htmlwidgets::onRender("
+          function(el, x) {
+            map = this;
+          }"
+    )
   # commenting out legend for now, the layer control in a way works as a legend and the screen was a bit cluttered with both
   #leaflet::addControl(position = "bottomright", html = html_legend)
 })
@@ -253,7 +260,7 @@ redrawFilteredMarkers <- function(filteredTibble,session){
                                        "<b>URL (if available):</b>",metadataAltURI,"<br>","<br>",
                                        "&nbsp;",actionButton("showmodal", "View more...", onclick = 'Shiny.onInputChange(\"button_click\",  Math.random())'),
                                        sep =" "),
-                        # enable clustering for spiderfy
+                        enable clustering for spiderfy
                         clusterOptions = leaflet::markerClusterOptions(
                           showCoverageOnHover = TRUE,
                           zoomToBoundsOnClick = FALSE,
@@ -420,6 +427,12 @@ observeEvent(input$searchTabMap_marker_click,{
 observeEvent(input$searchTabMap_click,{
   leaflet::leafletProxy('searchTabMap') %>%
     leaflet::clearGroup(group = 'markerRectangle')
+})
+# Observer for Search Datatable Click - Action: activate popup on map marker
+observeEvent(input$searchTabTable_rows_selected,{
+  rowIndex <- input$searchTabTable_rows_selected
+  metadataFilterReactive()[intersectVector(),]$id[rowIndex]
+  shinyjs::js$markerClick(metadataFilterReactive()[intersectVector(),]$id[rowIndex])
 })
 ############################################## 
 # Observer for Search Map Click - Action: Modal pop-up on each marker_click

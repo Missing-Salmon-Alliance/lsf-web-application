@@ -56,6 +56,7 @@ ui <- dashboardPage(skin = "blue",
                     ),
                     body = dashboardBody(
                       shinyjs::useShinyjs(),
+                      shinyjs::extendShinyjs(script = 'custom.js', functions = c('markerClick')),
                       includeCSS('www/custom.css'),
                       
                       # tabItems open
