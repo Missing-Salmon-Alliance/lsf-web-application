@@ -141,7 +141,7 @@ output$searchTabMap <- leaflet::renderLeaflet({
                                        "<b>URL (if available):</b>",metadataAltURI,"<br>","<br>",
                                        "&nbsp;",actionButton("showmodal", "View more...", onclick = 'Shiny.onInputChange(\"button_click\",  Math.random())'),
                                        sep =" "),
-                        enable clustering for spiderfy
+                        # enable clustering for spiderfy
                         clusterOptions = leaflet::markerClusterOptions(
                           showCoverageOnHover = TRUE,
                           zoomToBoundsOnClick = FALSE,
@@ -260,7 +260,7 @@ redrawFilteredMarkers <- function(filteredTibble,session){
                                        "<b>URL (if available):</b>",metadataAltURI,"<br>","<br>",
                                        "&nbsp;",actionButton("showmodal", "View more...", onclick = 'Shiny.onInputChange(\"button_click\",  Math.random())'),
                                        sep =" "),
-                        enable clustering for spiderfy
+                        # enable clustering for spiderfy
                         clusterOptions = leaflet::markerClusterOptions(
                           showCoverageOnHover = TRUE,
                           zoomToBoundsOnClick = FALSE,
