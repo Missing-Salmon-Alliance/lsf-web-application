@@ -134,11 +134,13 @@ output$searchTabMap <- leaflet::renderLeaflet({
                         label = ~metadataTitle,
                         layerId = ~id,
                         group = 'Data Source',
-                        popup = ~paste("<h3>",id," - More Information</h3>",
+                        popup = ~paste("<h3>More Information</h3>",
                                        "<b>Title:</b>",stringr::str_trunc(metadataTitle,width = 90,side = 'right',ellipsis = '...'),"<br>","<br>",
                                        "<b>Abstract:</b>",stringr::str_trunc(metadataAbstract,width = 200,side = 'right',ellipsis = '...'),"<br>","<br>",
                                        "<b>Organisation:</b>",metadataOrganisation,"<br>","<br>",
                                        "<b>URL (if available):</b>",metadataAltURI,"<br>","<br>",
+                                       "<em>UUID:</em>",metadataUUID,"<br>","<br>",
+                                       "<em>Internal ID:</em>",id,"<br>","<br>",
                                        "&nbsp;",actionButton("showmodal", "View more...", onclick = 'Shiny.onInputChange(\"button_click\",  Math.random())'),
                                        sep =" "),
                         # enable clustering for spiderfy
@@ -258,6 +260,8 @@ redrawFilteredMarkers <- function(filteredTibble,session){
                                        "<b>Abstract:</b>",stringr::str_trunc(metadataAbstract,width = 200,side = 'right',ellipsis = '...'),"<br>","<br>",
                                        "<b>Organisation:</b>",metadataOrganisation,"<br>","<br>",
                                        "<b>URL (if available):</b>",metadataAltURI,"<br>","<br>",
+                                       "<em>UUID:</em>",metadataUUID,"<br>","<br>",
+                                       "<em>Internal ID:</em>",id,"<br>","<br>",
                                        "&nbsp;",actionButton("showmodal", "View more...", onclick = 'Shiny.onInputChange(\"button_click\",  Math.random())'),
                                        sep =" "),
                         # enable clustering for spiderfy
@@ -442,6 +446,8 @@ observeEvent(input$button_click, {
   showModal(modalDialog(
     title = "Information on Selected Data Source",
     h4("More Information"),
+    em("UUID:    "), paste(lsfMetadata()[lsfMetadata()$id == click[1],]$metadataUUID),
+    br(),br(),
     em("Title:   "), paste(lsfMetadata()[lsfMetadata()$id == click[1],]$metadataTitle),
     br(),br(),
     em("Abstract:   "),paste(lsfMetadata()[lsfMetadata()$id == click[1],]$metadataAbstract),
