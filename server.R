@@ -30,6 +30,9 @@ server <- function(input, output, session) {
   ############################
   
   # Send user to registration page if URL contains register query ?register
+  # Send user to search page if URL contains ?search (figure out how to auto-prompt logon too)
+  # Send user to submit page if URL contains ?submit (figure out how to auto-prompt logon too)
+  # Send user to research activity page is URL contains ?newproject
   observe({
     query <- parseQueryString(session$clientData$url_search)
     if (!is.null(query[['register']])) {
