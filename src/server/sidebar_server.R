@@ -58,7 +58,8 @@ output$menu <- renderUI(
                   menuSubItem("Explore Map", tabName = 'searchlsf', icon = icon('globe-europe')),
                   menuSubItem("Explore Hypotheses", tabName = 'hypothesisExplore', icon = icon('question')),
                   menuSubItem("Explore Life-Stage Domains", tabName = 'domainExplore', icon = icon('fish'))
-                  )
+                  ),
+                shinyjs::hidden(menuItem("Submit Research Project", tabName = 'newproject', icon = icon('project-diagram')))
     )
   }
 )
