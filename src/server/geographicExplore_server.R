@@ -30,8 +30,7 @@ output$searchMapTabUI <- renderUI({
         width = 8,
         status = 'primary',
         solidHeader = FALSE,
-        title = "Map View",
-        leaflet::leafletOutput('searchTabMap', height = "85vh"),
+        leaflet::leafletOutput('searchTabMap', height = "80vh"),
         conditionalPanel(
           condition = "input.debug",
           textOutput('clickOutput'),
@@ -42,11 +41,8 @@ output$searchMapTabUI <- renderUI({
           textOutput('intersectVectorOut')
         )
       ),
-      shinydashboard::box(
+      column(
         width = 4,
-        status = 'primary',
-        solidHeader = FALSE,
-        title = "Table View",
         DT::DTOutput('searchTabTable')
       )
     )
