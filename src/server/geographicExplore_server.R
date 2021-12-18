@@ -26,9 +26,11 @@ output$searchMapTabUI <- renderUI({
     #               )
     # ),
     fluidRow(
-      column(
+      shinydashboard::box(
         width = 8,
-        leaflet::leafletOutput('searchTabMap', height = "85vh"),
+        status = 'primary',
+        solidHeader = FALSE,
+        leaflet::leafletOutput('searchTabMap', height = "80vh"),
         conditionalPanel(
           condition = "input.debug",
           textOutput('clickOutput'),
@@ -134,19 +136,22 @@ output$searchTabMap <- leaflet::renderLeaflet({
                         label = ~metadataTitle,
                         layerId = ~id,
                         group = 'Data Source',
-                        popup = ~paste("<h3>",id," - More Information</h3>",
+                        popup = ~paste("<h3>More Information</h3>",
                                        "<b>Title:</b>",stringr::str_trunc(metadataTitle,width = 90,side = 'right',ellipsis = '...'),"<br>","<br>",
                                        "<b>Abstract:</b>",stringr::str_trunc(metadataAbstract,width = 200,side = 'right',ellipsis = '...'),"<br>","<br>",
                                        "<b>Organisation:</b>",metadataOrganisation,"<br>","<br>",
                                        "<b>URL (if available):</b>",metadataAltURI,"<br>","<br>",
+                                       "<em>UUID:</em>",metadataUUID,"<br>","<br>",
+                                       "<em>Internal ID:</em>",id,"<br>","<br>",
                                        "&nbsp;",actionButton("showmodal", "View more...", onclick = 'Shiny.onInputChange(\"button_click\",  Math.random())'),
                                        sep =" "),
                         # enable clustering for spiderfy
                         clusterOptions = leaflet::markerClusterOptions(
                           showCoverageOnHover = TRUE,
-                          zoomToBoundsOnClick = FALSE,
+                          zoomToBoundsOnClick = TRUE,
                           spiderfyOnMaxZoom = TRUE,
                           removeOutsideVisibleBounds = TRUE,
+                          maxClusterRadius = 30,
                           spiderLegPolylineOptions = list(weight = 1.5, color = "#222", opacity = 0.5))) %>%
     
     leaflet::addMarkers(data = indexRiversSF,
@@ -228,12 +233,20 @@ output$searchTabMap <- leaflet::renderLeaflet({
                          "Proposed Outward Migration",
                          "Commonly Accepted Range",
                          "NASCO Rivers DB")) %>%
-    
+    # Customise layer control title
     htmlwidgets::onRender("
         function() {
             $('.leaflet-control-layers-overlays').prepend('<label style=\"text-align:left; font-size:16px;\">Layer Control</label>');
         }
-    ")
+    ") %>% 
+    
+    # assign the leaflet object to variable 'map' for use with custom css
+    # assists with click interactions on the table
+    htmlwidgets::onRender("
+          function(el, x) {
+            map = this;
+          }"
+    )
   # commenting out legend for now, the layer control in a way works as a legend and the screen was a bit cluttered with both
   #leaflet::addControl(position = "bottomright", html = html_legend)
 })
@@ -251,14 +264,17 @@ redrawFilteredMarkers <- function(filteredTibble,session){
                                        "<b>Abstract:</b>",stringr::str_trunc(metadataAbstract,width = 200,side = 'right',ellipsis = '...'),"<br>","<br>",
                                        "<b>Organisation:</b>",metadataOrganisation,"<br>","<br>",
                                        "<b>URL (if available):</b>",metadataAltURI,"<br>","<br>",
+                                       "<em>UUID:</em>",metadataUUID,"<br>","<br>",
+                                       "<em>Internal ID:</em>",id,"<br>","<br>",
                                        "&nbsp;",actionButton("showmodal", "View more...", onclick = 'Shiny.onInputChange(\"button_click\",  Math.random())'),
                                        sep =" "),
                         # enable clustering for spiderfy
                         clusterOptions = leaflet::markerClusterOptions(
                           showCoverageOnHover = TRUE,
-                          zoomToBoundsOnClick = FALSE,
+                          zoomToBoundsOnClick = TRUE,
                           spiderfyOnMaxZoom = TRUE,
                           removeOutsideVisibleBounds = TRUE,
+                          maxClusterRadius = 30,
                           spiderLegPolylineOptions = list(weight = 1.5, color = "#222", opacity = 0.5)))
 }
 
@@ -421,6 +437,12 @@ observeEvent(input$searchTabMap_click,{
   leaflet::leafletProxy('searchTabMap') %>%
     leaflet::clearGroup(group = 'markerRectangle')
 })
+# Observer for Search Datatable Click - Action: activate popup on map marker
+observeEvent(input$searchTabTable_rows_selected,{
+  rowIndex <- input$searchTabTable_rows_selected
+  metadataFilterReactive()[intersectVector(),]$id[rowIndex]
+  shinyjs::js$markerClick(metadataFilterReactive()[intersectVector(),]$id[rowIndex])
+})
 ############################################## 
 # Observer for Search Map Click - Action: Modal pop-up on each marker_click
 
@@ -429,6 +451,8 @@ observeEvent(input$button_click, {
   showModal(modalDialog(
     title = "Information on Selected Data Source",
     h4("More Information"),
+    em("UUID:    "), paste(lsfMetadata()[lsfMetadata()$id == click[1],]$metadataUUID),
+    br(),br(),
     em("Title:   "), paste(lsfMetadata()[lsfMetadata()$id == click[1],]$metadataTitle),
     br(),br(),
     em("Abstract:   "),paste(lsfMetadata()[lsfMetadata()$id == click[1],]$metadataAbstract),
