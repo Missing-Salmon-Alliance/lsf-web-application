@@ -151,6 +151,7 @@ output$searchTabMap <- leaflet::renderLeaflet({
                           zoomToBoundsOnClick = TRUE,
                           spiderfyOnMaxZoom = TRUE,
                           removeOutsideVisibleBounds = TRUE,
+                          maxClusterRadius = 30,
                           spiderLegPolylineOptions = list(weight = 1.5, color = "#222", opacity = 0.5))) %>%
     
     leaflet::addMarkers(data = indexRiversSF,
@@ -273,6 +274,7 @@ redrawFilteredMarkers <- function(filteredTibble,session){
                           zoomToBoundsOnClick = TRUE,
                           spiderfyOnMaxZoom = TRUE,
                           removeOutsideVisibleBounds = TRUE,
+                          maxClusterRadius = 30,
                           spiderLegPolylineOptions = list(weight = 1.5, color = "#222", opacity = 0.5)))
 }
 
