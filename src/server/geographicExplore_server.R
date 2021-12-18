@@ -26,8 +26,11 @@ output$searchMapTabUI <- renderUI({
     #               )
     # ),
     fluidRow(
-      column(
+      shinydashboard::box(
         width = 8,
+        status = 'primary',
+        solidHeader = FALSE,
+        title = "Map View",
         leaflet::leafletOutput('searchTabMap', height = "85vh"),
         conditionalPanel(
           condition = "input.debug",
@@ -39,8 +42,11 @@ output$searchMapTabUI <- renderUI({
           textOutput('intersectVectorOut')
         )
       ),
-      column(
+      shinydashboard::box(
         width = 4,
+        status = 'primary',
+        solidHeader = FALSE,
+        title = "Table View",
         DT::DTOutput('searchTabTable')
       )
     )
@@ -230,14 +236,15 @@ output$searchTabMap <- leaflet::renderLeaflet({
                          "Proposed Outward Migration",
                          "Commonly Accepted Range",
                          "NASCO Rivers DB")) %>%
-    
+    # Customise layer control title
     htmlwidgets::onRender("
         function() {
             $('.leaflet-control-layers-overlays').prepend('<label style=\"text-align:left; font-size:16px;\">Layer Control</label>');
         }
     ") %>% 
-  # assign the leaflet object to variable 'map'
-
+    
+    # assign the leaflet object to variable 'map' for use with custom css
+    # assists with click interactions on the table
     htmlwidgets::onRender("
           function(el, x) {
             map = this;
