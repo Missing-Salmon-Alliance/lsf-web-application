@@ -226,9 +226,10 @@ output$searchTabMap <- leaflet::renderLeaflet({
                                                                      "Proposed Outward Migration",
                                                                      "Commonly Accepted Range",
                                                                      "NASCO Rivers DB"),
-                              options = leaflet::layersControlOptions(collapsed = FALSE)) %>%
+                              options = leaflet::layersControlOptions(collapsed = TRUE)) %>%
     leaflet::hideGroup(c("ICES Ecoregions",
                          "NAFO Divisions",
+                         "ICES Index Rivers",
                          #"ICES Stat Squares",
                          "Proposed Outward Migration",
                          "Commonly Accepted Range",
