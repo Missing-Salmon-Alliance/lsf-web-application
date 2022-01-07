@@ -238,10 +238,18 @@ observeEvent(input$monthsOfYearToggleAll,{
 
 # Geographic Detail Server
 output$submitMap <- leaflet::renderLeaflet({
-  leaflet::leaflet(options = leaflet::leafletOptions(maxZoom = 10)) %>% # maxZoom set so that user can always see their rectangle in context of a coastline
-    leaflet::addProviderTiles(leaflet::providers$Esri.OceanBasemap) %>%
-    leaflet::addRectangles(-15,61,-14,60,group = 'userRectangle') %>% 
-    leaflet::fitBounds(-15,61,-14,60,options = leaflet::leafletOptions(maxZoom = 5))
+  leaflet::leaflet(options = leaflet::leafletOptions(minZoom = 3,maxZoom = 19)) %>% # maxZoom set so that user can always see their rectangle in context of a coastline
+    leaflet::addProviderTiles(leaflet::providers$Esri.OceanBasemap, options = leaflet::providerTileOptions(minZoom = 3, maxZoom =10)) %>%
+    leaflet::addProviderTiles(leaflet::providers$OpenStreetMap, options = leaflet::providerTileOptions(minZoom = 11, maxZoom = 19)) %>%
+    leaflet::addRectangles(round(salmosalarExtents[['xmin']],digits = 4),
+                           round(salmosalarExtents[['ymax']],digits = 4),
+                           round(salmosalarExtents[['xmax']],digits = 4),
+                           round(salmosalarExtents[['ymin']],digits = 4),
+                           group = 'userRectangle') %>% 
+    leaflet::fitBounds(round(salmosalarExtents[['xmin']],digits = 4),
+                       round(salmosalarExtents[['ymax']],digits = 4),
+                       round(salmosalarExtents[['xmax']],digits = 4),
+                       round(salmosalarExtents[['ymin']],digits = 4))
 })
 # observer for 4 numeric inputs lat/lon - action update userRectangle on submitMap, change zoom and centre
 observeEvent(input$submitEast | input$submitWest | input$submitNorth | input$submitSouth,{
