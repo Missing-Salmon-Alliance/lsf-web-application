@@ -238,8 +238,8 @@ observeEvent(input$monthsOfYearToggleAll,{
 
 # Geographic Detail Server
 output$submitMap <- leaflet::renderLeaflet({
-  leaflet::leaflet(options = leaflet::leafletOptions(minZoom = 3,maxZoom = 19)) %>% # maxZoom set so that user can always see their rectangle in context of a coastline
-    leaflet::addProviderTiles(leaflet::providers$Esri.OceanBasemap, options = leaflet::providerTileOptions(minZoom = 3, maxZoom =10)) %>%
+  leaflet::leaflet(options = leaflet::leafletOptions(minZoom = 0,maxZoom = 19)) %>% # maxZoom set so that user can always see their rectangle in context of a coastline
+    leaflet::addProviderTiles(leaflet::providers$Esri.OceanBasemap, options = leaflet::providerTileOptions(minZoom = 0, maxZoom =10)) %>%
     leaflet::addProviderTiles(leaflet::providers$OpenStreetMap, options = leaflet::providerTileOptions(minZoom = 11, maxZoom = 19)) %>%
     leaflet::addRectangles(round(salmosalarExtents[['xmin']],digits = 4),
                            round(salmosalarExtents[['ymax']],digits = 4),
