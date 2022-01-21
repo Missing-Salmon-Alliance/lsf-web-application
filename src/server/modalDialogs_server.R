@@ -68,7 +68,6 @@ observeEvent(input$metadataFields,{
              br(),
              h4("URL"),
              em("If the data being submitted is hosted on another website or database, please provide the URL for the location of this data."),
-             #em("Note that if the data is already hosted on the Knowledge Network for Biocomplexity then the sidebar ",strong("'Load from KNB'")," option can be used to link the resources."),
              br(),
              h4("Select Update Frequency "),
              em("Provide information on how regularly the data is updated, if updated at all."),
