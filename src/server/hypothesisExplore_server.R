@@ -205,12 +205,20 @@ observeEvent(input$esvFilterTraitHyp,{
     shinyWidgets::updateCheckboxGroupButtons(session,'esvFilterBioHyp',selected = character(0),
                                              checkIcon = checkboxGroupButtonsIcons,
                                              size = 'xs')
+    # IN DEVELOPMENT
+    # Hypotheses are directly related to Domains in the graph
+    # Use this relationship to filter the metadata based on metadata-ESV relationship domain
+    #filteredDomainTitles <- neo4r::call_neo4j(paste0("MATCH (h:Hypothesis)-[:HAS_DOMAIN]-(d) WHERE id(h) = ",input$hypothesisFilter," RETURN d.domainTitle as dom;"),neo_con,type = 'row')$dom$value
+    
+    
     # capture target environment from selected subHyp node
     filteredSubHypEnv <- neo4r::call_neo4j(paste0("MATCH (n) WHERE id(n) = ",input$subHypothesisFilter," RETURN n.subHypothesisEnvironment as env;"),neo_con,type='row')$env$value
     # capture subset of domains that apply to this environment
     filteredDomainTitles <- lsfDomains()[lsfDomains()$domainEnvironment == filteredSubHypEnv,]$domainTitle
+    
     # filter
     filteredMetadata <- neo4r::call_neo4j(paste0("MATCH (m)-[a:HAS_ESV]-(esv) WHERE id(esv) IN [",formatNumericList(input$esvFilterTraitHyp),"] AND a.domain IN [",formatCheckboxGroupCategories(filteredDomainTitles),"] RETURN m;"),neo_con,type = 'graph')
+    
     if(paste0(class(filteredMetadata),collapse = ",") == 'neo,list'){ # test that returned item is a valid graph object, otherwise ignore empty result
       filteredMetadata <- filteredMetadata$nodes %>% neo4r::unnest_nodes('all')
       hypothesisExploreReactive(filteredMetadata)
