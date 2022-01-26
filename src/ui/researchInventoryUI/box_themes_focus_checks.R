@@ -10,7 +10,7 @@ box( # Themes and Focus box open
   column( # sub column 1 open
     width = 6,
     checkboxGroupInput( # checkboxGroupInput 1
-      "researchProjectTheme",
+      "theme",
       label = "Select Themes addressed by the research project",
       choiceNames = list(
         "Method development",
