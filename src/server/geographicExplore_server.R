@@ -6,6 +6,7 @@
 # SIDEBAR Conditional UI
 output$searchRefreshUI <- renderUI(actionButton('searchRefresh',"Refresh"))
 output$searchFilterResetUI <- renderUI(actionButton('searchFilterReset',"Reset Filter"))
+output$onlineOnlyFilterUI <- renderUI(checkboxInput('onlineOnlyFilter',"Show Online Only Resources",value = F))
 ###########
 # MAP Tab Conditional UI
 output$searchMapTabUI <- renderUI({
@@ -317,6 +318,21 @@ options = list(pageLength = 15,
 )
 
 )
+
+# Online resource only filter - Display only metadata that has an entry in metadataAltURI
+observeEvent(input$onlineOnlyFilter,{
+  req(lsfMetadata())# don't activate until lsfMetadata is populated (after user log on)
+  if(!input$onlineOnlyFilter){
+    metadataFilterReactive(lsfMetadata())
+    leaflet::leafletProxy('searchTabMap', session) %>%
+      leaflet::clearGroup(group = 'Data Source')
+  }else{
+    metadataFilterReactive(lsfMetadata()[!(lsfMetadata()$metadataAltURI == ""),])
+    leaflet::leafletProxy('searchTabMap', session) %>%
+      leaflet::clearGroup(group = 'Data Source')
+  }
+  redrawFilteredMarkers(metadataFilterReactive(),session)
+})
 
 
 ###########################################

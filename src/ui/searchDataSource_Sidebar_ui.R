@@ -10,6 +10,7 @@ conditionalPanel(
       
     ),
     uiOutput('searchFilterResetUI'),
+    uiOutput('onlineOnlyFilterUI'),
     hr(),
     uiOutput('searchRefreshUI')
   )
