@@ -97,7 +97,12 @@ observeEvent(input$esvFilterBioDom,{
                                              checkIcon = checkboxGroupButtonsIcons,
                                              size = 'xs')
     # filter
-    filteredMetadata <- neo4r::call_neo4j(paste0("MATCH (m)-[:HAS_ESV]-(esv) WHERE id(esv) IN [",formatNumericList(input$esvFilterBioDom),"] RETURN m;"),neo_con,type = 'graph')
+    filteredMetadata <- neo4r::call_neo4j(paste0("MATCH (m)-[r:HAS_ESV]-(esv) WHERE id(esv) IN [",
+                                                 formatNumericList(input$esvFilterBioDom),
+                                                 "] AND r.domainID IN [",
+                                                 formatNumericList(input$domainFilter),
+                                                 "] RETURN m;"),
+                                          neo_con,type = 'graph')
     if(paste0(class(filteredMetadata),collapse = ",") == 'neo,list'){ # test that returned item is a valid graph object, otherwise ignore empty result
       filteredMetadata <- filteredMetadata$nodes %>% neo4r::unnest_nodes('all')
       domainExploreReactive(filteredMetadata)
@@ -122,7 +127,10 @@ observeEvent(input$esvFilterPhysDom,{
                                              checkIcon = checkboxGroupButtonsIcons,
                                              size = 'xs')
     # filter
-    filteredMetadata <- neo4r::call_neo4j(paste0("MATCH (m)-[:HAS_ESV]-(esv) WHERE id(esv) IN [",formatNumericList(input$esvFilterPhysDom),"] RETURN m;"),neo_con,type = 'graph')
+    filteredMetadata <- neo4r::call_neo4j(paste0("MATCH (m)-[r:HAS_ESV]-(esv) WHERE id(esv) IN [",formatNumericList(input$esvFilterPhysDom),
+                                                 "] AND r.domainID IN [",
+                                                 formatNumericList(input$domainFilter),
+                                                 "] RETURN m;"),neo_con,type = 'graph')
     if(paste0(class(filteredMetadata),collapse = ",") == 'neo,list'){ # test that returned item is a valid graph object, otherwise ignore empty result
       filteredMetadata <- filteredMetadata$nodes %>% neo4r::unnest_nodes('all')
       domainExploreReactive(filteredMetadata)
@@ -147,7 +155,10 @@ observeEvent(input$esvFilterTraitDom,{
                                              checkIcon = checkboxGroupButtonsIcons,
                                              size = 'xs')
     # filter
-    filteredMetadata <- neo4r::call_neo4j(paste0("MATCH (m)-[:HAS_ESV]-(esv) WHERE id(esv) IN [",formatNumericList(input$esvFilterTraitDom),"] RETURN m;"),neo_con,type = 'graph')
+    filteredMetadata <- neo4r::call_neo4j(paste0("MATCH (m)-[r:HAS_ESV]-(esv) WHERE id(esv) IN [",formatNumericList(input$esvFilterTraitDom),
+                                                 "] AND r.domainID IN [",
+                                                 formatNumericList(input$domainFilter),
+                                                 "] RETURN m;"),neo_con,type = 'graph')
     if(paste0(class(filteredMetadata),collapse = ",") == 'neo,list'){ # test that returned item is a valid graph object, otherwise ignore empty result
       filteredMetadata <- filteredMetadata$nodes %>% neo4r::unnest_nodes('all')
       domainExploreReactive(filteredMetadata)

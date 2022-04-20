@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<eml:eml
+    packageId="template_value"
+    xmlns:eml="https://eml.ecoinformatics.org/eml-2.2.0"
+    xmlns:stmml="http://www.xml-cml.org/schema/stmml-1.1"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    system="knb"
+    xsi:schemaLocation="https://eml.ecoinformatics.org/eml-2.2.0 https://eml.ecoinformatics.org/eml-2.2.0/eml.xsd">
+    <dataset>
+        <alternateIdentifier>template_value</alternateIdentifier>
+        <title>template_value</title>
+        <creator>
+            <individualName>
+                <givenName>template_value</givenName>
+                <surName>template_value</surName>
+            </individualName>
+            <organizationName>template_value</organizationName>
+            <electronicMailAddress>template_value</electronicMailAddress>
+            <userId directory="https://orcid.org">template_value</userId>
+        </creator>
+        <metadataProvider>
+            <individualName>
+                <givenName>template_value</givenName>
+                <surName>template_value</surName>
+            </individualName>
+            <organizationName>template_value</organizationName>
+            <electronicMailAddress>template_value</electronicMailAddress>
+            <userId directory="https://orcid.org">template_value</userId>
+        </metadataProvider>
+        <pubDate>9999</pubDate>
+        <abstract>
+            <para>template_value</para>
+        </abstract>
+        <keywordSet>
+            <keyword>template_value</keyword>
+        </keywordSet>
+        <intellectualRights>
+            <para>template_value</para>
+        </intellectualRights>
+        <coverage>
+            <geographicCoverage>
+                <geographicDescription>template_value</geographicDescription>
+                <boundingCoordinates>
+                    <westBoundingCoordinate>0.0</westBoundingCoordinate>
+                    <eastBoundingCoordinate>0.0</eastBoundingCoordinate>
+                    <northBoundingCoordinate>0.0</northBoundingCoordinate>
+                    <southBoundingCoordinate>0.0</southBoundingCoordinate>
+                </boundingCoordinates>
+            </geographicCoverage>
+            <taxonomicCoverage>
+                <generalTaxonomicCoverage>template_value</generalTaxonomicCoverage>
+                <taxonomicClassification>
+                    <taxonRankName>template_value</taxonRankName>
+                    <taxonRankValue>template_value</taxonRankValue>
+                </taxonomicClassification>
+            </taxonomicCoverage>
+            <temporalCoverage>
+                <rangeOfDates>
+                    <beginDate>
+                        <calendarDate>9999</calendarDate>
+                    </beginDate>
+                    <endDate>
+                        <calendarDate>9999</calendarDate>
+                    </endDate>
+                </rangeOfDates>
+            </temporalCoverage>
+        </coverage>
+        <maintenance>
+            <description>template_value</description>
+            <maintenanceUpdateFrequency>template_value</maintenanceUpdateFrequency>
+        </maintenance>
+        <contact>
+            <references>template_value</references>
+        </contact>
+    </dataset>
+</eml:eml>
