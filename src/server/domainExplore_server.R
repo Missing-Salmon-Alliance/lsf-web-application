@@ -99,7 +99,7 @@ observeEvent(input$esvFilterBioDom,{
     # filter
     filteredMetadata <- neo4r::call_neo4j(paste0("MATCH (m)-[r:HAS_ESV]-(esv) WHERE id(esv) IN [",
                                                  formatNumericList(input$esvFilterBioDom),
-                                                 "AND r.domainID IN [",
+                                                 "] AND r.domainID IN [",
                                                  formatNumericList(input$domainFilter),
                                                  "] RETURN m;"),
                                           neo_con,type = 'graph')
@@ -128,7 +128,7 @@ observeEvent(input$esvFilterPhysDom,{
                                              size = 'xs')
     # filter
     filteredMetadata <- neo4r::call_neo4j(paste0("MATCH (m)-[r:HAS_ESV]-(esv) WHERE id(esv) IN [",formatNumericList(input$esvFilterPhysDom),
-                                                 "AND r.domainID IN [",
+                                                 "] AND r.domainID IN [",
                                                  formatNumericList(input$domainFilter),
                                                  "] RETURN m;"),neo_con,type = 'graph')
     if(paste0(class(filteredMetadata),collapse = ",") == 'neo,list'){ # test that returned item is a valid graph object, otherwise ignore empty result
@@ -156,7 +156,7 @@ observeEvent(input$esvFilterTraitDom,{
                                              size = 'xs')
     # filter
     filteredMetadata <- neo4r::call_neo4j(paste0("MATCH (m)-[r:HAS_ESV]-(esv) WHERE id(esv) IN [",formatNumericList(input$esvFilterTraitDom),
-                                                 "AND r.domainID IN [",
+                                                 "] AND r.domainID IN [",
                                                  formatNumericList(input$domainFilter),
                                                  "] RETURN m;"),neo_con,type = 'graph')
     if(paste0(class(filteredMetadata),collapse = ",") == 'neo,list'){ # test that returned item is a valid graph object, otherwise ignore empty result
