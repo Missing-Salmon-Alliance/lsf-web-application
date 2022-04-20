@@ -97,7 +97,7 @@ observeEvent(input$esvFilterBioDom,{
                                              checkIcon = checkboxGroupButtonsIcons,
                                              size = 'xs')
     # filter
-    filteredMetadata <- neo4r::call_neo4j(paste0("MATCH (m)-[:HAS_ESV]-(esv) WHERE id(esv) IN [",
+    filteredMetadata <- neo4r::call_neo4j(paste0("MATCH (m)-[r:HAS_ESV]-(esv) WHERE id(esv) IN [",
                                                  formatNumericList(input$esvFilterBioDom),
                                                  "AND r.domainID IN [",
                                                  formatNumericList(input$domainFilter),
@@ -127,7 +127,7 @@ observeEvent(input$esvFilterPhysDom,{
                                              checkIcon = checkboxGroupButtonsIcons,
                                              size = 'xs')
     # filter
-    filteredMetadata <- neo4r::call_neo4j(paste0("MATCH (m)-[:HAS_ESV]-(esv) WHERE id(esv) IN [",formatNumericList(input$esvFilterPhysDom),
+    filteredMetadata <- neo4r::call_neo4j(paste0("MATCH (m)-[r:HAS_ESV]-(esv) WHERE id(esv) IN [",formatNumericList(input$esvFilterPhysDom),
                                                  "AND r.domainID IN [",
                                                  formatNumericList(input$domainFilter),
                                                  "] RETURN m;"),neo_con,type = 'graph')
@@ -155,7 +155,7 @@ observeEvent(input$esvFilterTraitDom,{
                                              checkIcon = checkboxGroupButtonsIcons,
                                              size = 'xs')
     # filter
-    filteredMetadata <- neo4r::call_neo4j(paste0("MATCH (m)-[:HAS_ESV]-(esv) WHERE id(esv) IN [",formatNumericList(input$esvFilterTraitDom),
+    filteredMetadata <- neo4r::call_neo4j(paste0("MATCH (m)-[r:HAS_ESV]-(esv) WHERE id(esv) IN [",formatNumericList(input$esvFilterTraitDom),
                                                  "AND r.domainID IN [",
                                                  formatNumericList(input$domainFilter),
                                                  "] RETURN m;"),neo_con,type = 'graph')
