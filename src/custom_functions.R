@@ -49,8 +49,8 @@ checkUserCredentials <- function(user,pw){
   
   # connect to neo4j and return person node that matches both username and password combination
   # return Person node and ALL directly connected nodes (e.g. requested metadata, submitted metadata and affiliated organisation)
-  res <- neo4r::call_neo4j(paste0("MATCH (p:Person{personEmail:'",user,
-                           "',personPassword:'",pw,
+  res <- neo4r::call_neo4j(paste0("MATCH (p:Person{personEmail:'",sanitiseFreeTextInputs(user),
+                           "',personPassword:'",sanitiseFreeTextInputs(pw),
                            "'})-[r]-(x) RETURN p,r,x;"),
                     neo_con,
                     type = 'graph')
