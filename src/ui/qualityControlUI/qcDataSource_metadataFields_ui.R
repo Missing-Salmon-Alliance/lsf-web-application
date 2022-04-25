@@ -51,6 +51,12 @@ box(title = p("Data Source Details"),
            width = 8,
            textInput('qcEmbargoEnd',"Embargo End Date:",value = "")
          )
+       ),
+       fluidRow(
+           column(
+               width = 12,
+               textInput('qcKeywords',"Keywords",value = "")
+           )
        )
     )
 )
