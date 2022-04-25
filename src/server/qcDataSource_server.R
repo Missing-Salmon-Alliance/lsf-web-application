@@ -52,6 +52,7 @@ qcLoadMetadata <- function(){
   updateCheckboxInput(session, inputId = 'qcAvailableOnline', value = qcDatabaseMetadata()$m$metadataAvailableOnline)
   updateCheckboxInput(session,inputId = 'qcEmbargoEndToggle',value = qcDatabaseMetadata()$m$metadataEmbargoed)
   updateTextInput(session,inputId = 'qcEmbargoEnd',value = qcDatabaseMetadata()$m$metadataEmbargoEnd)
+  updateTextInput(session, inputId = 'qcKeywords', value = qcDatabaseMetadata()$m$metadataKeywords)
 
 }
 
@@ -167,6 +168,7 @@ observeEvent(input$submitQCMetadata,{
                                     "', m.metadataAvailableOnline = ",input$qcAvailableOnline,
                                     ", m.metadataEmbargoed = ",input$qcEmbargoEndToggle,
                                     ", m.metadataEmbargoEnd = '",sanitiseFreeTextInputs(input$qcEmbargoEnd),
+                                    "', m.metadataKeywords = '",sanitiseFreeTextInputs(input$qcKeywords),
                                     "', m.metadataLastModified = '",Sys.time(),
                                     "', r.status = 'startedQC', r.lastModified = '",Sys.time(),"';")
   
