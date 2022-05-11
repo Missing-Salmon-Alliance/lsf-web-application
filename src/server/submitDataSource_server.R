@@ -527,7 +527,8 @@ observeEvent(input$confirmSubmitNewDataSource, {
                                      "',metadataAvailableOnline:",input$sourceAvailableOnline,
                                      ",metadataEmbargoed:",input$embargoEndToggle,
                                      ",metadataEmbargoEnd:'",sanitiseFreeTextInputs(input$embargoEnd),
-                                     "',metadataGeographicDescription:'",sanitiseFreeTextInputs(input$sourceGeographicDescription),
+                                     "',metadataAccessProtocol:''", # add blank Access Protocol to be confirmed at QC
+                                     ",metadataGeographicDescription:'",sanitiseFreeTextInputs(input$sourceGeographicDescription),
                                      "',metadataCreatorEmail:'",sanitiseFreeTextInputs(input$sourceCreatorEmail),
                                      "',metadataCreatorORCID:'",sanitiseFreeTextInputs(input$sourceCreatorORCID),
                                      "',metadataCoverageStartYear:",sanitiseFreeTextInputs(input$sourceStartYear),
@@ -560,7 +561,7 @@ observeEvent(input$confirmSubmitNewDataSource, {
     queryMasterList <- c()
     
     # create base query elements
-    queryBase <- c("MATCH (esv:EssentialSalmonVariable{esvTitle:'","'}),(md:Metadata{metadataUUID:'","'}) CREATE (esv)<-[:HAS_ESV{domain:'","'}]-(md);")
+    queryBase <- c("MATCH (esv:EssentialSalmonVariable{esvTitle:'","'}),(md:Metadata{metadataUUID:'","'}) CREATE (esv)<-[:HAS_ESV{domain:'","',domainID:","}]-(md);")
     # cycle through all the selected ESV for each domain IS THIS EFFICIENT?
     for(domainID in input$domainNodeList){
       domainName <- lsfDomains()[lsfDomains()$id == domainID,]$domainTitle
@@ -572,7 +573,7 @@ observeEvent(input$confirmSubmitNewDataSource, {
       variableClassesForDomain <- c(input[[paste0(domainID,"_biological")]],input[[paste0(domainID,"_physical")]],input[[paste0(domainID,"_salmontrait")]])
       for(esv in variableClassesForDomain){
         # create sub query for single esv-metadata
-        querySubMaster <- paste(queryBase[1],esv,queryBase[2],sessionUUID(),queryBase[3],domainName,queryBase[4],sep = "")
+        querySubMaster <- paste(queryBase[1],esv,queryBase[2],sessionUUID(),queryBase[3],domainName,queryBase[4],domainID,queryBase[5],sep = "")
         # add sub query to master query list
         queryMasterList <- append(queryMasterList,querySubMaster)
       }
