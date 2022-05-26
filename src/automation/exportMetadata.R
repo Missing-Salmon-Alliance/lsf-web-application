@@ -33,6 +33,32 @@ export <- dplyr::arrange(export,startNode)
 export <- export %>% dplyr::group_by(startNode) %>% dplyr::summarize(variableClasses = paste0(esvTitle, collapse = ", "))
 
 
+#EXPORT Variable Classes with Class physical, biological and salmon trait
+export <- neo4r::call_neo4j("MATCH (esv:EssentialSalmonVariable) RETURN esv;",neo_con,type = 'graph')
+export <- neo4r::unnest_nodes(export$nodes)
+readr::write_csv(export[,c('esvTitle','esvCategory')],'esv_data.csv')
+
+
+# Export Hypotheses and related metadata
+# Grab all the pathways from metadata through ESV's to hypotheses
+
+query <- "MATCH (m:Metadata)-[r:HAS_ESV]-(:EssentialSalmonVariable)
+          MATCH (hyp:Hypothesis)
+          WHERE (m)-[:HAS_ESV]-(:EssentialSalmonVariable)-[:REQUIRES_ESV]-(:SubHypothesis)-[:HAS_SUBHYPOTHESIS]-(hyp:Hypothesis)
+          MATCH (d:Domain) WHERE d.domainTitle = r.domain
+          AND d.domainEnvironment = hyp.hypothesisEnvironment
+          RETURN DISTINCT[id(m),m.metadataWksalmonSection,hyp.hypothesisTitle,m.metadataTitle,m.metadataAltURI,m.metadataFilename,m.metadataAccessProtocol]
+          AS output;"
+
+export <- neo4r::call_neo4j(query,neo_con,type = 'row')
+export <- export$output
+names(export) <- c("id","metadataWksalmonSection","hypothesisTitle","metadataTitle","metadataAltURI","metadataFilename","metadataAccessProtocol")
+
+
+readr::write_csv(export,'metadataHypotheses.csv')
+
+#########################
+
 #Load, selected column update
 
 loadData <- readr::read_csv('CDR_Data_IndexRivers_ModifiedForLoad.csv')
