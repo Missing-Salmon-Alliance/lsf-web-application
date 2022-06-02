@@ -22,23 +22,50 @@ ui <- shinydashboard::dashboardPage(
       width = 4,
       DT::dataTableOutput('searchTabTable')
     ),
+    column(width = 4,
+      h3('Title:'),
+      textOutput('title'),
+      h3('Abstract:'),
+      textOutput('abstract'),
+      h3('Organisation:'),
+      textOutput('organisation'),
+      h3('URL:'),
+      textOutput('url'),
+      h3('Access Protocol:'),
+      textOutput('accessProtocol'),
+      h3('Geography and Time:'),
+      textOutput('geographicDescription'),
+      textOutput('geographicExtents'),
+      textOutput('temporalRange')
+    ),
     column(
-      width = 8,
-      leaflet::leafletOutput('searchTabMap'),
-      br(),
-      shinydashboard::box(
-        width = 12,
-        title = "Selected Data Source Information"#,
-        # ~paste("<h3>More Information</h3>",
-        #        "<b>Title:</b>",stringr::str_trunc(metadataTitle,width = 90,side = 'right',ellipsis = '...'),"<br>","<br>",
-        #        "<b>Abstract:</b>",stringr::str_trunc(metadataAbstract,width = 200,side = 'right',ellipsis = '...'),"<br>","<br>",
-        #        "<b>Organisation:</b>",metadataOrganisation,"<br>","<br>",
-        #        "<b>URL (if available):</b>",metadataAltURI,"<br>","<br>",
-        #        "<em>UUID:</em>",metadataUUID,"<br>","<br>",
-        #        "<em>Internal ID:</em>",id,"<br>","<br>",
-        #        "&nbsp;",actionButton("showmodal", "View more...", onclick = 'Shiny.onInputChange(\"button_click\",  Math.random())'),
-        #        sep =" ")
-      )
+      width = 4,
+      leaflet::leafletOutput('searchTabMap',height = '90vh')
+      # br(),
+      # shinydashboard::box(
+      #   width = 12,
+      #   title = "Selected Data Source Information",
+      #   column(width = 6,
+      #     h3('Title:'),
+      #     textOutput('title'),
+      #     h3('Abstract:'),
+      #     textOutput('abstract')
+      #   ),
+      #   column(width = 3,
+      #     h3('Organisation:'),
+      #     textOutput('organisation'),
+      #     h3('URL:'),
+      #     textOutput('url'),
+      #     h3('Access Protocol:'),
+      #     textOutput('accessProtocol')
+      #   ),
+      #   column(width = 3,
+      #     h3('Geography and Time:'),
+      #     textOutput('geographicDescription'),
+      #     textOutput('geographicExtents'),
+      #     textOutput('temporalRange')
+      #   )
+      # )
     )
   )
 )
@@ -49,27 +76,27 @@ server <- function(input,output,session){
   lsfMetadata(sf::st_as_sf(testData, wkt = "metadataCoverageCentroid", crs = 4326, na.fail = FALSE))
   
   output$searchTabTable <- DT::renderDataTable({
-    req(input$searchTabMap_bounds)
-    # Create Intersection vector to filter table
-    intersectVector(
-      as.vector(
-        sf::st_intersects(
-          sf::st_polygon(
-            list(
-              rbind( # NOTE - build polygon clockwise AND WKT notation has longitude first, latitude second
-                as.numeric(input$searchTabMap_bounds[c(4,1)]),
-                as.numeric(input$searchTabMap_bounds[c(2,1)]),
-                as.numeric(input$searchTabMap_bounds[c(2,3)]),
-                as.numeric(input$searchTabMap_bounds[c(4,3)]),
-                as.numeric(input$searchTabMap_bounds[c(4,1)])
-              )
-            )
-          ),
-          lsfMetadata(),sparse = FALSE
-        )
-      )
-    )
-    sf::st_set_geometry(lsfMetadata()[intersectVector(),c('metadataTitle','metadataAbstract','metadataKeywords')],NULL)
+    # req(input$searchTabMap_bounds)
+    # # Create Intersection vector to filter table
+    # intersectVector(
+    #   as.vector(
+    #     sf::st_intersects(
+    #       sf::st_polygon(
+    #         list(
+    #           rbind( # NOTE - build polygon clockwise AND WKT notation has longitude first, latitude second
+    #             as.numeric(input$searchTabMap_bounds[c(4,1)]),
+    #             as.numeric(input$searchTabMap_bounds[c(2,1)]),
+    #             as.numeric(input$searchTabMap_bounds[c(2,3)]),
+    #             as.numeric(input$searchTabMap_bounds[c(4,3)]),
+    #             as.numeric(input$searchTabMap_bounds[c(4,1)])
+    #           )
+    #         )
+    #       ),
+    #       lsfMetadata(),sparse = FALSE
+    #     )
+    #   )
+    # )
+    sf::st_set_geometry(lsfMetadata()[,c('metadataTitle','metadataAbstract','metadataKeywords')],NULL)
     },
     selection = 'single',
     rownames = FALSE,
@@ -79,7 +106,8 @@ server <- function(input,output,session){
                    columnDefs = list(list(visible=FALSE, targets=c(1,2)),
                                      list(
                                        targets = 0,
-                                       render = JS("function(data, type, row, meta) {return type === 'display' && data.length > 50 ? '<span title=' + data + '>' + data.substr(0, 50) + '...</span>' : data;}"))
+                                       # limit row width by truncating text in the title field
+                                       render = JS("function(data, type, row, meta) {return type === 'display' && data.length > 80 ? '<span title=' + data + '>' + data.substr(0, 80) + '...</span>' : data;}"))
                                      ),
                    searching = FALSE,
                    lengthChange = FALSE,
@@ -111,6 +139,30 @@ server <- function(input,output,session){
                             maxClusterRadius = 30,
                             spiderLegPolylineOptions = list(weight = 1.5, color = "#222", opacity = 0.5)))
   })
+  
+  observeEvent(input$searchTabTable_rows_selected,{
+    leaflet::leafletProxy('searchTabMap') %>%
+      leaflet::clearGroup(group = 'selectedRectangle') %>%
+      leaflet::addRectangles(
+        lsfMetadata()$metadataCoverageWest[input$searchTabTable_rows_selected],
+        lsfMetadata()$metadataCoverageNorth[input$searchTabTable_rows_selected],
+        lsfMetadata()$metadataCoverageEast[input$searchTabTable_rows_selected],
+        lsfMetadata()$metadataCoverageSouth[input$searchTabTable_rows_selected],
+        group = 'selectedRectangle') %>%
+      leaflet::fitBounds(
+        lsfMetadata()$metadataCoverageWest[input$searchTabTable_rows_selected],
+        lsfMetadata()$metadataCoverageNorth[input$searchTabTable_rows_selected],
+        lsfMetadata()$metadataCoverageEast[input$searchTabTable_rows_selected],
+        lsfMetadata()$metadataCoverageSouth[input$searchTabTable_rows_selected])
+  })
+  output$title <- renderText({lsfMetadata()$metadataTitle[input$searchTabTable_rows_selected]})
+  output$abstract <- renderText({lsfMetadata()$metadataAbstract[input$searchTabTable_rows_selected]})
+  output$organisation <- renderText({lsfMetadata()$metadataOrganisation[input$searchTabTable_rows_selected]})
+  output$url <- renderText({lsfMetadata()$metadataAltURI[input$searchTabTable_rows_selected]})
+  output$accessProtocol <- renderText({lsfMetadata()$metadataAccessProtocol[input$searchTabTable_rows_selected]})
+  output$geographicDescription <- renderText({lsfMetadata()$metadataGeographicDescription[input$searchTabTable_rows_selected]})
+  # output$geographicExtents <- renderText({lsfMetadata()$metadata[input$searchTabTable_rows_selected]})
+  # output$temporalRange <- renderText({lsfMetadata()$metadata[input$searchTabTable_rows_selected]})
   
 }
 
