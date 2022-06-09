@@ -63,7 +63,7 @@ tabItem('introduction',
                 ),
                 box(
                   width = 4,
-                  title = "Search The Framework",
+                  title = "Search The Salmon Ecosystem Data Hub",
                   status = 'primary',
                   solidHeader = FALSE,
                   em(searchIntroCopy)

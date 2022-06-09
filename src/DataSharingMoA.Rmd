@@ -24,7 +24,7 @@ Submissions will undergo a quality control process that ensures the metadata is 
 Access to data resources will be via an online request form where the requester will supply information such as expected usage, expected duration of use and details of who will have access to the data. The request will be made in the name of the logged in person and access to the data resource will be granted to that same person. **The use of data resources for commercial purposes is not permitted.**  
 
 ### Data Access Audit
-Access history and actions (e.g., submit resource, request resource) will be audited per user within the framework to keep a record of usage statistics and also assist users to keep track of historical activity.  
+Access history and actions (e.g., submit resource, request resource) will be audited per user within the resource to keep a record of usage statistics and also assist users to keep track of historical activity.  
 
 ### Secure Data
 Despite our goal to ensure the cohesion and mobilisation of salmon-specific data and information to those driving salmon conservation, it is both ours and your responsibility to ensure the security of the data. Data and metadata within our database are a mix of both public and private sourced information. Knowledge resources will be highlighted as ‘Members Only’ if they are not already available for public download via an existing online portal, and these should be treated as confidential data. Despite your access to use the data we provide **you cannot share these restricted data with third parties without permission from the database manager who will seek consent from the primary contact for that data.**  
@@ -35,7 +35,7 @@ For our part, we will host the metadata and the associated data files themselves
 Parties joining the Data Sharing Group are expected to abide by academic norms for citation. Further information on Data Citation conventions can be found at https://www.force11.org/datacitationprinciples. Acknowledgment of the Likely Suspects Framework’s Database as a resource for data discovery (whether restricted or public), as well as the primary authors of the data resource themselves should be made in the form of a formal citation. Any novel outputs generated (e.g. scientific papers, reports, presentations) from data extracted from the database must also acknowledge this source, and also cite the relevant primary data source.  
 
 ### Digital Object Identifier for Data
-Submitted data are assigned unique identifiers. These can be used to facilitate attribution when a Data Source is used in research material. Our framework also makes use of specifications that give us access to online repositories such as https://knb.ecoinformatics.org/ where we can leverage globally unique identifiers, generally referred to as Digital Object Identifiers (DOIs).
+Submitted data are assigned unique identifiers. These can be used to facilitate attribution when a Data Source is used in research material. Our design also makes use of specifications that give us access to online repositories such as https://knb.ecoinformatics.org/ where we can leverage globally unique identifiers, generally referred to as Digital Object Identifiers (DOIs).
 
 
 ### Rights over your Data and Information
