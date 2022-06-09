@@ -12,7 +12,7 @@ generalIntroCopyPara2 <- "Salmon management is frequently impeded by poor access
 changing their approaches. The Likely Suspects Framework is working to mobilise biological, physical and 
 salmon specific information from freshwater and marine environments located around the North Atlantic."
 
-carouselGeneralIntro <- "The Central Data Resource is an online portal intending to provide a unique
+carouselGeneralIntro <- "The Salmon Ecosystem Data Hub (SalHub) is an online portal intending to provide a unique
 platform for Atlantic salmon knowledge mobilisation. The portal consists of an area inviting users
 to register salmon knowledge through a simplified metadata submission form, and a set of search areas
 to guide researchers to the data they need to test hypotheses. Registered knowledge sources are
@@ -22,7 +22,7 @@ classification of variables within the data. All knowledge in the resource is pr
 relevant to Atlantic salmon ecology, be that through Primary Observation, Derived Output, or Modelled Output."
 
 searchIntroCopy <- "The search areas allow exploration of the knowledge sources that have been
-registered in the Central Data Resource. These searches are presented in ways to facilitate different
+registered in the Salmon Ecosystem Data Hub. These searches are presented in ways to facilitate different
 use cases, from a location-based map search, free text based tabular search, to predefined filters
 based on Mortality Hypotheses or Atlantic salmon Life-Stage."
 
@@ -34,7 +34,7 @@ across a range of specific dates and geographical locations."
 
 searchIntroCopyPara2 <- "The interface contains a range of tools to help focus your data search on several levels. Filtering the 
 data will return descriptions of data (metadata) relevant to your search terms. This metadata will help you to discover relevant 
-knowledge sources and allow you to gain access via either primary sources or from within the Central Data Resource."
+knowledge sources and allow you to gain access via either primary sources or from within the Salmon Ecosystem Data Hub."
 
 
 submitIntroCopy <- "Through this portal you may submit knowledge sources via an easy-to-follow metadata
@@ -45,8 +45,8 @@ fields to capture detail on location, time and attributes, among other informati
 that can be supplied at this stage then the more utility the resource can add to the search areas."
 
 
-submitIntroCopyPara1 <- "This interface allows you to submit data along with a thorough description (metadata) into the Central Data 
-Resource. This data will be used to provision both managers and researchers in their fight to reduce declining salmon 
+submitIntroCopyPara1 <- "This interface allows you to submit data along with a thorough description (metadata) into the Salmon Ecosystem Data Hub.
+This data will be used to provision both managers and researchers in their fight to reduce declining salmon 
 abundance. Our interface will also allow you to categorise your data into salmon life-stage domains and variable classes. The variable classes 
 are a range of biological, physical and salmon-specific categories. By labelling your data with these classes, we hope to improve the 
 ability for people to efficiently find relevant data regarding various ecological factors across a range of specific dates and 
@@ -58,7 +58,7 @@ spatial and temporal extents and linked to how it may be applicable to Atlantic 
 (The Knowledge Network for Biocomplexity) then you may load the meta information via the URN or DOI always tagged to KNB 
 metadata. This will automatically fill the fields of this page as long as the equivalent field is present on KNB."
 
-submitIntroCopyPara2 <- "This interface ensures the data submitted into the Central Data Resource is labelled to both 
+submitIntroCopyPara2 <- "This interface ensures the data submitted into the Salmon Ecosystem Data Hub is labelled to both 
 spatial and temporal extents and linked to how it may be applicable to Atlantic salmon."
 
 domainsDescriptionCopy <- "Consideration of the range of space-time domains occupied by salmon as they

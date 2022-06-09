@@ -1,5 +1,5 @@
-# Automation script for synchronizing the LSF Central Data Resource with the Knowledge Network for Biocomplexity
-# Goals - For each entry in the CDR, create an entry in the KNB and maintain a sync between updates and UUID's
+# Automation script for synchronizing the LSF Salmon Ecosystem Data Hub with the Knowledge Network for Biocomplexity
+# Goals - For each entry in the SalHub, create an entry in the KNB and maintain a sync between updates and UUID's
 # Gotchas:
 #   - Try to be mindful of KNB's version control system which creates a new UUID each time an object is updated
 #   - 
@@ -57,9 +57,9 @@ result <- dplyr::filter(result,!is.na(title))
 result <-  tibble::as_tibble(result)
 
 #############
-# Compare KNB objects with LSF CDR Objects by UUID
+# Compare KNB objects with LSF SalHub Objects by UUID
 #############
-# Gotchas: Check CDR for duplicates and fix
+# Gotchas: Check SalHub for duplicates and fix
 lsfMetadata[duplicated(lsfMetadata$metadataUUID),]
 # Check KNB for existing UUID's that are not on LSF, this should not happen so is probably a UUID typo/mistake
 onKNBbutnotLSF <- dplyr::setdiff(result$id,lsfMetadata$metadataUUID)
@@ -68,11 +68,11 @@ onLSFbutnotKNB <- dplyr::setdiff(lsfMetadata$metadataUUID,result$id)
 newEntries <- lsfMetadata[!(lsfMetadata$metadataUUID %in% result$id),]
 
 ####################
-# Create EML files from CDR entries
+# Create EML files from SalHub entries
 ####################
 
-# This requires translation of CDR fields to EML fields
-# Use dictionary to translate CDR metadata node properties to EML nodes
+# This requires translation of SalHub fields to EML fields
+# Use dictionary to translate SalHub metadata node properties to EML nodes
 emlNodes <- list(metadataTitle = "/eml:eml/dataset/title",
                  metadataAltURI = "/eml:eml/dataset/alternateIdentifier",
                  metadataAbstract = "/eml:eml/dataset/abstract/para",
@@ -90,8 +90,8 @@ emlNodes <- list(metadataTitle = "/eml:eml/dataset/title",
                  metadataCoverageEndYear = "/eml:eml/dataset/coverage/temporalCoverage/rangeOfDates/endDate/calendarDate",
                  metadataMaintenance = "/eml:eml/dataset/maintenance/maintenanceUpdateFrequency",
                  metadataKeywords = "/eml:eml/dataset/keywordSet/keyword",
-                 # the following are not kept within the CDR metadata and at present at static or manual values
-                 givenName = "/eml:eml/dataset/creator/individualName/givenName", # CDR does not have first.last names separated
+                 # the following are not kept within the SalHub metadata and at present at static or manual values
+                 givenName = "/eml:eml/dataset/creator/individualName/givenName", # SalHub does not have first.last names separated
                  rights = "/eml:eml/dataset/intellectualRights/para",
                  metaProviderGivenName = "/eml:eml/dataset/metadataProvider/individualName/givenName",
                  metaProviderSurName = "/eml:eml/dataset/metadataProvider/individualName/surName",
@@ -105,7 +105,7 @@ emlNodes <- list(metadataTitle = "/eml:eml/dataset/title",
                  contactID = "/eml:eml/dataset/contact/references")
 
 
-# Add static or manual values to CDR tibble
+# Add static or manual values to SalHub tibble
 newEntries$givenName = ""
 newEntries$rights = "This work is licensed under the Creative Commons Attribution 4.0 International License. To view a copy of this license, visit http://creativecommons.org/licenses/by/4.0/."
 newEntries$metaProviderGivenName = "Graeme"
@@ -125,7 +125,7 @@ newEntries$contactID = "https://orcid.org/0000-0003-1023-4700"
 
 # Create data packages from EML files and upload
 # FUNCTION: The following FOR loop creates and imports multiple metadata descriptions on to KNB and in turn MSA DataONE portal
-# INPUT: newEntries tibble (Extract from CDR with existing KNB objects removed)
+# INPUT: newEntries tibble (Extract from SalHub with existing KNB objects removed)
 # INPUT: DataONE EML Template.xml
 # OUTPUT: eml.xml file with unique ID incorporated into filename
 # OUTPUT: create datapackage and upload to KNB
@@ -172,7 +172,7 @@ for(i in 1:nrow(newEntries)){ #rows ROWS CONTAIN NODE VALUES
   
   for(z in 1:length(emlNodes)){ #EML Dictionary information
     xpath_full <- emlNodes[[z]] #dictionary value
-    node_value <- toString(newEntries[[i,names(emlNodes)[z]]]) # cdr field value
+    node_value <- toString(newEntries[[i,names(emlNodes)[z]]]) # SalHub field value
     xml_set_text(xml_find_all(x, xpath = xpath_full,xml_ns(x)),node_value)
   }
   # timestamp to pubDate fixup, reduce timestamp to date CCYY-MM-DD only, remove time
@@ -227,7 +227,7 @@ readr::write_csv(report,paste0("./src/automation/eml/report_",Sys.Date()))
 
 
 ######################
-# Sync info between existing CDR/KNB objects
+# Sync info between existing SalHub/KNB objects
 ######################
 # grab relevant info from KNB (set up to capture Keywords at the moment but this could be anything)
 keywordsVEC <- list()

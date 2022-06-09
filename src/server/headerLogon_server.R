@@ -99,7 +99,7 @@ observeEvent(input$logoutModal, {
   # goodbye message
   showModal(
     modalDialog(title = "Logged Out",
-                p("Thank you for visiting the Likely Suspects Framework for Atlantic Salmon Central Data Resource"),
+                p("Thank you for visiting the Salmon Ecosystem Data Hub"),
                 p("We hope you found this interface useful and will return soon"),
                 p("All feedback welcome via either registering an issue/bug or feature request at our",
                   a(href="https://github.com/Missing-Salmon-Alliance/lsf-web-application","github repository"),
@@ -213,7 +213,7 @@ observeEvent(input$bookmarks,{
                   #selectInput("requestPosition", "Position/Occupation:", choices = c("Researcher","Database Manager","Government Official", "Conservationist", "Student", "Lecturer", "Other")),
                   #selectInput("requestDataUse", "What will the data be used for?", choices = c("Independent Research", "Conservation", "Guidance to Managers", "Other")),
                   #textInput("requestOther","Please describe what is meant, if you selected other"),
-                  #selectInput("requestProvision", "Do you intend to provide data to the Central Data Resource?", choices = c("Yes", "No", "In the Future")),
+                  #selectInput("requestProvision", "Do you intend to provide data to the Salmon Ecosystem Data Hub?", choices = c("Yes", "No", "In the Future")),
                   textAreaInput('requestIntention', "Please describe the intended use for the data. Please include information on the project, time scale of usage and expected number of users.", width = "1000px", height = "50px"),
                   
                   actionButton('sendRequest', "Send Data Request")

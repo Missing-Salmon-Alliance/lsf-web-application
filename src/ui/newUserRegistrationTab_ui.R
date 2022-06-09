@@ -14,7 +14,7 @@ tabItem(tabName = 'newMemberRegistration',
                                "I have read and agree to abide by the terms and guiding principles set out in the Data Sharing Group Memorandum of Agreement",
                                value = FALSE),
           checkboxInput('dataSharingAgreementAdvertiseOrganisation',
-                        "Organisations that are part of the Data Sharing Group can appear on the Central Data Resource as contributors. If you would like your organisation to be shown, please tick here.",
+                        "Organisations that are part of the Data Sharing Group can appear on the Salmon Ecosystem Data Hub as contributors. If you would like your organisation to be shown, please tick here.",
                         value = FALSE),
           hr(),
           actionButton('newUserRegisterSubmit',"Submit")
