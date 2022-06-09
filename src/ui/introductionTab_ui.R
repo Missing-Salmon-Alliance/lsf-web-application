@@ -5,7 +5,7 @@
 tabItem('introduction',
         fluidPage(
           fluidRow(
-            h1("Welcome to the Central Data Resource for Atlantic Salmon"),
+            h1("Welcome to the Salmon Ecosystem Data Hub (SalHub)"),
             br(),
             h3("A web application that aims to guide researchers to data sources for testing hypotheses,
                informing management activities, and ultimately improving Atlantic salmon populations."),
@@ -44,7 +44,7 @@ tabItem('introduction',
                 ),
                 box(
                   width = 6,
-                  title = "The Central Data Resource",
+                  title = "The Salmon Ecosystem Data Hub",
                   status = 'success',
                   solidHeader = FALSE,
                   em(carouselGeneralIntro)
@@ -63,7 +63,7 @@ tabItem('introduction',
                 ),
                 box(
                   width = 4,
-                  title = "Search The Framework",
+                  title = "Search The Salmon Ecosystem Data Hub",
                   status = 'primary',
                   solidHeader = FALSE,
                   em(searchIntroCopy)
@@ -82,7 +82,7 @@ tabItem('introduction',
                 ),
                 box(
                   width = 5,
-                  title = "Submit Data to The Central Data Resource",
+                  title = "Submit Data to The Salmon Ecosystem Data Hub",
                   status = 'primary',
                   solidHeader = FALSE,
                   em(submitIntroCopy)
@@ -144,7 +144,7 @@ tabItem('introduction',
                      Identifier (DOI) promotes more open and reproducible research,
                      as well as adding provenance to new syntheses that can otherwise
                      be difficult to trace. Data citation also provides a way for data owners to leverage more
-                     value from their used data resources. The Central Data Resource assigns locally unique
+                     value from their used data resources. The Salmon Ecosystem Data Hub assigns locally unique
                      identifiers and can facilitate the creation of globally unique and dereferenceable DOI's via
                      the",a(href="https://knb.ecoinformatics.org","Knowledge Network for Biocomplexity.",target = "_blank")),
                   br(),
@@ -177,7 +177,7 @@ tabItem('introduction',
           #     status = 'warning',
           #     solidHeader = FALSE,
           #     title = "Variable Classes",
-          #     h4("Variable classes are used to index data sources within the Central Data Resource. You may like to explore the classes here prior to searching for or submitting data sources"),
+          #     h4("Variable classes are used to index data sources within the Salmon Ecosystem Data Hub. You may like to explore the classes here prior to searching for or submitting data sources"),
           #     column(
           #       width = 6,
           #       selectInput('varClassesDomain',"Domain",choices = LSFDomainTibble$domainTitle)

@@ -462,7 +462,7 @@ observeEvent(input$submitNewDataSourceBody | input$submitNewDataSourceSidebar, {
       if(input$sourceCreatorEmail == ""){shinyjs::runjs('document.getElementById("sourceCreatorEmail").style.backgroundColor = "OrangeRed";')}
       if(input$sourceOrganisation == ""){shinyjs::runjs('document.getElementById("sourceOrganisation").style.backgroundColor = "OrangeRed";')}
     }else{
-      # If the DOI/URN entered does not exist in the framework already, show confirmation modal
+      # If the DOI/URN entered does not exist in the SalHub already, show confirmation modal
       showModal(submitSourceConfirmModal())
     }
   }else{ # otherwise show some detail for the user
