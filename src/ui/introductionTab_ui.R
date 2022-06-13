@@ -47,7 +47,10 @@ tabItem('introduction',
                   title = "The Salmon Ecosystem Data Hub",
                   status = 'success',
                   solidHeader = FALSE,
-                  em(carouselGeneralIntro)
+                  em(carouselGeneralIntro),
+                  br(),
+                  br(),
+                  em("Further background information and instructional videos on using SalHub are available via the ",a(href='https://missingsalmonalliance.org/the-central-data-resource',"Missing Salmon Alliance website.",target="_blank"))
                 ),
                 column(
                   width = 4,
