@@ -11,44 +11,46 @@ output$searchFilterResetUI <- renderUI(actionButton('searchFilterReset',"Reset F
 output$searchMapTabUI <- renderUI({
   req(user_info()) # only action if user_info has been created
   if (user_info()$result) { # if user logon is true:
-    #div(style="float:left",actionLink(inputId = "searchDescript", label = "Help", icon = icon("question-circle"))),
-    #br(),
-    # hiding until temporal filter works better
-    # absolutePanel(id = 'searchFiltersAbsPanel',
-    #               top = "110px",
-    #               right = "10px",
-    #               width = "35%",
-    #               style="z-index:1000;",
-    #               shinyBS::bsCollapse(id = "mapSearchFilters", open = NULL,
-    #                                   # new location to be determined for geographic filters
-    #                          #source("./src/ui/searchDataSource_geographicFilters_ui.R",local = TRUE)$value,
-    #                          source("./src/ui/searchDataSource_temporalFilters_ui.R",local = TRUE)$value
-    #               )
-    # ),
-    fluidRow(
-        leaflet::leafletOutput('searchTabMap', height = "100vh"),
-        absolutePanel(id = 'geographicSearchTable',
-                      top = "110px",
-                      right = "10px",
-                      width = "40%",
-                      style="z-index:1000;",
-                      shinydashboard::box(
-                        width = 12,
-                        solidHeader = F,
-                        status = 'primary',
-                        DT::DTOutput('searchTabTable')
-                      )
+    fluidPage(
+      column(
+        width = 4,
+        DT::dataTableOutput('searchTabTable')
+      ),
+      column(
+        8,
+        column(
+          width = 12,
+          leaflet::leafletOutput('searchTabMap',height = '45vh')
         ),
-        conditionalPanel(
-          condition = "input.debug",
-          textOutput('clickOutput'),
-          textOutput('clickMarkerOutput'),
-          textOutput('clickShapeOutput'),
-          textOutput('clickBoundsOutput'),
-          textOutput('clickTableRow'),
-          textOutput('intersectVectorOut')
+        shinydashboard::box(width = 12,
+          title = "Summary",
+          status = "warning",
+          solidHeader = F,
+          height = "45vh",
+          column(
+            6,
+            h3('Title:'),
+            textOutput('title'),
+            h3('Abstract:'),
+            textOutput('abstract'),
+            h3('Access Protocol:'),
+            textOutput('accessProtocol')
+          ),
+          column(
+            6,
+            h3('Organisation:'),
+            textOutput('organisation'),
+            h3('URL:'),
+            textOutput('url'),
+            h3('Geography and Time:'),
+            textOutput('geographicDescription'),
+            textOutput('geographicExtents'),
+            textOutput('temporalRange')
+          )
         )
       )
+    )
+
   }else{
     fluidPage(
       h1("Map Explore Area"),
@@ -125,37 +127,30 @@ observeEvent(input$searchFilterReset,{
 # Write a HTML Legend (As have used HTML ICONS and no gradient)
 
 # TODO: improve visual information in markers, colour index rivers or use river icon, check out the IYS icons
+
 output$searchTabMap <- leaflet::renderLeaflet({ 
   leaflet::leaflet (options = leaflet::leafletOptions(minZoom = 3,maxZoom = 19))%>%
     leaflet::setView(lng = -20,lat = 50,zoom = 3) %>% 
     leaflet::setMaxBounds( lng1 = -180
-                           , lat1 = -90
-                           , lng2 = 210
-                           , lat2 = 90 ) %>%
+      , lat1 = -90
+      , lng2 = 210
+      , lat2 = 90 ) %>%
     leaflet::addProviderTiles(leaflet::providers$Esri.OceanBasemap, options = leaflet::providerTileOptions(minZoom = 3, maxZoom =10)) %>%
     leaflet::addProviderTiles(leaflet::providers$OpenStreetMap, options = leaflet::providerTileOptions(minZoom = 11, maxZoom = 19)) %>%
     
     leaflet::addMarkers(data = lsfMetadata(),
-                        label = ~metadataTitle,
-                        layerId = ~id,
-                        group = 'Data Source',
-                        popup = ~paste("<h3>More Information</h3>",
-                                       "<b>Title:</b>",stringr::str_trunc(metadataTitle,width = 90,side = 'right',ellipsis = '...'),"<br>","<br>",
-                                       "<b>Abstract:</b>",stringr::str_trunc(metadataAbstract,width = 200,side = 'right',ellipsis = '...'),"<br>","<br>",
-                                       "<b>Organisation:</b>",metadataOrganisation,"<br>","<br>",
-                                       "<b>URL (if available):</b>",metadataAltURI,"<br>","<br>",
-                                       "<em>UUID:</em>",metadataUUID,"<br>","<br>",
-                                       "<em>Internal ID:</em>",id,"<br>","<br>",
-                                       "&nbsp;",actionButton("showmodal", "View more...", onclick = 'Shiny.onInputChange(\"button_click\",  Math.random())'),
-                                       sep =" "),
-                        # enable clustering for spiderfy
-                        clusterOptions = leaflet::markerClusterOptions(
-                          showCoverageOnHover = TRUE,
-                          zoomToBoundsOnClick = TRUE,
-                          spiderfyOnMaxZoom = TRUE,
-                          removeOutsideVisibleBounds = TRUE,
-                          maxClusterRadius = 30,
-                          spiderLegPolylineOptions = list(weight = 1.5, color = "#222", opacity = 0.5))) %>%
+      label = ~metadataTitle,
+      layerId = ~id,
+      group = 'Data Source',
+      popup = ~metadataTitle,
+      # enable clustering for spiderfy
+      clusterOptions = leaflet::markerClusterOptions(
+        showCoverageOnHover = TRUE,
+        zoomToBoundsOnClick = TRUE,
+        spiderfyOnMaxZoom = TRUE,
+        removeOutsideVisibleBounds = TRUE,
+        maxClusterRadius = 30,
+        spiderLegPolylineOptions = list(weight = 1.5, color = "#222", opacity = 0.5))) %>%
     
     leaflet::addMarkers(data = indexRiversSF,
                         label = ~paste("Salmon Index River: ",rivername),
@@ -242,15 +237,15 @@ output$searchTabMap <- leaflet::renderLeaflet({
         function() {
             $('.leaflet-control-layers-overlays').prepend('<label style=\"text-align:left; font-size:16px;\">Layer Control</label>');
         }
-    ") %>% 
+    ")# %>% 
     
     # assign the leaflet object to variable 'map' for use with custom css
     # assists with click interactions on the table
-    htmlwidgets::onRender("
-          function(el, x) {
-            map = this;
-          }"
-    )
+    # htmlwidgets::onRender("
+    #       function(el, x) {
+    #         map = this;
+    #       }"
+    # )
   # commenting out legend for now, the layer control in a way works as a legend and the screen was a bit cluttered with both
   #leaflet::addControl(position = "bottomright", html = html_legend)
 })
@@ -260,26 +255,18 @@ output$searchTabMap <- leaflet::renderLeaflet({
 redrawFilteredMarkers <- function(filteredTibble,session){
   leaflet::leafletProxy('searchTabMap', session) %>%
     leaflet::addMarkers(data = filteredTibble,
-                        label = ~metadataTitle,
-                        layerId = ~id,
-                        group = 'Data Source',
-                        popup = ~paste("<h3>",id," - More Information</h3>",
-                                       "<b>Title:</b>",stringr::str_trunc(metadataTitle,width = 90,side = 'right',ellipsis = '...'),"<br>","<br>",
-                                       "<b>Abstract:</b>",stringr::str_trunc(metadataAbstract,width = 200,side = 'right',ellipsis = '...'),"<br>","<br>",
-                                       "<b>Organisation:</b>",metadataOrganisation,"<br>","<br>",
-                                       "<b>URL (if available):</b>",metadataAltURI,"<br>","<br>",
-                                       "<em>UUID:</em>",metadataUUID,"<br>","<br>",
-                                       "<em>Internal ID:</em>",id,"<br>","<br>",
-                                       "&nbsp;",actionButton("showmodal", "View more...", onclick = 'Shiny.onInputChange(\"button_click\",  Math.random())'),
-                                       sep =" "),
-                        # enable clustering for spiderfy
-                        clusterOptions = leaflet::markerClusterOptions(
-                          showCoverageOnHover = TRUE,
-                          zoomToBoundsOnClick = TRUE,
-                          spiderfyOnMaxZoom = TRUE,
-                          removeOutsideVisibleBounds = TRUE,
-                          maxClusterRadius = 30,
-                          spiderLegPolylineOptions = list(weight = 1.5, color = "#222", opacity = 0.5)))
+      label = ~metadataTitle,
+      layerId = ~id,
+      group = 'Data Source',
+      popup = ~metadataTitle,
+      # enable clustering for spiderfy
+      clusterOptions = leaflet::markerClusterOptions(
+        showCoverageOnHover = TRUE,
+        zoomToBoundsOnClick = TRUE,
+        spiderfyOnMaxZoom = TRUE,
+        removeOutsideVisibleBounds = TRUE,
+        maxClusterRadius = 30,
+        spiderLegPolylineOptions = list(weight = 1.5, color = "#222", opacity = 0.5)))
 }
 
 # Geographic Search Tab Table Output
@@ -288,37 +275,24 @@ redrawFilteredMarkers <- function(filteredTibble,session){
 # initialise reactive value for clearer code
 intersectVector <- reactiveVal()
 
-output$searchTabTable <- DT::renderDT({
-  req(input$searchTabMap_bounds)
-  # Create Intersection vector to filter table
-  intersectVector(
-    as.vector(
-      sf::st_intersects(
-        sf::st_polygon(
-          list(
-            rbind( # NOTE - build polygon clockwise AND WKT notation has longitude first, latitude second
-              as.numeric(input$searchTabMap_bounds[c(4,1)]),
-              as.numeric(input$searchTabMap_bounds[c(2,1)]),
-              as.numeric(input$searchTabMap_bounds[c(2,3)]),
-              as.numeric(input$searchTabMap_bounds[c(4,3)]),
-              as.numeric(input$searchTabMap_bounds[c(4,1)])
-            )
-          )
-        ),
-        metadataFilterReactive(),sparse = FALSE
-      )
-    )
-  )
-  sf::st_set_geometry(metadataFilterReactive()[intersectVector(),c('metadataTitle','metadataAbstract','metadataKeywords')],NULL)
+output$searchTabTable <- DT::renderDataTable({
+  sf::st_set_geometry(lsfMetadata()[,c('metadataTitle','metadataAbstract','metadataKeywords')],NULL)
 },
-selection = 'single',
-rownames = FALSE,
-editable = FALSE,
-colnames = c('Title','Abstract','Keywords'),
-options = list(pageLength = 15,
-               columnDefs = list(list(visible=FALSE, targets=c(1,2)))
-)
-
+  selection = 'single',
+  rownames = FALSE,
+  editable = FALSE,
+  colnames = c('Data Source Title','Abstract','Keywords'),
+  options = list(pageLength = 20,
+    columnDefs = list(list(visible=FALSE, targets=c(1,2)),
+      list(
+        targets = 0,
+        # limit row width by truncating text in the title field
+        render = JS("function(data, type, row, meta) {return type === 'display' && data.length > 80 ? '<span title=' + data + '>' + data.substr(0, 80) + '...</span>' : data;}"))
+    ),
+    searching = T,
+    lengthChange = FALSE,
+    autoWidth = FALSE
+  )
 )
 
 
@@ -441,50 +415,62 @@ observeEvent(input$searchTabMap_click,{
   leaflet::leafletProxy('searchTabMap') %>%
     leaflet::clearGroup(group = 'markerRectangle')
 })
-# Observer for Search Datatable Click - Action: activate popup on map marker
+
+# Observer for Search Datatable Click - Action: pan map to centre on selected row and add rectangle/point
 observeEvent(input$searchTabTable_rows_selected,{
-  rowIndex <- input$searchTabTable_rows_selected
-  metadataFilterReactive()[intersectVector(),]$id[rowIndex]
-  shinyjs::js$markerClick(metadataFilterReactive()[intersectVector(),]$id[rowIndex])
+  leaflet::leafletProxy('searchTabMap') %>%
+    leaflet::clearGroup(group = 'markerRectangle') %>%
+    leaflet::addRectangles(
+      lsfMetadata()$metadataCoverageWest[input$searchTabTable_rows_selected],
+      lsfMetadata()$metadataCoverageNorth[input$searchTabTable_rows_selected],
+      lsfMetadata()$metadataCoverageEast[input$searchTabTable_rows_selected],
+      lsfMetadata()$metadataCoverageSouth[input$searchTabTable_rows_selected],
+      group = 'markerRectangle') %>%
+    leaflet::fitBounds(
+      lsfMetadata()$metadataCoverageWest[input$searchTabTable_rows_selected],
+      lsfMetadata()$metadataCoverageNorth[input$searchTabTable_rows_selected],
+      lsfMetadata()$metadataCoverageEast[input$searchTabTable_rows_selected],
+      lsfMetadata()$metadataCoverageSouth[input$searchTabTable_rows_selected],
+      options = leaflet::leafletOptions(maxZoom = 10))
 })
 ############################################## 
 # Observer for Search Map Click - Action: Modal pop-up on each marker_click
 
-observeEvent(input$button_click, {
-  click = input$searchTabMap_marker_click
-  showModal(modalDialog(
-    title = "Information on Selected Data Source",
-    h4("More Information"),
-    em("UUID:    "), paste(lsfMetadata()[lsfMetadata()$id == click[1],]$metadataUUID),
-    br(),br(),
-    em("Title:   "), paste(lsfMetadata()[lsfMetadata()$id == click[1],]$metadataTitle),
-    br(),br(),
-    em("Abstract:   "),paste(lsfMetadata()[lsfMetadata()$id == click[1],]$metadataAbstract),
-    br(), br(),
-    em("Organisation:   "),paste(lsfMetadata()[lsfMetadata()$id == click[1],]$metadataOrganisation),
-    br(),br(),
-    em("URL (if available):   "), tags$a(href = lsfMetadata()[lsfMetadata()$id == click[1],]$metadataAltURI,lsfMetadata()[lsfMetadata()$id == click[1],]$metadataAltURI, target = '_blank'),
-    br(),br(),
-    em("Update Frequency:   "), paste(lsfMetadata()[lsfMetadata()$id == click[1],]$metadataMaintenance),
-    br(),br(),
-    h4("Spatial Information"),
-    em("North:"), paste(lsfMetadata()[lsfMetadata()$id == click[1],]$metadataCoverageNorth),br(),
-    em("East:"),paste(lsfMetadata()[lsfMetadata()$id == click[1],]$metadataCoverageEast),br(),
-    em("South:"), paste(lsfMetadata()[lsfMetadata()$id == click[1],]$metadataCoverageSouth),br(),
-    em("West:"), paste(lsfMetadata()[lsfMetadata()$id == click[1],]$metadataCoverageWest),br(),
-    br(),br(),
-    em("Geographical Description:"), paste(lsfMetadata()[lsfMetadata()$id == click[1],]$metadataGeographicDescription),
-    br(),br(),
-    h4("Temporal Information"),
-    em("Start Year: "), paste(lsfMetadata()[lsfMetadata()$id == click[1],]$metadataCoverageStartYear), br(), em("End Year: ", paste(lsfMetadata()[lsfMetadata()$id == click[1],]$metadataCoverageEndYear)),
-    br(),br(),
-    # dynamic content based on user activity and history
-    uiOutput('addToBookmarksUI'),
-    easyClose = TRUE
-  )
-  
-  )
-})
+# observeEvent(input$button_click, {
+#   click = input$searchTabMap_marker_click
+#   showModal(modalDialog(
+#     title = "Information on Selected Data Source",
+#     h4("More Information"),
+#     em("UUID:    "), paste(lsfMetadata()[lsfMetadata()$id == click[1],]$metadataUUID),
+#     br(),br(),
+#     em("Title:   "), paste(lsfMetadata()[lsfMetadata()$id == click[1],]$metadataTitle),
+#     br(),br(),
+#     em("Abstract:   "),paste(lsfMetadata()[lsfMetadata()$id == click[1],]$metadataAbstract),
+#     br(), br(),
+#     em("Organisation:   "),paste(lsfMetadata()[lsfMetadata()$id == click[1],]$metadataOrganisation),
+#     br(),br(),
+#     em("URL (if available):   "), tags$a(href = lsfMetadata()[lsfMetadata()$id == click[1],]$metadataAltURI,lsfMetadata()[lsfMetadata()$id == click[1],]$metadataAltURI, target = '_blank'),
+#     br(),br(),
+#     em("Update Frequency:   "), paste(lsfMetadata()[lsfMetadata()$id == click[1],]$metadataMaintenance),
+#     br(),br(),
+#     h4("Spatial Information"),
+#     em("North:"), paste(lsfMetadata()[lsfMetadata()$id == click[1],]$metadataCoverageNorth),br(),
+#     em("East:"),paste(lsfMetadata()[lsfMetadata()$id == click[1],]$metadataCoverageEast),br(),
+#     em("South:"), paste(lsfMetadata()[lsfMetadata()$id == click[1],]$metadataCoverageSouth),br(),
+#     em("West:"), paste(lsfMetadata()[lsfMetadata()$id == click[1],]$metadataCoverageWest),br(),
+#     br(),br(),
+#     em("Geographical Description:"), paste(lsfMetadata()[lsfMetadata()$id == click[1],]$metadataGeographicDescription),
+#     br(),br(),
+#     h4("Temporal Information"),
+#     em("Start Year: "), paste(lsfMetadata()[lsfMetadata()$id == click[1],]$metadataCoverageStartYear), br(), em("End Year: ", paste(lsfMetadata()[lsfMetadata()$id == click[1],]$metadataCoverageEndYear)),
+#     br(),br(),
+#     # dynamic content based on user activity and history
+#     uiOutput('addToBookmarksUI'),
+#     easyClose = TRUE
+#   )
+#   
+#   )
+# })
 
 ##############################################
 # Bookmark System
@@ -518,14 +504,26 @@ observeEvent(input$Request, {
   neo4r::call_neo4j(query = paste0("MATCH (p:Person) WHERE id(p) = ",user_info()$user_info$id," SET p.personBookmarks = '",formatNumericList(sessionUserBookmarks()),"';"),con = neo_con, type = 'row')
 })
 
-
-# Debugging Information
-output$clickMarkerOutput <- renderText({paste0("Marker: ",paste0(input$searchTabMap_marker_click,collapse = ","))})
-output$clickOutput <- renderText({paste0("Click: ",paste0(input$searchTabMap_click,collapse = ","))})
-output$clickShapeOutput <- renderText({paste0("Shape: ",input$searchTabMap_shape_click,collapse = ",")})
-output$clickBoundsOutput <- renderText({paste0("Bounds: ",paste0(input$searchTabMap_bounds,collapse = ","))})
-output$clickTableRow <- renderText({paste0("Row Info: ",input$searchTabTable_rows_selected,collapse = ",")})
-output$intersectVectorOut <- renderText({paste0(intersectVector(),collapse = ",")})
+output$title <- renderText({lsfMetadata()$metadataTitle[input$searchTabTable_rows_selected]})
+output$abstract <- renderText({lsfMetadata()$metadataAbstract[input$searchTabTable_rows_selected]})
+output$organisation <- renderText({lsfMetadata()$metadataOrganisation[input$searchTabTable_rows_selected]})
+output$url <- renderText({lsfMetadata()$metadataAltURI[input$searchTabTable_rows_selected]})
+output$accessProtocol <- renderText({lsfMetadata()$metadataAccessProtocol[input$searchTabTable_rows_selected]})
+output$geographicDescription <- renderText({lsfMetadata()$metadataGeographicDescription[input$searchTabTable_rows_selected]})
+output$geographicExtents <- renderText({
+  paste0(
+    "North: ",lsfMetadata()$metadataCoverageNorth[input$searchTabTable_rows_selected],
+    ", East: ",lsfMetadata()$metadataCoverageEast[input$searchTabTable_rows_selected],
+    ", South: ",lsfMetadata()$metadataCoverageSouth[input$searchTabTable_rows_selected],
+    ", West: ",lsfMetadata()$metadataCoverageWest[input$searchTabTable_rows_selected]
+  )
+})
+output$temporalRange <- renderText({
+  paste0(
+    "Start Year: ",lsfMetadata()$metadataCoverageStartYear[input$searchTabTable_rows_selected],
+    ", End Year: ",lsfMetadata()$metadataCoverageEndYear[input$searchTabTable_rows_selected]
+  )
+})
 ############################
 # DataSearch_server.R END
 ############################

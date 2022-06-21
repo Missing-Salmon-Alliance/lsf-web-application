@@ -100,7 +100,7 @@ server <- function(input, output, session) {
   # DataSearch_server.R START
   ############################
   
-  source("./src/server/geographicExplore_server.R", local = TRUE)$value
+  source("./src/server/geographicExplore_server_new.R", local = TRUE)$value
   
   ############################
   # DataSearch_server.R END
