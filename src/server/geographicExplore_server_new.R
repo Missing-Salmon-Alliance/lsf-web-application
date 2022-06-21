@@ -11,38 +11,39 @@ output$searchFilterResetUI <- renderUI(actionButton('searchFilterReset',"Reset F
 output$searchMapTabUI <- renderUI({
   req(user_info()) # only action if user_info has been created
   if (user_info()$result) { # if user logon is true:
-    fluidPage(
+    fluidRow(
       column(
         width = 4,
         DT::dataTableOutput('searchTabTable')
       ),
       column(
         8,
-        column(
+        shinydashboard::box(
           width = 12,
+          status = 'primary',
+          solidheader = F,
           leaflet::leafletOutput('searchTabMap',height = '45vh')
         ),
         shinydashboard::box(width = 12,
-          title = "Summary",
           status = "warning",
           solidHeader = F,
-          height = "45vh",
+          #height = "45vh",
           column(
             6,
-            h3('Title:'),
+            h4('Title:'),
             textOutput('title'),
-            h3('Abstract:'),
-            textOutput('abstract'),
-            h3('Access Protocol:'),
-            textOutput('accessProtocol')
+            h4('Abstract:'),
+            textOutput('abstract')
           ),
           column(
             6,
-            h3('Organisation:'),
+            h4('Access Protocol:'),
+            textOutput('accessProtocol'),
+            h4('Organisation:'),
             textOutput('organisation'),
-            h3('URL:'),
-            textOutput('url'),
-            h3('Geography and Time:'),
+            h4('URL:'),
+            uiOutput('url'),
+            h4('Geography and Time:'),
             textOutput('geographicDescription'),
             textOutput('geographicExtents'),
             textOutput('temporalRange')
@@ -282,12 +283,12 @@ output$searchTabTable <- DT::renderDataTable({
   rownames = FALSE,
   editable = FALSE,
   colnames = c('Data Source Title','Abstract','Keywords'),
-  options = list(pageLength = 20,
+  options = list(pageLength = 16,
     columnDefs = list(list(visible=FALSE, targets=c(1,2)),
       list(
         targets = 0,
         # limit row width by truncating text in the title field
-        render = JS("function(data, type, row, meta) {return type === 'display' && data.length > 80 ? '<span title=' + data + '>' + data.substr(0, 80) + '...</span>' : data;}"))
+        render = htmlwidgets::JS("function(data, type, row, meta) {return type === 'display' && data.length > 75 ? '<span title=' + data + '>' + data.substr(0, 75) + '...</span>' : data;}"))
     ),
     searching = T,
     lengthChange = FALSE,
@@ -507,7 +508,7 @@ observeEvent(input$Request, {
 output$title <- renderText({lsfMetadata()$metadataTitle[input$searchTabTable_rows_selected]})
 output$abstract <- renderText({lsfMetadata()$metadataAbstract[input$searchTabTable_rows_selected]})
 output$organisation <- renderText({lsfMetadata()$metadataOrganisation[input$searchTabTable_rows_selected]})
-output$url <- renderText({lsfMetadata()$metadataAltURI[input$searchTabTable_rows_selected]})
+output$url <- renderUI({HTML(paste0("<a href=",lsfMetadata()$metadataAltURI[input$searchTabTable_rows_selected]," target='_blank'>",lsfMetadata()$metadataAltURI[input$searchTabTable_rows_selected],"</a>"))})
 output$accessProtocol <- renderText({lsfMetadata()$metadataAccessProtocol[input$searchTabTable_rows_selected]})
 output$geographicDescription <- renderText({lsfMetadata()$metadataGeographicDescription[input$searchTabTable_rows_selected]})
 output$geographicExtents <- renderText({
