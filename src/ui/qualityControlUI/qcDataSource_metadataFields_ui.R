@@ -4,7 +4,8 @@ box(title = p("Data Source Details"),
      column(
        width = 4,
        textAreaInput(inputId = 'qcTitle', label = "Title*",value = "", width = '100%'),
-       textAreaInput(inputId = 'qcAbstract', label = "Abstract*",value = "", width = '100%')
+       textAreaInput(inputId = 'qcAbstract', label = "Abstract*",value = "", width = '100%'),
+       textAreaInput(inputId = 'qcAccessProtocol', label = "Access Protocol*",value = "", width = '100%')
      ),
      column(
        width = 4,

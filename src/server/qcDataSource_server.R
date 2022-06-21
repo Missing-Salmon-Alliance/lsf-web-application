@@ -43,6 +43,7 @@ qcLoadMetadata <- function(){
   updateTextInput(session,inputId = 'qcOrganisation',value = qcDatabaseMetadata()$m$metadataOrganisation)
   
   updateTextAreaInput(session,inputId = 'qcAbstract',value = qcDatabaseMetadata()$m$metadataAbstract)
+  updateTextAreaInput(session,inputId = 'qcAccessProtocol',value = qcDatabaseMetadata()$m$metadataAccessProtocol)
   updateTextInput(session,inputId = 'qcCreatorEmail',value = qcDatabaseMetadata()$m$metadataCreatorEmail)
   updateTextInput(session,inputId = 'qcURI',value = qcDatabaseMetadata()$m$metadataKNBURI) # KNB URL
   updateTextInput(session, inputId = 'qcALTURI', value = qcDatabaseMetadata()$m$metadataAltURI)
@@ -161,6 +162,7 @@ observeEvent(input$submitQCMetadata,{
                                     "', m.metadataCreator = '",sanitiseFreeTextInputs(input$qcCreator),
                                     "', m.metadataOrganisation = '",sanitiseFreeTextInputs(input$qcOrganisation),
                                     "', m.metadataAbstract = '",sanitiseFreeTextInputs(input$qcAbstract),
+                                    "', m.metadataAccessProtocol = '",sanitiseFreeTextInputs(input$qcAccessProtocol),    
                                     "', m.metadataCreatorEmail = '",sanitiseFreeTextInputs(input$qcCreatorEmail),
                                     "', m.metadataAltURI = '",sanitiseFreeTextInputs(input$qcALTURI),
                                     "', m.metadataCreatorORCID = '",sanitiseFreeTextInputs(input$qcCreatorORCID),
