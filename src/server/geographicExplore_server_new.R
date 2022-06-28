@@ -161,8 +161,9 @@ output$searchTabMap <- leaflet::renderLeaflet({
                           iconSize = c(35, 35))) %>%
     
     leaflet::addCircleMarkers(data = nascoRiversDBSF,
-                              label = ~rivername,
+                              label = ~paste0(rivername,", Lat:",lat,", Lon:",lon),
                               group = "NASCO Rivers DB",
+                              popup = '<a href = "https://nasco.int/rivers-database/">NASCO Rivers Database</a>',
                               color = "black",
                               radius = 3,
                               stroke = FALSE,
@@ -204,12 +205,12 @@ output$searchTabMap <- leaflet::renderLeaflet({
                          color = "purple", group = "NAFO Divisions", weight = 1,
                          highlightOptions = leaflet::highlightOptions(color = "yellow", weight = 3,
                                                                       bringToFront = TRUE)) %>%
-    leaflet::addPolygons(data = migrationSF,
-                         label = ~icesname,
-                         layerId = paste0("mig_",migrationSF$fid),
-                         color = "blue", group = "Proposed Outward Migration", weight = 1,
-                         highlightOptions = leaflet::highlightOptions(color = "yellow", weight = 3,
-                                                                      bringToFront = TRUE)) %>%
+    #leaflet::addPolygons(data = migrationSF,
+    #                     label = ~icesname,
+    #                     layerId = paste0("mig_",migrationSF$fid),
+    #                     color = "blue", group = "Proposed Outward Migration", weight = 1,
+    #                     highlightOptions = leaflet::highlightOptions(color = "yellow", weight = 3,
+    #                                                                  bringToFront = TRUE)) %>%
     
     # leaflet::addPolygons(data = feedingSF,
     #             label = feedingSF$name,
@@ -222,7 +223,7 @@ output$searchTabMap <- leaflet::renderLeaflet({
                                                                      "ICES Ecoregions",
                                                                      "NAFO Divisions",
                                                                      #"ICES Stat Squares",
-                                                                     "Proposed Outward Migration",
+                                                                     #"Proposed Outward Migration",
                                                                      "Commonly Accepted Range",
                                                                      "NASCO Rivers DB"),
                               options = leaflet::layersControlOptions(collapsed = TRUE)) %>%
@@ -230,7 +231,7 @@ output$searchTabMap <- leaflet::renderLeaflet({
                          "NAFO Divisions",
                          "ICES Index Rivers",
                          #"ICES Stat Squares",
-                         "Proposed Outward Migration",
+                         #"Proposed Outward Migration",
                          "Commonly Accepted Range",
                          "NASCO Rivers DB")) %>%
     # Customise layer control title
