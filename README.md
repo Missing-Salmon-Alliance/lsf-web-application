@@ -1,5 +1,4 @@
-# lsf-web-application
-SalHub - The Salmon Ecosystem Data Hub
+# SalHub - The Salmon Ecosystem Data Hub
 Likely Suspects Framework Data Mobilisation Solution - Web Application to provide interface for data owners to provide data and data users to find data!
 
 ## Current Status
