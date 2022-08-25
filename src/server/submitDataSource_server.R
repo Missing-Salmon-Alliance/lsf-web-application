@@ -253,10 +253,39 @@ output$submitMap <- leaflet::renderLeaflet({
 })
 # observer for 4 numeric inputs lat/lon - action update userRectangle on submitMap, change zoom and centre
 observeEvent(input$submitEast | input$submitWest | input$submitNorth | input$submitSouth,{
+  # catch empty value, prevent crash
   req(input$submitEast)
   req(input$submitWest)
   req(input$submitNorth)
-  req(input$submitSouth) # catch empty value, prevent crash?
+  req(input$submitSouth)
+  
+  # catch out of bounds values
+  if(input$submitNorth > 90){
+    updateNumericInput(session, inputId = 'submitNorth', value = 90)
+  } 
+  if(input$submitNorth < -90){
+    updateNumericInput(session, inputId = 'submitNorth', value = -90)
+  }
+  if(input$submitSouth > 90){
+    updateNumericInput(session, inputId = 'submitSouth', value = 90)
+  }
+  if(input$submitSouth < -90){
+    updateNumericInput(session, inputId = 'submitSouth', value = -90)
+  }
+  if(input$submitEast > 180){
+    updateNumericInput(session, inputId = 'submitEast', value = 180)
+  } 
+  if(input$submitEast < -180){
+    updateNumericInput(session, inputId = 'submitEast', value = -180)
+  }
+  if(input$submitWest > 180){
+    updateNumericInput(session, inputId = 'submitWest', value = 180)
+  }
+  if(input$submitWest < -180){
+    updateNumericInput(session, inputId = 'submitWest', value = -180)
+  }
+  
+  # show user coordinates on map as rectangle
   leaflet::leafletProxy('submitMap') %>%
     leaflet::clearGroup(group = 'userRectangle') %>%
     leaflet::addRectangles(input$submitWest,input$submitNorth,input$submitEast,input$submitSouth,group = 'userRectangle') %>%
