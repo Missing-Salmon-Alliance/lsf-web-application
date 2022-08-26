@@ -21,10 +21,20 @@ output$domainExploreTabUI <- renderUI({
       ),
       box(
         status = 'primary',
-        title = "Step 2 - Variable Classes Relevant to Selected Life-Stage Domains",
+        title = "Step 2 - Variable Class",
         width = 7,
         
-        shinyWidgets::pickerInput('esvFilter',"Select Variable Classes",choices = c("Please select a Domain"),selected = "Please select a Domain",
+        shinyWidgets::pickerInput('esvFilter',"Select Variable Classes",
+          choices = list('Biological Processes' = 
+            stats::setNames(as.list(lsfVariableClasses()[lsfVariableClasses()$esvCategory == "Biological",]$id),
+              lsfVariableClasses()[lsfVariableClasses()$esvCategory == "Biological",]$esvTitle),
+          'Physcial Environment' = 
+            stats::setNames(as.list(lsfVariableClasses()[lsfVariableClasses()$esvCategory == "Physical",]$id),
+              lsfVariableClasses()[lsfVariableClasses()$esvCategory == "Physical",]$esvTitle),
+          'Salmon Trait' = 
+            stats::setNames(as.list(lsfVariableClasses()[lsfVariableClasses()$esvCategory == "Salmon Trait",]$id),
+              lsfVariableClasses()[lsfVariableClasses()$esvCategory == "Salmon Trait",]$esvTitle)
+        ),
           multiple = TRUE,
           options = shinyWidgets::pickerOptions(
             selectedTextFormat = 'count',
@@ -36,6 +46,7 @@ output$domainExploreTabUI <- renderUI({
         width = 12,
         solidHeader = TRUE,
         title = "Step 3 - Results",
+        downloadButton('downloadSearchResults',"Download Search Results", class = 'btn-primary btn-xs'),
         DT::DTOutput('domainExploreTable')
       )
     )
@@ -52,83 +63,42 @@ output$domainExploreTabUI <- renderUI({
 ################################
 
 domainExploreReactive <- reactiveVal()
+
 # Observe Domain Filter - Action: Update Variable Class Filters (available class choices filtered by Domain)
-observeEvent(input$domainFilter,{
-  
+observeEvent(c(input$domainFilter,input$esvFilter),{
+
+  # create domainFilter search space
   if(is.null(input$domainFilter)){
-    shinyWidgets::updatePickerInput(session, 'esvFilter', choices = c("Please select a Domain"),selected = "Please select a Domain")
-
-    # Update table - clear results and refill with new selection
-    domainExploreReactive(NULL)
-    
-    filteredMetadata <- neo4r::call_neo4j(paste0("MATCH (m)-[r:HAS_ESV]-(esv) RETURN m;"),neo_con,type = 'graph')
-    
-    if(paste0(class(filteredMetadata),collapse = ",") == 'neo,list'){ # test that returned item is a valid graph object, otherwise ignore empty result
-      filteredMetadata <- filteredMetadata$nodes %>% neo4r::unnest_nodes('all')
-      domainExploreReactive(filteredMetadata)
-    }else{
-      domainExploreReactive(NULL)
-    }
-    
+    domainSearchSpace <- lsfDomains()$id # selecting zero domains has the effect of adding all domains to the search space (i.e., no domain filter applied)
   }else{
-    # capture filtered domain ID's as vector
-    filteredDomainIds <- input$domainFilter
-    # load variable classes from graph that have a relationship with selected domains
-    filteredVariableClasses <- neo4r::call_neo4j(paste0("MATCH (d)<-[:HAS_DOMAIN]-(esv:EssentialSalmonVariable) WHERE id(d) IN [",formatNumericList(input$domainFilter),"] RETURN esv;"),neo_con,type='graph')
-    filteredVariableClasses <- filteredVariableClasses$nodes %>% neo4r::unnest_nodes('all') %>% dplyr::group_by('esvCategory')
-    
-    # update select input using filtered class Titles
-    shinyWidgets::updatePickerInput(session, 'esvFilter',
-      choices = list('Biological Processes' = 
-      stats::setNames(as.list(filteredVariableClasses[filteredVariableClasses$esvCategory == "Biological",]$id),
-        filteredVariableClasses[filteredVariableClasses$esvCategory == "Biological",]$esvTitle),
-        'Physcial Environment' = 
-      stats::setNames(as.list(filteredVariableClasses[filteredVariableClasses$esvCategory == "Physical",]$id),
-        filteredVariableClasses[filteredVariableClasses$esvCategory == "Physical",]$esvTitle),
-        'Salmon Trait' = 
-      stats::setNames(as.list(filteredVariableClasses[filteredVariableClasses$esvCategory == "Salmon Trait",]$id),
-        filteredVariableClasses[filteredVariableClasses$esvCategory == "Salmon Trait",]$esvTitle)
-      ),
-      selected = character(0))
-
+    domainSearchSpace <- input$domainFilter
   }
+  # create esvFilter search space
+  if(is.null(input$esvFilter)){
+    esvSearchSpace <- lsfVariableClasses()$id # selecting zero variable classes has the effect of adding all variable classes to the search space (i.e., no variable class filter applied)
+  }else{
+    esvSearchSpace <- input$esvFilter
+  }
+  
+  # load metadata with filters applied
+  filteredMetadata <- neo4r::call_neo4j(paste0("MATCH (m)-[r:HAS_ESV]-(esv) WHERE id(esv) IN [",
+    formatNumericList(esvSearchSpace),
+    "] AND r.domainID IN [",
+    formatNumericList(domainSearchSpace),
+    "] RETURN m;"),
+    neo_con,type = 'graph')
+  
+  # deal with empty results
+  if(paste0(class(filteredMetadata),collapse = ",") == 'neo,list'){ # test that returned item is a valid graph object, otherwise ignore empty result
+    filteredMetadata <- filteredMetadata$nodes %>% neo4r::unnest_nodes('all')
+    domainExploreReactive(filteredMetadata)
+  }else{
+    domainExploreReactive(NULL)
+  }
+  
 },ignoreNULL = FALSE)
 
-# Observe Var Class Filter - Action: Update metadata nodes displayed on map (filter by relationship to class selected)
-observeEvent(input$esvFilter,{
-  if("Please select a Domain" %in% input$esvFilter || is.null(input$esvFilter)){
-    # Update table - clear results and refill with new selection
-    domainExploreReactive(NULL)
-    
-    filteredMetadata <- neo4r::call_neo4j(paste0("MATCH (m)-[r:HAS_ESV]-(esv) WHERE r.domainID IN [",
-      formatNumericList(input$domainFilter),
-      "] RETURN m;"),
-      neo_con,type = 'graph')
-    if(paste0(class(filteredMetadata),collapse = ",") == 'neo,list'){ # test that returned item is a valid graph object, otherwise ignore empty result
-      filteredMetadata <- filteredMetadata$nodes %>% neo4r::unnest_nodes('all')
-      domainExploreReactive(filteredMetadata)
-    }else{
-      domainExploreReactive(NULL)
-    }
-  }else{
-    # Update table - clear results and refill with new selection
-    domainExploreReactive(NULL)
-    # filter
-    filteredMetadata <- neo4r::call_neo4j(paste0("MATCH (m)-[r:HAS_ESV]-(esv) WHERE id(esv) IN [",
-                                                 formatNumericList(input$esvFilter),
-                                                 "] AND r.domainID IN [",
-                                                 formatNumericList(input$domainFilter),
-                                                 "] RETURN m;"),
-                                          neo_con,type = 'graph')
-    if(paste0(class(filteredMetadata),collapse = ",") == 'neo,list'){ # test that returned item is a valid graph object, otherwise ignore empty result
-      filteredMetadata <- filteredMetadata$nodes %>% neo4r::unnest_nodes('all')
-      domainExploreReactive(filteredMetadata)
-    }else{
-      domainExploreReactive(NULL)
-    }
-  }
-},ignoreNULL = FALSE)
-
+# load search results into table
 output$domainExploreTable <- DT::renderDT({
     if(!is.null(domainExploreReactive())){
       domainExploreReactive()[,c('metadataTitle','metadataAbstract','metadataKeywords')]
@@ -141,4 +111,16 @@ output$domainExploreTable <- DT::renderDT({
   options = list(pageLength = 20,
                  columnDefs = list(list(visible=FALSE, targets=c(2)))
   )
+)
+
+# download search results - Action: prompt user to save dropped rows
+output$downloadSearchResults <- downloadHandler(
+  filename = function() {
+    paste('SalHub_Search_Results_', Sys.Date(), '.csv', sep='')
+  },
+  content = function(file) {
+    results <- domainExploreReactive()[,c('metadataUUID','metadataTitle','metadataAbstract','metadataOrganisation','metadataAltURI','metadataAccessProtocol','metadataGeographicDescription','metadataCoverageNorth','metadataCoverageEast','metadataCoverageSouth','metadataCoverageWest')]
+    names(results) <- c('UUID','Title','Abstract','Organisation','URL','AccessProtocol','GeographicDescription','lat1','lon1','lat2','lon2')
+    readr::write_csv(results,file)
+  }
 )

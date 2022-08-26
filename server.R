@@ -25,6 +25,7 @@ server <- function(input, output, session) {
   lsfDomains <- reactiveVal(NULL)
   lsfMetadata <- reactiveVal(NULL)
   lsfHypotheses <- reactiveVal(NULL)
+  lsfVariableClasses <- reactiveVal(NULL)
   ############################
   # Reactive Values END
   ############################
