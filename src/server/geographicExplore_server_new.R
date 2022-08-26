@@ -32,6 +32,7 @@ output$searchMapTabUI <- renderUI({
             6,
             h4('Title:'),
             textOutput('title'),
+            tags$i(textOutput('doi')),
             h4('Abstract:'),
             textOutput('abstract')
           ),
@@ -507,6 +508,7 @@ observeEvent(input$Request, {
 
 output$title <- renderText({lsfMetadata()$metadataTitle[input$searchTabTable_rows_selected]})
 output$abstract <- renderText({lsfMetadata()$metadataAbstract[input$searchTabTable_rows_selected]})
+output$doi <- renderText({paste0("doi: ",lsfMetadata()$metadataUUID[input$searchTabTable_rows_selected],"/",lsfMetadata()$id[input$searchTabTable_rows_selected])})
 output$organisation <- renderText({lsfMetadata()$metadataOrganisation[input$searchTabTable_rows_selected]})
 output$url <- renderUI({HTML(paste0("<a href=",lsfMetadata()$metadataAltURI[input$searchTabTable_rows_selected]," target='_blank'>",lsfMetadata()$metadataAltURI[input$searchTabTable_rows_selected],"</a>"))})
 output$accessProtocol <- renderText({lsfMetadata()$metadataAccessProtocol[input$searchTabTable_rows_selected]})
