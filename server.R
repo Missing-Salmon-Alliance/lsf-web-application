@@ -120,7 +120,7 @@ server <- function(input, output, session) {
   # domainExplore_server.R START
   ############################
   
-  source("./src/server/domainExplore_server.R", local = TRUE)$value
+  source("./src/server/domainExplore_server_new.R", local = TRUE)$value
   
   ############################
   # domainExplore_server.R END
