@@ -45,6 +45,7 @@ ui <- dashboardPage(skin = "blue",
                       # Search Data Source Conditional Sidebar Items
                       ##############################################
                       source("./src/ui/searchDataSource_Sidebar_ui.R",local = TRUE)$value,
+                      source("./src/ui/domainExploreUI/domainExplore_Sidebar_ui.R",local = TRUE)$value,
                       ##############################################
                       # Search Data Source Conditional Sidebar Items
                       ##############################################

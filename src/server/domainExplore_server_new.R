@@ -5,50 +5,54 @@ output$domainExploreTabUI <- renderUI({
       h4("Explore available data resources based on salmon life-stage domains."),
       p("The life-stage domains represent a combination of salmon lifecycle and the environments within which they reside and transit.
         Although marine phases are defined here at a low resolution, geographic information available within the resource can improve context."),
-      box(
-        width = 5,
-        status = 'primary',
-        title = "Step 1 - Life-Stage Domain",
-        shinyWidgets::pickerInput(
-          inputId = "domainFilter",
-          label = "Select Salmon Life-Stage Domains",
-          choices = stats::setNames(as.list(lsfDomains()$id),lsfDomains()$domainTitle),
-          multiple = TRUE,
-          options = shinyWidgets::pickerOptions(
-            selectedTextFormat = 'count',
-            liveSearch = TRUE)
-        )
-      ),
-      box(
-        status = 'primary',
-        title = "Step 2 - Variable Class",
-        width = 7,
-        
-        shinyWidgets::pickerInput('esvFilter',"Select Variable Classes",
-          choices = list('Biological Processes' = 
-            stats::setNames(as.list(lsfVariableClasses()[lsfVariableClasses()$esvCategory == "Biological",]$id),
-              lsfVariableClasses()[lsfVariableClasses()$esvCategory == "Biological",]$esvTitle),
-          'Physcial Environment' = 
-            stats::setNames(as.list(lsfVariableClasses()[lsfVariableClasses()$esvCategory == "Physical",]$id),
-              lsfVariableClasses()[lsfVariableClasses()$esvCategory == "Physical",]$esvTitle),
-          'Salmon Trait' = 
-            stats::setNames(as.list(lsfVariableClasses()[lsfVariableClasses()$esvCategory == "Salmon Trait",]$id),
-              lsfVariableClasses()[lsfVariableClasses()$esvCategory == "Salmon Trait",]$esvTitle)
-        ),
-          multiple = TRUE,
-          options = shinyWidgets::pickerOptions(
-            selectedTextFormat = 'count',
-            liveSearch = TRUE)
-        )
-      ),
-      box(
-        status = 'success',
-        width = 12,
-        solidHeader = TRUE,
-        title = "Step 3 - Results",
+      # box(
+      #   width = 5,
+      #   status = 'primary',
+      #   title = "Life-Stage Domain",
+      #   shinyWidgets::pickerInput(
+      #     inputId = "domainFilter",
+      #     label = "Select Salmon Life-Stage Domains",
+      #     choices = stats::setNames(as.list(lsfDomains()$id),lsfDomains()$domainTitle),
+      #     multiple = TRUE,
+      #     options = shinyWidgets::pickerOptions(
+      #       selectedTextFormat = 'count',
+      #       liveSearch = TRUE)
+      #   )
+      # ),
+      # box(
+      #   status = 'primary',
+      #   title = "Variable Class",
+      #   width = 7,
+      #   
+      #   shinyWidgets::pickerInput('esvFilter',"Select Variable Classes",
+      #     choices = list(
+      #       'Biological Processes' = 
+      #         stats::setNames(as.list(lsfVariableClasses()[lsfVariableClasses()$esvCategory == "Biological",]$id),
+      #                         lsfVariableClasses()[lsfVariableClasses()$esvCategory == "Biological",]$esvTitle),
+      #       'Physcial Environment' = 
+      #         stats::setNames(as.list(lsfVariableClasses()[lsfVariableClasses()$esvCategory == "Physical",]$id),
+      #                         lsfVariableClasses()[lsfVariableClasses()$esvCategory == "Physical",]$esvTitle),
+      #       'Salmon Trait' = 
+      #         stats::setNames(as.list(lsfVariableClasses()[lsfVariableClasses()$esvCategory == "Salmon Trait",]$id),
+      #                         lsfVariableClasses()[lsfVariableClasses()$esvCategory == "Salmon Trait",]$esvTitle)
+      #   ),
+      #     multiple = TRUE,
+      #     options = shinyWidgets::pickerOptions(
+      #       selectedTextFormat = 'count',
+      #       liveSearch = TRUE)
+      #   )
+      # ),
+      # box(
+      #   status = 'success',
+      #   width = 12,
+      #   solidHeader = TRUE,
+      #   title = "Results",
+      verbatimTextOutput('domainFilterActive'),
+      verbatimTextOutput('vclassFilterActive'),
+      verbatimTextOutput('stockunitFilterActive'),
         downloadButton('downloadSearchResults',"Download Search Results", class = 'btn-primary btn-xs'),
         DT::DTOutput('domainExploreTable')
-      )
+      # )
     )
   }else{
     fluidPage(
@@ -59,32 +63,77 @@ output$domainExploreTabUI <- renderUI({
 })
 
 ################################
-# Domain/Var Class filters
+# Domain/Var Class filters (sidebar UI)
 ################################
 
-domainExploreReactive <- reactiveVal()
+output$domainExploreFiltersUI <- renderUI({
+  req(user_info()) # only action if user_info has been created
+  if (user_info()$result) { # if user logon is true:
+    tagList(
+      shinyWidgets::pickerInput(
+        inputId = 'domainFilter',
+        label = "Select Salmon Life-Stage Domains",
+        choices = stats::setNames(as.list(lsfDomains()$id),lsfDomains()$domainTitle),
+        multiple = TRUE,
+        options = shinyWidgets::pickerOptions(
+          selectedTextFormat = 'count',
+          liveSearch = TRUE)),
+      shinyWidgets::pickerInput(
+        inputId = 'esvFilter',
+        label = "Select Variable Classes",
+        choices = list(
+          'Biological Processes' =
+            stats::setNames(as.list(lsfVariableClasses()[lsfVariableClasses()$esvCategory == "Biological",]$id),
+                            lsfVariableClasses()[lsfVariableClasses()$esvCategory == "Biological",]$esvTitle),
+          'Physcial Environment' =
+            stats::setNames(as.list(lsfVariableClasses()[lsfVariableClasses()$esvCategory == "Physical",]$id),
+                            lsfVariableClasses()[lsfVariableClasses()$esvCategory == "Physical",]$esvTitle),
+          'Salmon Trait' =
+            stats::setNames(as.list(lsfVariableClasses()[lsfVariableClasses()$esvCategory == "Salmon Trait",]$id),
+                            lsfVariableClasses()[lsfVariableClasses()$esvCategory == "Salmon Trait",]$esvTitle)
+        ),
+        multiple = TRUE,
+        options = shinyWidgets::pickerOptions(
+          selectedTextFormat = 'count',
+          liveSearch = TRUE))
+    )
+  }
+})
 
+# UI showing active filters
+
+output$domainFilterActive <- renderText({
+  lsfDomains()[lsfDomains()$id %in% domainSearchSpace(),]$domainTitle
+  })
+output$vclassFilterActive <- renderText({
+  lsfVariableClasses()[lsfVariableClasses()$id %in% esvSearchSpace(),]$esvTitle
+  })
+output$stockunitFilterActive <- renderText('TBC')
+
+domainExploreReactive <- reactiveVal()
+domainSearchSpace <- reactiveVal()
+esvSearchSpace <- reactiveVal()
 # Observe Domain Filter - Action: Update Variable Class Filters (available class choices filtered by Domain)
 observeEvent(c(input$domainFilter,input$esvFilter),{
 
   # create domainFilter search space
   if(is.null(input$domainFilter)){
-    domainSearchSpace <- lsfDomains()$id # selecting zero domains has the effect of adding all domains to the search space (i.e., no domain filter applied)
+    domainSearchSpace(lsfDomains()$id) # selecting zero domains has the effect of adding all domains to the search space (i.e., no domain filter applied)
   }else{
-    domainSearchSpace <- input$domainFilter
+    domainSearchSpace(input$domainFilter)
   }
   # create esvFilter search space
   if(is.null(input$esvFilter)){
-    esvSearchSpace <- lsfVariableClasses()$id # selecting zero variable classes has the effect of adding all variable classes to the search space (i.e., no variable class filter applied)
+    esvSearchSpace(lsfVariableClasses()$id) # selecting zero variable classes has the effect of adding all variable classes to the search space (i.e., no variable class filter applied)
   }else{
-    esvSearchSpace <- input$esvFilter
+    esvSearchSpace(input$esvFilter)
   }
   
   # load metadata with filters applied
   filteredMetadata <- neo4r::call_neo4j(paste0("MATCH (m)-[r:HAS_ESV]-(esv) WHERE id(esv) IN [",
-    formatNumericList(esvSearchSpace),
+    formatNumericList(esvSearchSpace()),
     "] AND r.domainID IN [",
-    formatNumericList(domainSearchSpace),
+    formatNumericList(domainSearchSpace()),
     "] RETURN m;"),
     neo_con,type = 'graph')
   
