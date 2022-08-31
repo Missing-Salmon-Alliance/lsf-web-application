@@ -33,17 +33,17 @@ output$menu <- renderUI(
                 
                 # Admin Menu items
                 checkboxInput('debug',"Debug Info"),# DEBUG - Tick box to show input raw outputs
-                menuItem("Introduction", tabName = 'introduction', icon = icon('info')),
-                shinyjs::hidden(menuItem("New Member Registration",tabName = 'newMemberRegistration',icon = icon('user-plus'))),
-                menuItem("Submit Data Source", tabName = 'newsource', icon = icon('project-diagram')),
-                menuItem("Search and Explore",tabname = 'searchTabs', icon = icon('search-location'),
-                         menuSubItem("Explore Map", tabName = 'searchlsf', icon = icon('globe-europe')),
-                         menuSubItem("Explore Hypotheses", tabName = 'hypothesisExplore', icon = icon('question')),
-                         menuSubItem("Explore Life-Stage Domains", tabName = 'domainExplore', icon = icon('fish'))
+                menuItem("Introduction", tabName = 'introduction', icon = icon('info',verify_fa = FALSE)),
+                shinyjs::hidden(menuItem("New Member Registration",tabName = 'newMemberRegistration',icon = icon('user-plus',verify_fa = FALSE))),
+                menuItem("Submit Data Source", tabName = 'newsource', icon = icon('project-diagram',verify_fa = FALSE)),
+                menuItem("Search and Explore",tabname = 'searchTabs', icon = icon('search-location',verify_fa = FALSE),
+                         menuSubItem("Explore Map", tabName = 'searchlsf', icon = icon('globe-europe',verify_fa = FALSE)),
+                         menuSubItem("Explore Hypotheses", tabName = 'hypothesisExplore', icon = icon('question',verify_fa = FALSE)),
+                         menuSubItem("Explore Life-Stage Domains", tabName = 'domainExplore', icon = icon('fish',verify_fa = FALSE))
                 ),
                 # menuItem("Metadata Node Report", tabName = 'metadataNodeReport', icon = icon('flag-checkered')),
-                menuItem("Submit Research Project", tabName = 'newproject', icon = icon('project-diagram')),
-                menuItem("Administration", tabName = 'adminZone', icon = icon('cogs'))
+                menuItem("Submit Research Project", tabName = 'newproject', icon = icon('project-diagram',verify_fa = FALSE)),
+                menuItem("Administration", tabName = 'adminZone', icon = icon('cogs',verify_fa = FALSE))
 
                 
     )
