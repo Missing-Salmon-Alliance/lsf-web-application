@@ -72,7 +72,7 @@ output$domainExploreFiltersUI <- renderUI({
     tagList(
       shinyWidgets::pickerInput(
         inputId = 'domainFilter',
-        label = "Select Salmon Life-Stage Domains",
+        label = "Salmon Life-Stage Domain",
         choices = stats::setNames(as.list(lsfDomains()$id),lsfDomains()$domainTitle),
         multiple = TRUE,
         options = shinyWidgets::pickerOptions(
@@ -80,7 +80,7 @@ output$domainExploreFiltersUI <- renderUI({
           liveSearch = TRUE)),
       shinyWidgets::pickerInput(
         inputId = 'esvFilter',
-        label = "Select Variable Classes",
+        label = "Variable Class",
         choices = list(
           'Biological Processes' =
             stats::setNames(as.list(lsfVariableClasses()[lsfVariableClasses()$esvCategory == "Biological",]$id),
@@ -95,7 +95,16 @@ output$domainExploreFiltersUI <- renderUI({
         multiple = TRUE,
         options = shinyWidgets::pickerOptions(
           selectedTextFormat = 'count',
-          liveSearch = TRUE))
+          liveSearch = TRUE)),
+      shinyWidgets::pickerInput(
+        inputId = 'stockunitFilter',
+        label = "Stock Unit",
+        choices = c("LB","NFLD","QB","GF","SF","US","IC.SW","SC.W","SC.E",
+                    "IR.N","IR","EW","FR","GY","SP","RU","FI","NO","SWD","IC.NE","DK"),
+        multiple = TRUE,
+        options = shinyWidgets::pickerOptions(
+          selectedTextFormat = 'count',
+          liveSearch = TRUE)),
     )
   }
 })
@@ -108,13 +117,17 @@ output$domainFilterActive <- renderText({
 output$vclassFilterActive <- renderText({
   lsfVariableClasses()[lsfVariableClasses()$id %in% esvSearchSpace(),]$esvTitle
   })
-output$stockunitFilterActive <- renderText('TBC')
+output$stockunitFilterActive <- renderText({
+  stockunitSearchSpace()
+})
 
 domainExploreReactive <- reactiveVal()
 domainSearchSpace <- reactiveVal()
 esvSearchSpace <- reactiveVal()
+stockunitSearchSpace <- reactiveVal()
+
 # Observe Domain Filter - Action: Update Variable Class Filters (available class choices filtered by Domain)
-observeEvent(c(input$domainFilter,input$esvFilter),{
+observeEvent(c(input$domainFilter,input$esvFilter,input$stockunitFilter),{
 
   # create domainFilter search space
   if(is.null(input$domainFilter)){
@@ -129,18 +142,35 @@ observeEvent(c(input$domainFilter,input$esvFilter),{
     esvSearchSpace(input$esvFilter)
   }
   
-  # load metadata with filters applied
-  filteredMetadata <- neo4r::call_neo4j(paste0("MATCH (m)-[r:HAS_ESV]-(esv) WHERE id(esv) IN [",
-    formatNumericList(esvSearchSpace()),
-    "] AND r.domainID IN [",
-    formatNumericList(domainSearchSpace()),
-    "] RETURN m;"),
+  # create stockunitFilter search space
+  if(is.null(input$stockunitFilter)){
+    stockunitSearchSpace(c("LB","NFLD","QB","GF","SF","US","IC.SW","SC.W","SC.E",
+                           "IR.N","IR","EW","FR","GY","SP","RU","FI","NO","SWD","IC.NE","DK")) # selecting stock units has the effect of adding all stock units to the search space (i.e., no stock unit filter applied)
+  }else{
+    stockunitSearchSpace(input$stockunitFilter)
+  }
+  
+  
+  # # load metadata with filters applied
+  filteredMetadata <- neo4r::call_neo4j(
+    paste0(
+      "MATCH (m)-[r:HAS_ESV]-(esv) WHERE id(esv) IN [",
+      formatNumericList(esvSearchSpace()),
+      "] AND r.domainID IN [",
+      formatNumericList(domainSearchSpace()),
+      "] RETURN m;"),
     neo_con,type = 'graph')
   
   # deal with empty results
   if(paste0(class(filteredMetadata),collapse = ",") == 'neo,list'){ # test that returned item is a valid graph object, otherwise ignore empty result
-    filteredMetadata <- filteredMetadata$nodes %>% neo4r::unnest_nodes('all')
-    domainExploreReactive(filteredMetadata)
+    filteredMetadata <- filteredMetadata$nodes %>% neo4r::unnest_nodes('all') # if valid graph, unnest nodes
+    # apply stockunit search space
+    filteredMetadata <- filteredMetadata[length(dplyr::intersect(stockunitSearchSpace(),filteredMetadata$metadataStockUnit)) > 0,]
+    if(nrow(filteredMetadata) > 0){
+      domainExploreReactive(filteredMetadata)
+    }else{
+      domainExploreReactive(NULL)
+    }
   }else{
     domainExploreReactive(NULL)
   }
