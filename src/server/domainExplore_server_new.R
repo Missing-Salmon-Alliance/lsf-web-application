@@ -5,54 +5,77 @@ output$domainExploreTabUI <- renderUI({
       h4("Explore available data resources based on salmon life-stage domains."),
       p("The life-stage domains represent a combination of salmon lifecycle and the environments within which they reside and transit.
         Although marine phases are defined here at a low resolution, geographic information available within the resource can improve context."),
-      # box(
-      #   width = 5,
-      #   status = 'primary',
-      #   title = "Life-Stage Domain",
-      #   shinyWidgets::pickerInput(
-      #     inputId = "domainFilter",
-      #     label = "Select Salmon Life-Stage Domains",
-      #     choices = stats::setNames(as.list(lsfDomains()$id),lsfDomains()$domainTitle),
-      #     multiple = TRUE,
-      #     options = shinyWidgets::pickerOptions(
-      #       selectedTextFormat = 'count',
-      #       liveSearch = TRUE)
-      #   )
-      # ),
-      # box(
-      #   status = 'primary',
-      #   title = "Variable Class",
-      #   width = 7,
-      #   
-      #   shinyWidgets::pickerInput('esvFilter',"Select Variable Classes",
-      #     choices = list(
-      #       'Biological Processes' = 
-      #         stats::setNames(as.list(lsfVariableClasses()[lsfVariableClasses()$esvCategory == "Biological",]$id),
-      #                         lsfVariableClasses()[lsfVariableClasses()$esvCategory == "Biological",]$esvTitle),
-      #       'Physcial Environment' = 
-      #         stats::setNames(as.list(lsfVariableClasses()[lsfVariableClasses()$esvCategory == "Physical",]$id),
-      #                         lsfVariableClasses()[lsfVariableClasses()$esvCategory == "Physical",]$esvTitle),
-      #       'Salmon Trait' = 
-      #         stats::setNames(as.list(lsfVariableClasses()[lsfVariableClasses()$esvCategory == "Salmon Trait",]$id),
-      #                         lsfVariableClasses()[lsfVariableClasses()$esvCategory == "Salmon Trait",]$esvTitle)
-      #   ),
-      #     multiple = TRUE,
-      #     options = shinyWidgets::pickerOptions(
-      #       selectedTextFormat = 'count',
-      #       liveSearch = TRUE)
-      #   )
-      # ),
-      # box(
-      #   status = 'success',
-      #   width = 12,
-      #   solidHeader = TRUE,
-      #   title = "Results",
-      verbatimTextOutput('domainFilterActive'),
-      verbatimTextOutput('vclassFilterActive'),
-      verbatimTextOutput('stockunitFilterActive'),
-        downloadButton('downloadSearchResults',"Download Search Results", class = 'btn-primary btn-xs'),
+      splitLayout(
+        #width = 3,
+        cellArgs = list(style='white-space: normal;overflow: visible;'), # enable text wrap in splitLayout
+        shinyWidgets::multiInput(
+          inputId = 'domainFilter',
+          label = "Life-Stage Domain",
+          choices = stats::setNames(as.list(lsfDomains()$id),lsfDomains()$domainTitle),
+          width = '100%'
+          #multiple = TRUE,
+          # options = shinyWidgets::pickerOptions(
+          #   selectedTextFormat = 'count',
+          #   liveSearch = TRUE)
+        ),
+        shinyWidgets::multiInput(
+          inputId = 'esvBioFilter',
+          label = "Biological Processes",
+          choices = stats::setNames(as.list(lsfVariableClasses()[lsfVariableClasses()$esvCategory == "Biological",]$id),lsfVariableClasses()[lsfVariableClasses()$esvCategory == "Biological",]$esvTitle),
+          width = '100%'
+        ),
+        shinyWidgets::multiInput(
+          inputId = 'esvPhysFilter',
+          label = "Physical Environment",
+          choices = stats::setNames(as.list(lsfVariableClasses()[lsfVariableClasses()$esvCategory == "Physical",]$id),lsfVariableClasses()[lsfVariableClasses()$esvCategory == "Physical",]$esvTitle),
+          width = '100%'
+        ),
+        shinyWidgets::multiInput(
+          inputId = 'esvTraitFilter',
+          label = "Salmon Trait",
+          choices = stats::setNames(as.list(lsfVariableClasses()[lsfVariableClasses()$esvCategory == "Salmon Trait",]$id),lsfVariableClasses()[lsfVariableClasses()$esvCategory == "Salmon Trait",]$esvTitle),
+          width = '100%'
+        ),
+        # shinyWidgets::multiInput(
+        #   inputId = 'esvFilter',
+        #   label = "Variable Class",
+        #   choices = list(
+        #     'Biological Processes' =
+        #       stats::setNames(as.list(lsfVariableClasses()[lsfVariableClasses()$esvCategory == "Biological",]$id),
+        #         lsfVariableClasses()[lsfVariableClasses()$esvCategory == "Biological",]$esvTitle),
+        #     'Physical Environment' =
+        #       stats::setNames(as.list(lsfVariableClasses()[lsfVariableClasses()$esvCategory == "Physical",]$id),
+        #         lsfVariableClasses()[lsfVariableClasses()$esvCategory == "Physical",]$esvTitle),
+        #     'Salmon Trait' =
+        #       stats::setNames(as.list(lsfVariableClasses()[lsfVariableClasses()$esvCategory == "Salmon Trait",]$id),
+        #         lsfVariableClasses()[lsfVariableClasses()$esvCategory == "Salmon Trait",]$esvTitle)
+        #   ),
+        #   #multiple = TRUE,
+        #   # options = shinyWidgets::pickerOptions(
+        #   #   selectedTextFormat = 'count',
+        #   #   liveSearch = TRUE)
+        # ),
+        shinyWidgets::multiInput(
+          inputId = 'stockunitFilter',
+          label = "Stock Unit",
+          choices = stockUnits,
+          width = '100%'
+          #multiple = TRUE,
+          # options = shinyWidgets::pickerOptions(
+          #   selectedTextFormat = 'count',
+          #   liveSearch = TRUE)
+        )
+      ),
+      column(
+        width = 9,
         DT::DTOutput('domainExploreTable')
-      # )
+      ),
+      column(
+        width = 3,
+        h3("Selected Row Detail"),
+        downloadButton('downloadSearchResults',"Download Search Results", class = 'btn-primary')
+      )
+      
     )
   }else{
     fluidPage(
@@ -70,55 +93,8 @@ output$domainExploreFiltersUI <- renderUI({
   req(user_info()) # only action if user_info has been created
   if (user_info()$result) { # if user logon is true:
     tagList(
-      shinyWidgets::pickerInput(
-        inputId = 'domainFilter',
-        label = "Salmon Life-Stage Domain",
-        choices = stats::setNames(as.list(lsfDomains()$id),lsfDomains()$domainTitle),
-        multiple = TRUE,
-        options = shinyWidgets::pickerOptions(
-          selectedTextFormat = 'count',
-          liveSearch = TRUE)),
-      shinyWidgets::pickerInput(
-        inputId = 'esvFilter',
-        label = "Variable Class",
-        choices = list(
-          'Biological Processes' =
-            stats::setNames(as.list(lsfVariableClasses()[lsfVariableClasses()$esvCategory == "Biological",]$id),
-                            lsfVariableClasses()[lsfVariableClasses()$esvCategory == "Biological",]$esvTitle),
-          'Physcial Environment' =
-            stats::setNames(as.list(lsfVariableClasses()[lsfVariableClasses()$esvCategory == "Physical",]$id),
-                            lsfVariableClasses()[lsfVariableClasses()$esvCategory == "Physical",]$esvTitle),
-          'Salmon Trait' =
-            stats::setNames(as.list(lsfVariableClasses()[lsfVariableClasses()$esvCategory == "Salmon Trait",]$id),
-                            lsfVariableClasses()[lsfVariableClasses()$esvCategory == "Salmon Trait",]$esvTitle)
-        ),
-        multiple = TRUE,
-        options = shinyWidgets::pickerOptions(
-          selectedTextFormat = 'count',
-          liveSearch = TRUE)),
-      shinyWidgets::pickerInput(
-        inputId = 'stockunitFilter',
-        label = "Stock Unit",
-        choices = c("LB","NFLD","QB","GF","SF","US","IC.SW","SC.W","SC.E",
-                    "IR.N","IR","EW","FR","GY","SP","RU","FI","NO","SWD","IC.NE","DK"),
-        multiple = TRUE,
-        options = shinyWidgets::pickerOptions(
-          selectedTextFormat = 'count',
-          liveSearch = TRUE)),
     )
   }
-})
-
-# UI showing active filters
-
-output$domainFilterActive <- renderText({
-  lsfDomains()[lsfDomains()$id %in% domainSearchSpace(),]$domainTitle
-  })
-output$vclassFilterActive <- renderText({
-  lsfVariableClasses()[lsfVariableClasses()$id %in% esvSearchSpace(),]$esvTitle
-  })
-output$stockunitFilterActive <- renderText({
-  stockunitSearchSpace()
 })
 
 domainExploreReactive <- reactiveVal()
@@ -127,7 +103,7 @@ esvSearchSpace <- reactiveVal()
 stockunitSearchSpace <- reactiveVal()
 
 # Observe Filters - Action: Update search space and query database
-observeEvent(c(input$domainFilter,input$esvFilter,input$stockunitFilter),{
+observeEvent(c(input$domainFilter,input$esvBioFilter,input$esvPhysFilter,input$esvTraitFilter,input$stockunitFilter),{
 
   # create domainFilter search space
   if(is.null(input$domainFilter)){
@@ -144,8 +120,7 @@ observeEvent(c(input$domainFilter,input$esvFilter,input$stockunitFilter),{
   
   # create stockunitFilter search space
   if(is.null(input$stockunitFilter)){
-    stockunitSearchSpace(c("LB","NFLD","QB","GF","SF","US","IC.SW","SC.W","SC.E",
-                           "IR.N","IR","EW","FR","GY","SP","RU","FI","NO","SWD","IC.NE","DK")) # selecting stock units has the effect of adding all stock units to the search space (i.e., no stock unit filter applied)
+    stockunitSearchSpace(stockUnits) # selecting stock units has the effect of adding all stock units to the search space (i.e., no stock unit filter applied)
   }else{
     stockunitSearchSpace(input$stockunitFilter)
   }
@@ -165,7 +140,7 @@ observeEvent(c(input$domainFilter,input$esvFilter,input$stockunitFilter),{
   if(paste0(class(filteredMetadata),collapse = ",") == 'neo,list'){ # test that returned item is a valid graph object, otherwise ignore empty result
     filteredMetadata <- filteredMetadata$nodes %>% neo4r::unnest_nodes('all') # if valid graph, unnest nodes
     # apply stockunit search space
-    filteredMetadata$x <- list(stockunitSearchSpace)
+    filteredMetadata$x <- list(stockunitSearchSpace())
     filteredMetadata$y <- stringr::str_split(filteredMetadata$metadataStockUnit,",")
     filteredMetadata <- filteredMetadata %>% rowwise() %>% mutate(z = paste0(intersect(x,y),collapse = ","))
     
