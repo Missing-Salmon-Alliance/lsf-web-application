@@ -126,7 +126,7 @@ domainSearchSpace <- reactiveVal()
 esvSearchSpace <- reactiveVal()
 stockunitSearchSpace <- reactiveVal()
 
-# Observe Domain Filter - Action: Update Variable Class Filters (available class choices filtered by Domain)
+# Observe Filters - Action: Update search space and query database
 observeEvent(c(input$domainFilter,input$esvFilter,input$stockunitFilter),{
 
   # create domainFilter search space
@@ -165,7 +165,12 @@ observeEvent(c(input$domainFilter,input$esvFilter,input$stockunitFilter),{
   if(paste0(class(filteredMetadata),collapse = ",") == 'neo,list'){ # test that returned item is a valid graph object, otherwise ignore empty result
     filteredMetadata <- filteredMetadata$nodes %>% neo4r::unnest_nodes('all') # if valid graph, unnest nodes
     # apply stockunit search space
-    filteredMetadata <- filteredMetadata[length(dplyr::intersect(stockunitSearchSpace(),filteredMetadata$metadataStockUnit)) > 0,]
+    filteredMetadata$x <- list(stockunitSearchSpace)
+    filteredMetadata$y <- stringr::str_split(filteredMetadata$metadataStockUnit,",")
+    filteredMetadata <- filteredMetadata %>% rowwise() %>% mutate(z = paste0(intersect(x,y),collapse = ","))
+    
+    filteredMetadata <- filteredMetadata[filteredMetadata$z != "",]
+    
     if(nrow(filteredMetadata) > 0){
       domainExploreReactive(filteredMetadata)
     }else{
