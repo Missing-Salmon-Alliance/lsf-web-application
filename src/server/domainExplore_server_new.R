@@ -1,6 +1,7 @@
 output$domainExploreTabUI <- renderUI({
   req(user_info()) # only action if user_info has been created
   if (user_info()$result) { # if user logon is true:
+    div(
     fluidPage(
       h4("Explore available data resources based on salmon life-stage domains."),
       p("The life-stage domains represent a combination of salmon lifecycle and the environments within which they reside and transit.
@@ -52,7 +53,7 @@ output$domainExploreTabUI <- renderUI({
       ),
       column(
         width = 7,
-        div(DT::DTOutput("domainExploreTable"), style = "font-size:80%") # reduce font size in table
+        DT::DTOutput("domainExploreTable")
         
       ),
       column(
@@ -61,7 +62,7 @@ output$domainExploreTabUI <- renderUI({
         downloadButton('downloadSearchResults',"Download Search Results", class = 'btn-primary')
       )
       
-    )
+    ), style = "font-size:80%") # reduce font size in table
   }else{
     fluidPage(
       h1("Life-Stage Domain Explore Area"),
@@ -88,7 +89,7 @@ esvSearchSpace <- reactiveVal()
 stockunitSearchSpace <- reactiveVal()
 
 # Observe Filters - Action: Update search space and query database
-observeEvent(c(input$domainFilter,input$esvBioFilter,input$esvPhysFilter,input$esvTraitFilter,input$stockunitFilter),{
+observeEvent(c(input$domainFilter,input$esvFilter,input$stockunitFilter),{
 
   # create domainFilter search space
   if(is.null(input$domainFilter)){
