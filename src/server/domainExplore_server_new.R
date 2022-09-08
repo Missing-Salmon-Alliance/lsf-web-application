@@ -6,10 +6,10 @@ output$domainExploreTabUI <- renderUI({
       h4("Explore available data resources based on salmon life-stage domains."),
       p("The life-stage domains represent a combination of salmon lifecycle and the environments within which they reside and transit.
         Although marine phases are defined here at a low resolution, geographic information available within the resource can improve context."),
-      splitLayout(
-        #width = 3,
-        cellWidths = c("25%","50%","25%"),
-        cellArgs = list(style='white-space: normal;overflow: visible;'), # enable text wrap in splitLayout
+      column(
+        width = 2,
+        #cellWidths = c("25%","50%","25%"),
+        #cellArgs = list(style='white-space: normal;overflow: visible;'), # enable text wrap in splitLayout
         shinyWidgets::pickerInput(
           inputId = 'domainFilter',
           label = "Life-Stage Domain",
@@ -57,7 +57,7 @@ output$domainExploreTabUI <- renderUI({
         
       ),
       column(
-        width = 5,
+        width = 3,
         h3("Selected Row Detail"),
         downloadButton('downloadSearchResults',"Download Search Results", class = 'btn-primary')
       )
@@ -71,17 +71,6 @@ output$domainExploreTabUI <- renderUI({
   }
 })
 
-################################
-# Domain/Var Class filters (sidebar UI)
-################################
-
-output$domainExploreFiltersUI <- renderUI({
-  req(user_info()) # only action if user_info has been created
-  if (user_info()$result) { # if user logon is true:
-    tagList(
-    )
-  }
-})
 
 domainExploreReactive <- reactiveVal()
 domainSearchSpace <- reactiveVal()
