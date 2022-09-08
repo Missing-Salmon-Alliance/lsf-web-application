@@ -7,71 +7,56 @@ output$domainExploreTabUI <- renderUI({
         Although marine phases are defined here at a low resolution, geographic information available within the resource can improve context."),
       splitLayout(
         #width = 3,
+        cellWidths = c("25%","50%","25%"),
         cellArgs = list(style='white-space: normal;overflow: visible;'), # enable text wrap in splitLayout
-        shinyWidgets::multiInput(
+        shinyWidgets::pickerInput(
           inputId = 'domainFilter',
           label = "Life-Stage Domain",
           choices = stats::setNames(as.list(lsfDomains()$id),lsfDomains()$domainTitle),
-          width = '100%'
-          #multiple = TRUE,
-          # options = shinyWidgets::pickerOptions(
-          #   selectedTextFormat = 'count',
-          #   liveSearch = TRUE)
+          width = '100%',
+          multiple = TRUE,
+          options = shinyWidgets::pickerOptions(
+            selectedTextFormat = 'count',
+            liveSearch = TRUE)
         ),
-        shinyWidgets::multiInput(
-          inputId = 'esvBioFilter',
-          label = "Biological Processes",
-          choices = stats::setNames(as.list(lsfVariableClasses()[lsfVariableClasses()$esvCategory == "Biological",]$id),lsfVariableClasses()[lsfVariableClasses()$esvCategory == "Biological",]$esvTitle),
-          width = '100%'
+        shinyWidgets::pickerInput(
+          inputId = 'esvFilter',
+          label = "Variable Class",
+          choices = list(
+            'Biological Processes' =
+              stats::setNames(as.list(lsfVariableClasses()[lsfVariableClasses()$esvCategory == "Biological",]$id),
+                lsfVariableClasses()[lsfVariableClasses()$esvCategory == "Biological",]$esvTitle),
+            'Physical Environment' =
+              stats::setNames(as.list(lsfVariableClasses()[lsfVariableClasses()$esvCategory == "Physical",]$id),
+                lsfVariableClasses()[lsfVariableClasses()$esvCategory == "Physical",]$esvTitle),
+            'Salmon Trait' =
+              stats::setNames(as.list(lsfVariableClasses()[lsfVariableClasses()$esvCategory == "Salmon Trait",]$id),
+                lsfVariableClasses()[lsfVariableClasses()$esvCategory == "Salmon Trait",]$esvTitle)
+          ),
+          width = '100%',
+          multiple = TRUE,
+          options = shinyWidgets::pickerOptions(
+            selectedTextFormat = 'count',
+            liveSearch = TRUE)
         ),
-        shinyWidgets::multiInput(
-          inputId = 'esvPhysFilter',
-          label = "Physical Environment",
-          choices = stats::setNames(as.list(lsfVariableClasses()[lsfVariableClasses()$esvCategory == "Physical",]$id),lsfVariableClasses()[lsfVariableClasses()$esvCategory == "Physical",]$esvTitle),
-          width = '100%'
-        ),
-        shinyWidgets::multiInput(
-          inputId = 'esvTraitFilter',
-          label = "Salmon Trait",
-          choices = stats::setNames(as.list(lsfVariableClasses()[lsfVariableClasses()$esvCategory == "Salmon Trait",]$id),lsfVariableClasses()[lsfVariableClasses()$esvCategory == "Salmon Trait",]$esvTitle),
-          width = '100%'
-        ),
-        # shinyWidgets::multiInput(
-        #   inputId = 'esvFilter',
-        #   label = "Variable Class",
-        #   choices = list(
-        #     'Biological Processes' =
-        #       stats::setNames(as.list(lsfVariableClasses()[lsfVariableClasses()$esvCategory == "Biological",]$id),
-        #         lsfVariableClasses()[lsfVariableClasses()$esvCategory == "Biological",]$esvTitle),
-        #     'Physical Environment' =
-        #       stats::setNames(as.list(lsfVariableClasses()[lsfVariableClasses()$esvCategory == "Physical",]$id),
-        #         lsfVariableClasses()[lsfVariableClasses()$esvCategory == "Physical",]$esvTitle),
-        #     'Salmon Trait' =
-        #       stats::setNames(as.list(lsfVariableClasses()[lsfVariableClasses()$esvCategory == "Salmon Trait",]$id),
-        #         lsfVariableClasses()[lsfVariableClasses()$esvCategory == "Salmon Trait",]$esvTitle)
-        #   ),
-        #   #multiple = TRUE,
-        #   # options = shinyWidgets::pickerOptions(
-        #   #   selectedTextFormat = 'count',
-        #   #   liveSearch = TRUE)
-        # ),
-        shinyWidgets::multiInput(
+        shinyWidgets::pickerInput(
           inputId = 'stockunitFilter',
           label = "Stock Unit",
           choices = stockUnits,
-          width = '100%'
-          #multiple = TRUE,
-          # options = shinyWidgets::pickerOptions(
-          #   selectedTextFormat = 'count',
-          #   liveSearch = TRUE)
+          width = '100%',
+          multiple = TRUE,
+          options = shinyWidgets::pickerOptions(
+            selectedTextFormat = 'count',
+            liveSearch = TRUE)
         )
       ),
       column(
-        width = 9,
-        DT::DTOutput('domainExploreTable')
+        width = 7,
+        div(DT::DTOutput("domainExploreTable"), style = "font-size:80%") # reduce font size in table
+        
       ),
       column(
-        width = 3,
+        width = 5,
         h3("Selected Row Detail"),
         downloadButton('downloadSearchResults',"Download Search Results", class = 'btn-primary')
       )
