@@ -45,7 +45,7 @@ ui <- dashboardPage(skin = "blue",
                       # Search Data Source Conditional Sidebar Items
                       ##############################################
                       source("./src/ui/searchDataSource_Sidebar_ui.R",local = TRUE)$value,
-                      source("./src/ui/domainExploreUI/domainExplore_Sidebar_ui.R",local = TRUE)$value,
+                      #source("./src/ui/domainExploreUI/domainExplore_Sidebar_ui.R",local = TRUE)$value,
                       ##############################################
                       # Search Data Source Conditional Sidebar Items
                       ##############################################
@@ -70,9 +70,9 @@ ui <- dashboardPage(skin = "blue",
                         
                         source("./src/ui/searchDataSource_ui.R", local = TRUE)$value, # tabItem general search view
                         
-                        source("./src/ui/hypothesisUI/hypothesisExplore_ui.R", local = TRUE)$value, #tabItem hypothesis explore
+                        #source("./src/ui/hypothesisUI/hypothesisExplore_ui.R", local = TRUE)$value, #tabItem hypothesis explore
                         
-                        source("./src/ui/domainExploreUI/domainExplore_ui.R", local = TRUE)$value, # tabItem domain explore
+                        #source("./src/ui/domainExploreUI/domainExplore_ui.R", local = TRUE)$value, # tabItem domain explore
                         
                         source("./src/ui/researchInventoryUI/submitResearchActivity_ui.R",local = TRUE)$value, #tabItem submit research
                         

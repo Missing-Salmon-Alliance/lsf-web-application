@@ -101,7 +101,7 @@ server <- function(input, output, session) {
   # DataSearch_server.R START
   ############################
   
-  source("./src/server/geographicExplore_server_new.R", local = TRUE)$value
+  #source("./src/server/geographicExplore_server_new.R", local = TRUE)$value
   
   ############################
   # DataSearch_server.R END
@@ -111,7 +111,7 @@ server <- function(input, output, session) {
   # hypothesisExplore_server.R START
   ############################
   
-  source("./src/server/hypothesisExplore_server.R", local = TRUE)$value
+  #source("./src/server/hypothesisExplore_server.R", local = TRUE)$value
   
   ############################
   # hypothesisExplore_server.R END
@@ -121,8 +121,8 @@ server <- function(input, output, session) {
   # domainExplore_server.R START
   ############################
   
-  source("./src/server/domainExplore_server_new.R", local = TRUE)$value
-  
+  #source("./src/server/domainExplore_server_new.R", local = TRUE)$value
+  source("./src/server/exploreMetadata_server.R", local = TRUE)$value
   ############################
   # domainExplore_server.R END
   ############################

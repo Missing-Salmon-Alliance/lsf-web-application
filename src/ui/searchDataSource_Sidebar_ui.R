@@ -3,14 +3,7 @@ conditionalPanel(
   column(
     width = 12,
     hr(),
-    column(
-      width = 12,
-      h4("Active Filter:"),
-      textOutput('activeGeographicFilter')
-      
-    ),
-    uiOutput('searchFilterResetUI'),
-    hr(),
-    uiOutput('searchRefreshUI')
+    uiOutput('searchSidebarFilters'),
+    downloadButton('downloadSearchResults',"Download Search Results", class = 'btn-primary')
   )
 )
