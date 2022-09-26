@@ -2,6 +2,8 @@ output$searchMapTabUI <- renderUI({
   req(user_info()) # only action if user_info has been created
   if (user_info()$result) { # if user logon is true:
     div(
+      tags$b(h4("Search and Explore the SalHub Catalogue!")),
+      tags$hr(style="border-color: black;"),
       column(
         width = 4,
         DT::dataTableOutput('domainExploreTable')
@@ -20,21 +22,21 @@ output$searchMapTabUI <- renderUI({
           #height = "45vh",
           column(
             6,
-            h4('Title:'),
+            h5('Title:'),
             textOutput('title'),
             tags$i(textOutput('doi')),
-            h4('Abstract:'),
+            h5('Abstract:'),
             textOutput('abstract')
           ),
           column(
             6,
-            h4('Access Protocol:'),
+            h5('Access Protocol:'),
             textOutput('accessProtocol'),
-            h4('Organisation:'),
+            h5('Organisation:'),
             textOutput('organisation'),
-            h4('URL:'),
+            h5('URL:'),
             uiOutput('url'),
-            h4('Geography and Time:'),
+            h5('Geography and Time:'),
             textOutput('geographicDescription'),
             textOutput('geographicExtents'),
             textOutput('temporalRange')
@@ -49,7 +51,6 @@ output$searchMapTabUI <- renderUI({
   }
 })
 
-
 domainExploreReactive <- reactiveVal()
 
 domainSearchSpace <- reactiveVal()
@@ -58,7 +59,11 @@ stockunitSearchSpace <- reactiveVal()
 
 # Observe Filters - Action: Update search space and query database
 observeEvent(c(input$domainFilter,input$esvFilter,input$stockunitFilter),{
-  
+  leaflet::leafletProxy('searchTabMap') %>%
+    leaflet::clearGroup(group = 'markerRectangle')
+  domainSearchSpace(lsfDomains()$id)
+  esvSearchSpace(lsfVariableClasses()$id)
+  stockunitSearchSpace(stockUnits)
   # create domainFilter search space
   if(is.null(input$domainFilter)){
     domainSearchSpace(lsfDomains()$id) # selecting zero domains has the effect of adding all domains to the search space (i.e., no domain filter applied)
@@ -112,6 +117,9 @@ observeEvent(c(input$domainFilter,input$esvFilter,input$stockunitFilter),{
   if(!is.null(domainExploreReactive())){
     domainExploreReactive(sf::st_as_sf(domainExploreReactive(), wkt = "metadataCoverageCentroid", crs = 4326, na.fail = FALSE))
     redrawFilteredMarkers(domainExploreReactive(),session)
+  }else{
+    leaflet::leafletProxy('searchTabMap', session) %>%
+      leaflet::clearGroup(group = 'Data Source')
   }
   
   
