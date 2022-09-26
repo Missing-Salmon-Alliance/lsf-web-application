@@ -2,7 +2,7 @@ output$searchMapTabUI <- renderUI({
   req(user_info()) # only action if user_info has been created
   if (user_info()$result) { # if user logon is true:
     div(
-      tags$b(h4("Search and Explore the SalHub Catalogue!")),
+      h4(tags$b("Search and Explore the SalHub Catalogue!")),
       tags$hr(style="border-color: black;"),
       column(
         width = 4,
@@ -22,21 +22,21 @@ output$searchMapTabUI <- renderUI({
           #height = "45vh",
           column(
             6,
-            h5('Title:'),
+            h5(tags$b('Title:')),
             textOutput('title'),
             tags$i(textOutput('doi')),
-            h5('Abstract:'),
+            h5(tags$b('Abstract:')),
             textOutput('abstract')
           ),
           column(
             6,
-            h5('Access Protocol:'),
+            h5(tags$b('Access Protocol:')),
             textOutput('accessProtocol'),
-            h5('Organisation:'),
+            h5(tags$b('Organisation:')),
             textOutput('organisation'),
-            h5('URL:'),
+            h5(tags$b('URL:')),
             uiOutput('url'),
-            h5('Geography and Time:'),
+            h5(tags$b('Geography and Time:')),
             textOutput('geographicDescription'),
             textOutput('geographicExtents'),
             textOutput('temporalRange')
@@ -59,6 +59,8 @@ stockunitSearchSpace <- reactiveVal()
 
 # Observe Filters - Action: Update search space and query database
 observeEvent(c(input$domainFilter,input$esvFilter,input$stockunitFilter),{
+  # Set up waiter
+  wLoadDB$show()
   leaflet::leafletProxy('searchTabMap') %>%
     leaflet::clearGroup(group = 'markerRectangle')
   domainSearchSpace(lsfDomains()$id)
@@ -121,7 +123,7 @@ observeEvent(c(input$domainFilter,input$esvFilter,input$stockunitFilter),{
     leaflet::leafletProxy('searchTabMap', session) %>%
       leaflet::clearGroup(group = 'Data Source')
   }
-  
+  wLoadDB$hide()
   
 },ignoreNULL = FALSE, ignoreInit = FALSE)
 

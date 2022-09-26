@@ -46,3 +46,19 @@ stockUnits <- c("LB","NFLD","QB","GF","SF","US","IC.SW","SC.W","SC.E","IR.N","IR
 #checkboxGroupButtonsIcons <- list(yes = icon("ok",lib = "glyphicon"),no = icon("remove",lib = "glyphicon"))
 # Alternative design - Keep for an example
 checkboxGroupButtonsIcons <- list(yes = tags$i(class = "fa fa-check-square",style = "color: steelblue"),no = tags$i(class = "fa fa-square-o",style = "color: steelblue"))
+
+# Set up waiter that covers search map during db updates
+wLoadDB <- waiter::Waiter$new(id = 'searchTabMap',
+  html = HTML("
+              <div class='container--box'>
+                <div class='boxxy'>
+                  <div class='spinner spinner--3'>
+                  </div>
+                </div>
+              </div>
+              <div>
+                <h4 style='color:black;'>Please wait while the map refreshes...</h4>
+              </div>
+              "),
+  color = waiter::transparent(.7)
+)

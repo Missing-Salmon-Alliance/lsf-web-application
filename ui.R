@@ -57,6 +57,7 @@ ui <- dashboardPage(skin = "blue",
                     ),
                     body = dashboardBody(
                       shinyjs::useShinyjs(),
+                      waiter::use_waiter(),
                       shinyjs::extendShinyjs(script = 'custom.js', functions = c('markerClick')),
                       includeCSS('www/custom.css'),
                       
