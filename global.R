@@ -48,7 +48,7 @@ stockUnits <- c("LB","NFLD","QB","GF","SF","US","IC.SW","SC.W","SC.E","IR.N","IR
 checkboxGroupButtonsIcons <- list(yes = tags$i(class = "fa fa-check-square",style = "color: steelblue"),no = tags$i(class = "fa fa-square-o",style = "color: steelblue"))
 
 # Set up waiter that covers search map during db updates
-wLoadDB <- waiter::Waiter$new(id = 'searchTabMap',
+wLoadDB <- waiter::Waiter$new(id = 'metadataExploreMap',
   html = HTML("
               <div class='container--box'>
                 <div class='boxxy'>
