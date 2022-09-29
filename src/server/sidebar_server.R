@@ -65,7 +65,8 @@ output$searchSidebarFilters <- renderUI({
       multiple = TRUE,
       options = shinyWidgets::pickerOptions(
         selectedTextFormat = 'count',
-        liveSearch = TRUE)
+        liveSearch = TRUE,
+        container = 'body')
     ),
     shinyWidgets::pickerInput(
       inputId = 'esvFilter',
@@ -85,7 +86,8 @@ output$searchSidebarFilters <- renderUI({
       multiple = TRUE,
       options = shinyWidgets::pickerOptions(
         selectedTextFormat = 'count',
-        liveSearch = TRUE)
+        liveSearch = TRUE,
+        container = 'body')
     ),
     shinyWidgets::pickerInput(
       inputId = 'stockunitFilter',
@@ -95,7 +97,8 @@ output$searchSidebarFilters <- renderUI({
       multiple = TRUE,
       options = shinyWidgets::pickerOptions(
         selectedTextFormat = 'count',
-        liveSearch = TRUE)
+        liveSearch = TRUE,
+        container = 'body')
     ), style = "font-size:80%") # reduce font size in table
 })
 

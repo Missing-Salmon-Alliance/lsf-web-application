@@ -6,7 +6,7 @@ output$searchMapTabUI <- renderUI({
       tags$hr(style="border-color: black;"),
       column(
         width = 4,
-        DT::dataTableOutput('domainExploreTable')
+        DT::dataTableOutput('metadataExploreTable')
       ),
       column(
         8,
@@ -14,7 +14,7 @@ output$searchMapTabUI <- renderUI({
           width = 12,
           status = 'primary',
           solidheader = F,
-          leaflet::leafletOutput('searchTabMap',height = '45vh')
+          leaflet::leafletOutput('metadataExploreMap',height = '45vh')
         ),
         shinydashboard::box(width = 12,
           status = "warning",
@@ -61,7 +61,7 @@ stockunitSearchSpace <- reactiveVal()
 observeEvent(c(input$domainFilter,input$esvFilter,input$stockunitFilter),{
   # Set up waiter
   wLoadDB$show()
-  leaflet::leafletProxy('searchTabMap') %>%
+  leaflet::leafletProxy('metadataExploreMap') %>%
     leaflet::clearGroup(group = 'markerRectangle')
   domainSearchSpace(lsfDomains()$id)
   esvSearchSpace(lsfVariableClasses()$id)
@@ -120,7 +120,7 @@ observeEvent(c(input$domainFilter,input$esvFilter,input$stockunitFilter),{
     domainExploreReactive(sf::st_as_sf(domainExploreReactive(), wkt = "metadataCoverageCentroid", crs = 4326, na.fail = FALSE))
     redrawFilteredMarkers(domainExploreReactive(),session)
   }else{
-    leaflet::leafletProxy('searchTabMap', session) %>%
+    leaflet::leafletProxy('metadataExploreMap', session) %>%
       leaflet::clearGroup(group = 'Data Source')
   }
   wLoadDB$hide()
@@ -128,7 +128,7 @@ observeEvent(c(input$domainFilter,input$esvFilter,input$stockunitFilter),{
 },ignoreNULL = FALSE, ignoreInit = FALSE)
 
 # load search results into table
-output$domainExploreTable <- DT::renderDT({
+output$metadataExploreTable <- DT::renderDT({
   if(!is.null(domainExploreReactive())){
     sf::st_set_geometry(domainExploreReactive()[,c('metadataTitle','metadataAbstract','metadataKeywords')],NULL)
   }
@@ -159,7 +159,7 @@ output$downloadSearchResults <- downloadHandler(
 
 # TODO: improve visual information in markers, colour index rivers or use river icon, check out the IYS icons
 
-output$searchTabMap <- leaflet::renderLeaflet({ 
+output$metadataExploreMap <- leaflet::renderLeaflet({ 
   leaflet::leaflet (options = leaflet::leafletOptions(minZoom = 3,maxZoom = 19))%>%
     leaflet::setView(lng = -20,lat = 50,zoom = 3) %>% 
     leaflet::setMaxBounds( lng1 = -180
@@ -270,10 +270,10 @@ output$searchTabMap <- leaflet::renderLeaflet({
 
 # Create standard metadata map marker popup information
 redrawFilteredMarkers <- function(filteredTibble,session){
-  leaflet::leafletProxy('searchTabMap', session) %>%
+  leaflet::leafletProxy('metadataExploreMap', session) %>%
     leaflet::clearGroup(group = 'Data Source')
 
-  leaflet::leafletProxy('searchTabMap', session) %>%
+  leaflet::leafletProxy('metadataExploreMap', session) %>%
     leaflet::addMarkers(data = filteredTibble,
       label = ~metadataTitle,
       layerId = ~id,
@@ -294,38 +294,42 @@ redrawFilteredMarkers <- function(filteredTibble,session){
 ###########################################
 
 # Observer for Search Map Click - Action: When user clicks a marker add the extents of the marker data source as rectangle to the map
-observeEvent(input$searchTabMap_marker_click,{
-  leaflet::leafletProxy('searchTabMap') %>%
+observeEvent(input$metadataExploreMap_marker_click,{
+  # on marker click, clear existing rectangle and add new one from marker information
+  leaflet::leafletProxy('metadataExploreMap') %>%
     leaflet::clearGroup(group = 'markerRectangle') %>%
-    leaflet::addRectangles(domainExploreReactive()[domainExploreReactive()$id == input$searchTabMap_marker_click[1],]$metadataCoverageWest,
-      domainExploreReactive()[domainExploreReactive()$id == input$searchTabMap_marker_click[1],]$metadataCoverageNorth,
-      domainExploreReactive()[domainExploreReactive()$id == input$searchTabMap_marker_click[1],]$metadataCoverageEast,
-      domainExploreReactive()[domainExploreReactive()$id == input$searchTabMap_marker_click[1],]$metadataCoverageSouth,
+    leaflet::addRectangles(domainExploreReactive()[domainExploreReactive()$id == input$metadataExploreMap_marker_click[1],]$metadataCoverageWest,
+      domainExploreReactive()[domainExploreReactive()$id == input$metadataExploreMap_marker_click[1],]$metadataCoverageNorth,
+      domainExploreReactive()[domainExploreReactive()$id == input$metadataExploreMap_marker_click[1],]$metadataCoverageEast,
+      domainExploreReactive()[domainExploreReactive()$id == input$metadataExploreMap_marker_click[1],]$metadataCoverageSouth,
       group = 'markerRectangle', color = "blue", weight = 1, stroke = TRUE)
+  # select relevant row in data table
+  
+  
 }
 )
 
 # Observer for Search Map Click - Action: clear rectangle on background click
-observeEvent(input$searchTabMap_click,{
-  leaflet::leafletProxy('searchTabMap') %>%
+observeEvent(input$metadataExploreMap_click,{
+  leaflet::leafletProxy('metadataExploreMap') %>%
     leaflet::clearGroup(group = 'markerRectangle')
 })
 
 # Observer for Search Datatable Click - Action: pan map to centre on selected row and add rectangle/point
-observeEvent(input$domainExploreTable_rows_selected,{
-  leaflet::leafletProxy('searchTabMap') %>%
+observeEvent(input$metadataExploreTable_rows_selected,{
+  leaflet::leafletProxy('metadataExploreMap') %>%
     leaflet::clearGroup(group = 'markerRectangle') %>%
     leaflet::addRectangles(
-      domainExploreReactive()$metadataCoverageWest[input$domainExploreTable_rows_selected],
-      domainExploreReactive()$metadataCoverageNorth[input$domainExploreTable_rows_selected],
-      domainExploreReactive()$metadataCoverageEast[input$domainExploreTable_rows_selected],
-      domainExploreReactive()$metadataCoverageSouth[input$domainExploreTable_rows_selected],
+      domainExploreReactive()$metadataCoverageWest[input$metadataExploreTable_rows_selected],
+      domainExploreReactive()$metadataCoverageNorth[input$metadataExploreTable_rows_selected],
+      domainExploreReactive()$metadataCoverageEast[input$metadataExploreTable_rows_selected],
+      domainExploreReactive()$metadataCoverageSouth[input$metadataExploreTable_rows_selected],
       group = 'markerRectangle') %>%
     leaflet::fitBounds(
-      domainExploreReactive()$metadataCoverageWest[input$domainExploreTable_rows_selected],
-      domainExploreReactive()$metadataCoverageNorth[input$domainExploreTable_rows_selected],
-      domainExploreReactive()$metadataCoverageEast[input$domainExploreTable_rows_selected],
-      domainExploreReactive()$metadataCoverageSouth[input$domainExploreTable_rows_selected],
+      domainExploreReactive()$metadataCoverageWest[input$metadataExploreTable_rows_selected],
+      domainExploreReactive()$metadataCoverageNorth[input$metadataExploreTable_rows_selected],
+      domainExploreReactive()$metadataCoverageEast[input$metadataExploreTable_rows_selected],
+      domainExploreReactive()$metadataCoverageSouth[input$metadataExploreTable_rows_selected],
       options = leaflet::leafletOptions(maxZoom = 10))
 })
 
@@ -336,7 +340,7 @@ observeEvent(input$domainExploreTable_rows_selected,{
 # Bookmark System
 
 output$addToBookmarksUI <- renderUI({
-  click = input$searchTabMap_marker_click
+  click = input$metadataExploreMap_marker_click
   if(domainExploreReactive()[domainExploreReactive()$id == click[1],]$id %in% sessionUserBookmarks()){
     h4("This resource is in your bookmarks.")
   }else if(domainExploreReactive()[domainExploreReactive()$id == click[1],]$id %in% neo4r::call_neo4j(paste0("MATCH (p:Person)-[r:HAS_REQUESTED]-(m:Metadata) WHERE id(p) = ",user_info()$user_info$id," RETURN id(m) as id;"),con = neo_con, type = 'row')$id$value){
@@ -352,37 +356,38 @@ output$addToBookmarksUI <- renderUI({
   }
 })
 
-# Action button uses information from the searchTabMap_marker_click to update the bookmarks list 
+# Action button uses information from the metadataExploreMap_marker_click to update the bookmarks list 
 observeEvent(input$Request, {
   # when user adds to bookmark disable request button and change label to indicate action completed
   shinyjs::disable(id = 'Request')
   updateActionButton(session, inputId = 'Request',label = "Added to bookmarks!")
-  click = input$searchTabMap_marker_click
+  click = input$metadataExploreMap_marker_click
   sourceIDString <- paste0(domainExploreReactive()[domainExploreReactive()$id == click[1],]$id)
   sessionUserBookmarks(append(sessionUserBookmarks(),sourceIDString))
   # update database bookmark list
   neo4r::call_neo4j(query = paste0("MATCH (p:Person) WHERE id(p) = ",user_info()$user_info$id," SET p.personBookmarks = '",formatNumericList(sessionUserBookmarks()),"';"),con = neo_con, type = 'row')
 })
 
-output$title <- renderText({domainExploreReactive()$metadataTitle[input$domainExploreTable_rows_selected]})
-output$abstract <- renderText({domainExploreReactive()$metadataAbstract[input$domainExploreTable_rows_selected]})
-output$doi <- renderText({paste0("doi: ",domainExploreReactive()$metadataUUID[input$domainExploreTable_rows_selected],"/",domainExploreReactive()$id[input$domainExploreTable_rows_selected])})
-output$organisation <- renderText({domainExploreReactive()$metadataOrganisation[input$domainExploreTable_rows_selected]})
-output$url <- renderUI({HTML(paste0("<a href=",domainExploreReactive()$metadataAltURI[input$domainExploreTable_rows_selected]," target='_blank'>",domainExploreReactive()$metadataAltURI[input$domainExploreTable_rows_selected],"</a>"))})
-output$accessProtocol <- renderText({domainExploreReactive()$metadataAccessProtocol[input$domainExploreTable_rows_selected]})
-output$geographicDescription <- renderText({domainExploreReactive()$metadataGeographicDescription[input$domainExploreTable_rows_selected]})
+# The section renders all the further information text from the selected data table row
+output$title <- renderText({domainExploreReactive()$metadataTitle[input$metadataExploreTable_rows_selected]})
+output$abstract <- renderText({domainExploreReactive()$metadataAbstract[input$metadataExploreTable_rows_selected]})
+output$doi <- renderText({paste0("doi: ",domainExploreReactive()$metadataUUID[input$metadataExploreTable_rows_selected],"/",domainExploreReactive()$id[input$metadataExploreTable_rows_selected])})
+output$organisation <- renderText({domainExploreReactive()$metadataOrganisation[input$metadataExploreTable_rows_selected]})
+output$url <- renderUI({HTML(paste0("<a href=",domainExploreReactive()$metadataAltURI[input$metadataExploreTable_rows_selected]," target='_blank'>",domainExploreReactive()$metadataAltURI[input$metadataExploreTable_rows_selected],"</a>"))})
+output$accessProtocol <- renderText({domainExploreReactive()$metadataAccessProtocol[input$metadataExploreTable_rows_selected]})
+output$geographicDescription <- renderText({domainExploreReactive()$metadataGeographicDescription[input$metadataExploreTable_rows_selected]})
 output$geographicExtents <- renderText({
   paste0(
-    "North: ",domainExploreReactive()$metadataCoverageNorth[input$domainExploreTable_rows_selected],
-    ", East: ",domainExploreReactive()$metadataCoverageEast[input$domainExploreTable_rows_selected],
-    ", South: ",domainExploreReactive()$metadataCoverageSouth[input$domainExploreTable_rows_selected],
-    ", West: ",domainExploreReactive()$metadataCoverageWest[input$domainExploreTable_rows_selected]
+    "North: ",domainExploreReactive()$metadataCoverageNorth[input$metadataExploreTable_rows_selected],
+    ", East: ",domainExploreReactive()$metadataCoverageEast[input$metadataExploreTable_rows_selected],
+    ", South: ",domainExploreReactive()$metadataCoverageSouth[input$metadataExploreTable_rows_selected],
+    ", West: ",domainExploreReactive()$metadataCoverageWest[input$metadataExploreTable_rows_selected]
   )
 })
 output$temporalRange <- renderText({
   paste0(
-    "Start Year: ",domainExploreReactive()$metadataCoverageStartYear[input$domainExploreTable_rows_selected],
-    ", End Year: ",domainExploreReactive()$metadataCoverageEndYear[input$domainExploreTable_rows_selected]
+    "Start Year: ",domainExploreReactive()$metadataCoverageStartYear[input$metadataExploreTable_rows_selected],
+    ", End Year: ",domainExploreReactive()$metadataCoverageEndYear[input$metadataExploreTable_rows_selected]
   )
 })
 ############################
