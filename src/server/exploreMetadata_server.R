@@ -137,7 +137,7 @@ output$metadataExploreTable <- DT::renderDT({
   rownames = FALSE,
   editable = FALSE,
   colnames = c('Title','Abstract','Keywords'),
-  options = list(pageLength = 20,
+  options = list(pageLength = 20,stateSave = TRUE,
     columnDefs = list(list(visible=FALSE, targets=c(1,2)))
   )
 )
@@ -295,19 +295,20 @@ redrawFilteredMarkers <- function(filteredTibble,session){
 
 # Observer for Search Map Click - Action: When user clicks a marker add the extents of the marker data source as rectangle to the map
 observeEvent(input$metadataExploreMap_marker_click,{
+  index <- input$metadataExploreMap_marker_click[1]
   # on marker click, clear existing rectangle and add new one from marker information
   leaflet::leafletProxy('metadataExploreMap') %>%
     leaflet::clearGroup(group = 'markerRectangle') %>%
-    leaflet::addRectangles(domainExploreReactive()[domainExploreReactive()$id == input$metadataExploreMap_marker_click[1],]$metadataCoverageWest,
-      domainExploreReactive()[domainExploreReactive()$id == input$metadataExploreMap_marker_click[1],]$metadataCoverageNorth,
-      domainExploreReactive()[domainExploreReactive()$id == input$metadataExploreMap_marker_click[1],]$metadataCoverageEast,
-      domainExploreReactive()[domainExploreReactive()$id == input$metadataExploreMap_marker_click[1],]$metadataCoverageSouth,
+    leaflet::addRectangles(domainExploreReactive()[domainExploreReactive()$id == index,]$metadataCoverageWest,
+      domainExploreReactive()[domainExploreReactive()$id == index,]$metadataCoverageNorth,
+      domainExploreReactive()[domainExploreReactive()$id == index,]$metadataCoverageEast,
+      domainExploreReactive()[domainExploreReactive()$id == index,]$metadataCoverageSouth,
       group = 'markerRectangle', color = "blue", weight = 1, stroke = TRUE)
   # select relevant row in data table
-  
-  
-}
-)
+  DT::dataTableProxy('metadataExploreTable') %>%
+    DT::selectRows(which(domainExploreReactive()$id == index)) %>%
+    DT::selectPage(which(input$metadataExploreTable_rows_all == which(domainExploreReactive()$id == index)) %/% input$metadataExploreTable_state$length + 1)
+})
 
 # Observer for Search Map Click - Action: clear rectangle on background click
 observeEvent(input$metadataExploreMap_click,{
