@@ -138,7 +138,15 @@ output$metadataExploreTable <- DT::renderDT({
   editable = FALSE,
   colnames = c('Title','Abstract','Keywords'),
   options = list(pageLength = 20,stateSave = TRUE,
-    columnDefs = list(list(visible=FALSE, targets=c(1,2)))
+    columnDefs = list(list(visible=FALSE, targets=c(1,2)),
+      list(
+        targets = 0,
+        # limit row width by truncating text in the title field
+        render = htmlwidgets::JS("function(data, type, row, meta) {return type === 'display' && data.length > 90 ? '<span title=' + data + '>' + data.substr(0, 90) + '...</span>' : data;}"))
+    ),
+    searching = T,
+    lengthChange = FALSE,
+    autoWidth = FALSE
   )
 )
 
