@@ -40,7 +40,25 @@ neo_con <- neo4r::neo4j_api$new(url = paste("http://",NEO4J_HOST,":",NEO4J_PORT,
 # neo4r query results are sometimes passed to log files. This is a list of the desired columns/fields that need captured
 neo4rResultFields <<- c('contains_updates','nodes_created','nodes_deleted','properties_set','relationships_created','relationship_deleted','labels_added','labels_removed')
 
+# stock units
+stockUnits <- c("LB","NFLD","QB","GF","SF","US","IC.SW","SC.W","SC.E","IR.N","IR","EW","FR","GY","SP","RU","FI","NO","SWD","IC.NE","DK")
 # Check box group button icon options
 #checkboxGroupButtonsIcons <- list(yes = icon("ok",lib = "glyphicon"),no = icon("remove",lib = "glyphicon"))
 # Alternative design - Keep for an example
 checkboxGroupButtonsIcons <- list(yes = tags$i(class = "fa fa-check-square",style = "color: steelblue"),no = tags$i(class = "fa fa-square-o",style = "color: steelblue"))
+
+# Set up waiter that covers search map during db updates
+wLoadDB <- waiter::Waiter$new(id = 'metadataExploreMap',
+  html = HTML("
+              <div class='container--box'>
+                <div class='boxxy'>
+                  <div class='spinner spinner--3'>
+                  </div>
+                </div>
+              </div>
+              <div>
+                <h4 style='color:black;'>Please wait while the map refreshes...</h4>
+              </div>
+              "),
+  color = waiter::transparent(.7)
+)

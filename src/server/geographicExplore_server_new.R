@@ -11,6 +11,7 @@ output$searchFilterResetUI <- renderUI(actionButton('searchFilterReset',"Reset F
 output$searchMapTabUI <- renderUI({
   req(user_info()) # only action if user_info has been created
   if (user_info()$result) { # if user logon is true:
+    div(
     fluidRow(
       column(
         width = 4,
@@ -32,6 +33,7 @@ output$searchMapTabUI <- renderUI({
             6,
             h4('Title:'),
             textOutput('title'),
+            tags$i(textOutput('doi')),
             h4('Abstract:'),
             textOutput('abstract')
           ),
@@ -50,7 +52,7 @@ output$searchMapTabUI <- renderUI({
           )
         )
       )
-    )
+    ), style = "font-size:80%") # reduce font size in table
 
   }else{
     fluidPage(
@@ -508,6 +510,7 @@ observeEvent(input$Request, {
 
 output$title <- renderText({lsfMetadata()$metadataTitle[input$searchTabTable_rows_selected]})
 output$abstract <- renderText({lsfMetadata()$metadataAbstract[input$searchTabTable_rows_selected]})
+output$doi <- renderText({paste0("doi: ",lsfMetadata()$metadataUUID[input$searchTabTable_rows_selected],"/",lsfMetadata()$id[input$searchTabTable_rows_selected])})
 output$organisation <- renderText({lsfMetadata()$metadataOrganisation[input$searchTabTable_rows_selected]})
 output$url <- renderUI({HTML(paste0("<a href=",lsfMetadata()$metadataAltURI[input$searchTabTable_rows_selected]," target='_blank'>",lsfMetadata()$metadataAltURI[input$searchTabTable_rows_selected],"</a>"))})
 output$accessProtocol <- renderText({lsfMetadata()$metadataAccessProtocol[input$searchTabTable_rows_selected]})

@@ -33,17 +33,12 @@ output$menu <- renderUI(
                 
                 # Admin Menu items
                 checkboxInput('debug',"Debug Info"),# DEBUG - Tick box to show input raw outputs
-                menuItem("Introduction", tabName = 'introduction', icon = icon('info')),
-                shinyjs::hidden(menuItem("New Member Registration",tabName = 'newMemberRegistration',icon = icon('user-plus'))),
-                menuItem("Submit Data Source", tabName = 'newsource', icon = icon('project-diagram')),
-                menuItem("Search and Explore",tabname = 'searchTabs', icon = icon('search-location'),
-                         menuSubItem("Explore Map", tabName = 'searchlsf', icon = icon('globe-europe')),
-                         menuSubItem("Explore Hypotheses", tabName = 'hypothesisExplore', icon = icon('question')),
-                         menuSubItem("Explore Life-Stage Domains", tabName = 'domainExplore', icon = icon('fish'))
-                ),
-                # menuItem("Metadata Node Report", tabName = 'metadataNodeReport', icon = icon('flag-checkered')),
-                menuItem("Submit Research Project", tabName = 'newproject', icon = icon('project-diagram')),
-                menuItem("Administration", tabName = 'adminZone', icon = icon('cogs'))
+                menuItem("Introduction", tabName = 'introduction', icon = icon('info',verify_fa = FALSE)),
+                shinyjs::hidden(menuItem("New Member Registration",tabName = 'newMemberRegistration',icon = icon('user-plus',verify_fa = FALSE))),
+                menuItem("Submit Data Source", tabName = 'newsource', icon = icon('project-diagram',verify_fa = FALSE)),
+                menuItem("Search and Explore",tabName = 'searchlsf', icon = icon('search-location',verify_fa = FALSE)),
+                menuItem("Submit Research Project", tabName = 'newproject', icon = icon('project-diagram',verify_fa = FALSE)),
+                menuItem("Administration", tabName = 'adminZone', icon = icon('cogs',verify_fa = FALSE))
 
                 
     )
@@ -52,15 +47,58 @@ output$menu <- renderUI(
                 
                 # Basic Menu items
                 menuItem("Introduction", tabName = 'introduction', icon = icon('info')),
-                shinyjs::hidden(menuItem("New Member Registration",tabName = 'newMemberRegistration',icon = icon('user-plus'))),
-                menuItem("Submit Data Source", tabName = 'newsource', icon = icon('project-diagram')),
-                menuItem("Search and Explore",tabname = 'searchTabs', icon = icon('search-location'),
-                  menuSubItem("Explore Map", tabName = 'searchlsf', icon = icon('globe-europe')),
-                  menuSubItem("Explore Hypotheses", tabName = 'hypothesisExplore', icon = icon('question')),
-                  menuSubItem("Explore Life-Stage Domains", tabName = 'domainExplore', icon = icon('fish'))
-                  ),
-                shinyjs::hidden(menuItem("Submit Research Project", tabName = 'newproject', icon = icon('project-diagram')))
+                shinyjs::hidden(menuItem("New Member Registration",tabName = 'newMemberRegistration',icon = icon('user-plus',verify_fa = FALSE))),
+                menuItem("Submit Data Source", tabName = 'newsource', icon = icon('project-diagram',verify_fa = FALSE)),
+                menuItem("Search and Explore",tabName = 'searchlsf', icon = icon('search-location',verify_fa = FALSE)),
+                shinyjs::hidden(menuItem("Submit Research Project", tabName = 'newproject', icon = icon('project-diagram',verify_fa = FALSE)))
     )
   }
 )
+
+output$searchSidebarFilters <- renderUI({
+  shiny::div(
+    shinyWidgets::pickerInput(
+      inputId = 'domainFilter',
+      label = "Life-Stage Domain",
+      choices = stats::setNames(as.list(lsfDomains()$id),lsfDomains()$domainTitle),
+      width = '100%',
+      multiple = TRUE,
+      options = shinyWidgets::pickerOptions(
+        selectedTextFormat = 'count',
+        liveSearch = TRUE,
+        container = 'body')
+    ),
+    shinyWidgets::pickerInput(
+      inputId = 'esvFilter',
+      label = "Variable Class",
+      choices = list(
+        'Biological Processes' =
+          stats::setNames(as.list(lsfVariableClasses()[lsfVariableClasses()$esvCategory == "Biological",]$id),
+            lsfVariableClasses()[lsfVariableClasses()$esvCategory == "Biological",]$esvTitle),
+        'Physical Environment' =
+          stats::setNames(as.list(lsfVariableClasses()[lsfVariableClasses()$esvCategory == "Physical",]$id),
+            lsfVariableClasses()[lsfVariableClasses()$esvCategory == "Physical",]$esvTitle),
+        'Salmon Trait' =
+          stats::setNames(as.list(lsfVariableClasses()[lsfVariableClasses()$esvCategory == "Salmon Trait",]$id),
+            lsfVariableClasses()[lsfVariableClasses()$esvCategory == "Salmon Trait",]$esvTitle)
+      ),
+      width = '100%',
+      multiple = TRUE,
+      options = shinyWidgets::pickerOptions(
+        selectedTextFormat = 'count',
+        liveSearch = TRUE,
+        container = 'body')
+    ),
+    shinyWidgets::pickerInput(
+      inputId = 'stockunitFilter',
+      label = "Stock Unit",
+      choices = stockUnits,
+      width = '100%',
+      multiple = TRUE,
+      options = shinyWidgets::pickerOptions(
+        selectedTextFormat = 'count',
+        liveSearch = TRUE,
+        container = 'body')
+    ), style = "font-size:80%") # reduce font size in table
+})
 
