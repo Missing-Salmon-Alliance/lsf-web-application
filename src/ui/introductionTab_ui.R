@@ -7,10 +7,11 @@ tabItem('introduction',
           fluidRow(
             h1("Welcome to the Salmon Ecosystem Data Hub (SalHub)"),
             br(),
-            h3("A web application that aims to guide researchers to data sources for testing hypotheses,
+            h3("Enhancing data mobilisation through a centralised data repository for Atlantic salmon -",a(href="https://doi.org/10.1016/j.ecoinf.2022.101746","https://doi.org/10.1016/j.ecoinf.2022.101746",target = "_blank")),
+            tags$b("SalHub is a web application that aims to guide researchers to data sources for testing hypotheses,
                informing management activities, and ultimately improving Atlantic salmon populations."),
-            
-            tags$b("This resource is ready for use but may change in appearance and functionality as our user base and knowledge base grows.
+            p(),
+            tags$i("This resource is ready for use but may change in appearance and functionality as our user base and knowledge base grows.
                    Development suggestions are always welcome and can be directed to the team via",a(href="mailto: data.admin@missingsalmonalliance.org","email."),"It is best viewed in a modern browser, at a zoom level of 100% or less and is not designed to be viewed on a mobile device.")
           ),
           fluidRow(
