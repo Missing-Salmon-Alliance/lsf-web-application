@@ -558,7 +558,7 @@ observeEvent(input$confirmSubmitNewDataSource, {
                                      ",metadataEmbargoEnd:'",sanitiseFreeTextInputs(input$embargoEnd),
                                      "',metadataAccessProtocol:''", # add blank Access Protocol to be confirmed at QC
                                      ",metadataStockUnit:'",paste0(stockUnits,collapse = ','), # add all Stock Units to be confirmed at QC
-                                     ",metadataGeographicDescription:'",sanitiseFreeTextInputs(input$sourceGeographicDescription),
+                                     "',metadataGeographicDescription:'",sanitiseFreeTextInputs(input$sourceGeographicDescription),
                                      "',metadataCreatorEmail:'",sanitiseFreeTextInputs(input$sourceCreatorEmail),
                                      "',metadataCreatorORCID:'",sanitiseFreeTextInputs(input$sourceCreatorORCID),
                                      "',metadataCoverageStartYear:",sanitiseFreeTextInputs(input$sourceStartYear),

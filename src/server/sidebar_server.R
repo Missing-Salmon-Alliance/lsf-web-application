@@ -57,6 +57,7 @@ output$menu <- renderUI(
 
 output$searchSidebarFilters <- renderUI({
   shiny::div(
+    h4("Filters"),
     shinyWidgets::pickerInput(
       inputId = 'domainFilter',
       label = "Life-Stage Domain",
@@ -69,19 +70,34 @@ output$searchSidebarFilters <- renderUI({
         container = 'body')
     ),
     shinyWidgets::pickerInput(
-      inputId = 'esvFilter',
-      label = "Variable Class",
-      choices = list(
-        'Biological Processes' =
-          stats::setNames(as.list(lsfVariableClasses()[lsfVariableClasses()$esvCategory == "Biological",]$id),
+      inputId = 'esvFilter1',
+      label = "Salmon Trait",
+      choices = stats::setNames(as.list(lsfVariableClasses()[lsfVariableClasses()$esvCategory == "Salmon Trait",]$id),
+            lsfVariableClasses()[lsfVariableClasses()$esvCategory == "Salmon Trait",]$esvTitle),
+      width = '100%',
+      multiple = TRUE,
+      options = shinyWidgets::pickerOptions(
+        selectedTextFormat = 'count',
+        liveSearch = TRUE,
+        container = 'body')
+    ),
+    shinyWidgets::pickerInput(
+      inputId = 'esvFilter2',
+      label = "Biological Processes",
+      choices = stats::setNames(as.list(lsfVariableClasses()[lsfVariableClasses()$esvCategory == "Biological",]$id),
             lsfVariableClasses()[lsfVariableClasses()$esvCategory == "Biological",]$esvTitle),
-        'Physical Environment' =
-          stats::setNames(as.list(lsfVariableClasses()[lsfVariableClasses()$esvCategory == "Physical",]$id),
+      width = '100%',
+      multiple = TRUE,
+      options = shinyWidgets::pickerOptions(
+        selectedTextFormat = 'count',
+        liveSearch = TRUE,
+        container = 'body')
+    ),
+    shinyWidgets::pickerInput(
+      inputId = 'esvFilter3',
+      label = "Physical Environment",
+      choices = stats::setNames(as.list(lsfVariableClasses()[lsfVariableClasses()$esvCategory == "Physical",]$id),
             lsfVariableClasses()[lsfVariableClasses()$esvCategory == "Physical",]$esvTitle),
-        'Salmon Trait' =
-          stats::setNames(as.list(lsfVariableClasses()[lsfVariableClasses()$esvCategory == "Salmon Trait",]$id),
-            lsfVariableClasses()[lsfVariableClasses()$esvCategory == "Salmon Trait",]$esvTitle)
-      ),
       width = '100%',
       multiple = TRUE,
       options = shinyWidgets::pickerOptions(

@@ -2,8 +2,6 @@ output$searchMapTabUI <- renderUI({
   req(user_info()) # only action if user_info has been created
   if (user_info()$result) { # if user logon is true:
     div(
-      h4(tags$b("Search and Explore the SalHub Catalogue!")),
-      tags$hr(style="border-color: black;"),
       column(
         width = 4,
         DT::dataTableOutput('metadataExploreTable')
@@ -58,72 +56,76 @@ esvSearchSpace <- reactiveVal()
 stockunitSearchSpace <- reactiveVal()
 
 # Observe Filters - Action: Update search space and query database
-observeEvent(c(input$domainFilter,input$esvFilter,input$stockunitFilter),{
-  # Set up waiter
-  wLoadDB$show()
-  leaflet::leafletProxy('metadataExploreMap') %>%
-    leaflet::clearGroup(group = 'markerRectangle')
-  domainSearchSpace(lsfDomains()$id)
-  esvSearchSpace(lsfVariableClasses()$id)
-  stockunitSearchSpace(stockUnits)
-  # create domainFilter search space
-  if(is.null(input$domainFilter)){
-    domainSearchSpace(lsfDomains()$id) # selecting zero domains has the effect of adding all domains to the search space (i.e., no domain filter applied)
-  }else{
-    domainSearchSpace(input$domainFilter)
-  }
-  # create esvFilter search space
-  if(is.null(input$esvFilter)){
-    esvSearchSpace(lsfVariableClasses()$id) # selecting zero variable classes has the effect of adding all variable classes to the search space (i.e., no variable class filter applied)
-  }else{
-    esvSearchSpace(input$esvFilter)
-  }
-  
-  # create stockunitFilter search space
-  if(is.null(input$stockunitFilter)){
-    stockunitSearchSpace(stockUnits) # selecting stock units has the effect of adding all stock units to the search space (i.e., no stock unit filter applied)
-  }else{
-    stockunitSearchSpace(input$stockunitFilter)
-  }
-  
-  
-  # # load metadata with filters applied
-  filteredMetadata <- neo4r::call_neo4j(
-    paste0(
-      "MATCH (m)-[r:HAS_ESV]-(esv) WHERE id(esv) IN [",
-      formatNumericList(esvSearchSpace()),
-      "] AND r.domainID IN [",
-      formatNumericList(domainSearchSpace()),
-      "] RETURN m;"),
-    neo_con,type = 'graph')
-  
-  # deal with empty results
-  if(paste0(class(filteredMetadata),collapse = ",") == 'neo,list'){ # test that returned item is a valid graph object, otherwise ignore empty result
-    filteredMetadata <- filteredMetadata$nodes %>% neo4r::unnest_nodes('all') # if valid graph, unnest nodes
-    # apply stockunit search space
-    filteredMetadata$x <- list(stockunitSearchSpace())
-    filteredMetadata$y <- stringr::str_split(filteredMetadata$metadataStockUnit,",")
-    filteredMetadata <- filteredMetadata %>% rowwise() %>% mutate(z = paste0(intersect(x,y),collapse = ","))
+observeEvent(c(input$menu1,input$domainFilter,input$esvFilter1,input$esvFilter2,input$esvFilter3,input$stockunitFilter),{
+  req(input$menu1)
+  if(input$menu1 == 'searchlsf'){
+    # Set up waiter
+    wLoadDB$show()
+    leaflet::leafletProxy('metadataExploreMap') %>%
+      leaflet::clearGroup(group = 'markerRectangle')
+    domainSearchSpace(lsfDomains()$id)
+    esvSearchSpace(lsfVariableClasses()$id)
+    stockunitSearchSpace(stockUnits)
+    # create domainFilter search space
+    if(is.null(input$domainFilter)){
+      domainSearchSpace(lsfDomains()$id) # selecting zero domains has the effect of adding all domains to the search space (i.e., no domain filter applied)
+    }else{
+      domainSearchSpace(input$domainFilter)
+    }
+    # create esvFilter search space
+    if(is.null(input$esvFilter1) & is.null(input$esvFilter2) & is.null(input$esvFilter3)){
+      esvSearchSpace(lsfVariableClasses()$id) # selecting zero variable classes has the effect of adding all variable classes to the search space (i.e., no variable class filter applied)
+    }else{
+      esvSearchSpace(c(input$esvFilter1,input$esvFilter2,input$esvFilter3))
+    }
     
-    filteredMetadata <- filteredMetadata[filteredMetadata$z != "",]
+    # create stockunitFilter search space
+    if(is.null(input$stockunitFilter)){
+      stockunitSearchSpace(stockUnits) # selecting stock units has the effect of adding all stock units to the search space (i.e., no stock unit filter applied)
+    }else{
+      stockunitSearchSpace(input$stockunitFilter)
+    }
     
-    if(nrow(filteredMetadata) > 0){
-      domainExploreReactive(filteredMetadata)
+    
+    # # load metadata with filters applied
+    filteredMetadata <- neo4r::call_neo4j(
+      paste0(
+        "MATCH (m)-[r:HAS_ESV]-(esv) WHERE id(esv) IN [",
+        formatNumericList(esvSearchSpace()),
+        "] AND r.domainID IN [",
+        formatNumericList(domainSearchSpace()),
+        "] RETURN m;"),
+      neo_con,type = 'graph')
+    
+    # deal with empty results
+    if(paste0(class(filteredMetadata),collapse = ",") == 'neo,list'){ # test that returned item is a valid graph object, otherwise ignore empty result
+      filteredMetadata <- filteredMetadata$nodes %>% neo4r::unnest_nodes('all') # if valid graph, unnest nodes
+      # apply stockunit search space
+      filteredMetadata$x <- list(stockunitSearchSpace())
+      filteredMetadata$y <- stringr::str_split(filteredMetadata$metadataStockUnit,",")
+      filteredMetadata <- filteredMetadata %>% rowwise() %>% mutate(z = paste0(intersect(x,y),collapse = ","))
+      
+      filteredMetadata <- filteredMetadata[filteredMetadata$z != "",]
+      
+      if(nrow(filteredMetadata) > 0){
+        domainExploreReactive(filteredMetadata)
+      }else{
+        domainExploreReactive(NULL)
+      }
     }else{
       domainExploreReactive(NULL)
     }
-  }else{
-    domainExploreReactive(NULL)
+    
+    if(!is.null(domainExploreReactive())){
+      domainExploreReactive(sf::st_as_sf(domainExploreReactive(), wkt = "metadataCoverageCentroid", crs = 4326, na.fail = FALSE))
+      redrawFilteredMarkers(domainExploreReactive(),session)
+    }else{
+      leaflet::leafletProxy('metadataExploreMap', session) %>%
+        leaflet::clearGroup(group = 'Data Source')
+    }
+    wLoadDB$hide()
   }
-  
-  if(!is.null(domainExploreReactive())){
-    domainExploreReactive(sf::st_as_sf(domainExploreReactive(), wkt = "metadataCoverageCentroid", crs = 4326, na.fail = FALSE))
-    redrawFilteredMarkers(domainExploreReactive(),session)
-  }else{
-    leaflet::leafletProxy('metadataExploreMap', session) %>%
-      leaflet::clearGroup(group = 'Data Source')
-  }
-  wLoadDB$hide()
+
   
 },ignoreNULL = FALSE, ignoreInit = FALSE)
 
@@ -176,6 +178,20 @@ output$metadataExploreMap <- leaflet::renderLeaflet({
       , lat2 = 90 ) %>%
     leaflet::addProviderTiles(leaflet::providers$Esri.OceanBasemap, options = leaflet::providerTileOptions(minZoom = 3, maxZoom =10)) %>%
     leaflet::addProviderTiles(leaflet::providers$OpenStreetMap, options = leaflet::providerTileOptions(minZoom = 11, maxZoom = 19)) %>%
+    
+    leaflet::addMarkers(data = lsfMetadata(),
+      label = ~metadataTitle,
+      layerId = ~id,
+      group = 'Data Source',
+      popup = ~metadataTitle,
+      # enable clustering for spiderfy
+      clusterOptions = leaflet::markerClusterOptions(
+        showCoverageOnHover = TRUE,
+        zoomToBoundsOnClick = TRUE,
+        spiderfyOnMaxZoom = TRUE,
+        removeOutsideVisibleBounds = TRUE,
+        maxClusterRadius = 30,
+        spiderLegPolylineOptions = list(weight = 1.5, color = "#222", opacity = 0.5))) %>%
 
     leaflet::addMarkers(data = indexRiversSF,
       label = ~paste("Salmon Index River: ",rivername),
