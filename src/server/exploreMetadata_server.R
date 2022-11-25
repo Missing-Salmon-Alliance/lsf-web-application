@@ -197,7 +197,8 @@ output$metadataExploreMap <- leaflet::renderLeaflet({
       label = ~paste("Salmon Index River: ",rivername),
       group = "ICES Index Rivers",
       icon = list(
-        iconUrl = "https://img.icons8.com/cotton/64/000000/salmon--v1.png",
+        #iconUrl = "https://img.icons8.com/cotton/64/000000/salmon--v1.png",
+        iconUrl = "https://shiny.missingsalmonalliance.org/SalHub/images/SalHub_marker_100x100.png",
         iconSize = c(35, 35))) %>%
     
     leaflet::addCircleMarkers(data = nascoRiversDBSF,

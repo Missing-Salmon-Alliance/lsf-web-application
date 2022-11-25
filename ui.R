@@ -4,9 +4,11 @@ ui <- dashboardPage(skin = "blue",
                     header = dashboardHeader(
                       # Set MSA logo as title and clickable link to MSA website
                       # https://stackoverflow.com/questions/31440564/adding-a-company-logo-to-shinydashboard-header
-                      title = tags$a(href='https://missingsalmonalliance.org',
-                                     tags$img(src='The_missing_salmon_type-394x100.png'), # note, logo stored in www folder
-                                     target="_blank"), # opens the link in a new tab/window
+                      # title = tags$a(href='https://missingsalmonalliance.org',
+                      #                tags$img(src='The_missing_salmon_type-394x100.png'), # note, logo stored in www folder
+                      #                target="_blank"), # opens the link in a new tab/window
+                      title = tagList(tags$img(class = 'logo-lg',src = './images/SalHub_full_394x100.png',width = 394),
+                        tags$img(class = 'logo-mini',src = './images/SalHub_small_70x100.png',width = 70)),
                       titleWidth = 394,
                       # tag$li for header based user logon, logout and profile buttons
                       source("./src/ui/headerItems_ui.R",local = TRUE)$value
