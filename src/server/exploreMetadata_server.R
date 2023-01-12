@@ -86,16 +86,21 @@ observeEvent(c(input$menu1,input$domainFilter,input$esvFilter1,input$esvFilter2,
       stockunitSearchSpace(input$stockunitFilter)
     }
     
-    
-    # # load metadata with filters applied
-    filteredMetadata <- neo4r::call_neo4j(
-      paste0(
-        "MATCH (m)-[r:HAS_ESV]-(esv) WHERE id(esv) IN [",
-        formatNumericList(esvSearchSpace()),
-        "] AND r.domainID IN [",
-        formatNumericList(domainSearchSpace()),
-        "] RETURN m;"),
-      neo_con,type = 'graph')
+    # if filters are all null, use a simpler cypher query to get all Metadata nodes, otherwise use special filtering cypher (slower)
+    if(is.null(input$domainFilter) & is.null(input$esvFilter1) & is.null(input$esvFilter2) & is.null(input$esvFilter3) & is.null(input$stockunitFilter)){
+      filteredMetadata <- neo4r::call_neo4j("MATCH (m:Metadata) RETURN m;",neo_con, type = 'graph')
+    }else{
+      # # load metadata with filters applied
+      filteredMetadata <- neo4r::call_neo4j(
+        paste0(
+          "MATCH (m)-[r:HAS_ESV]-(esv) WHERE id(esv) IN [",
+          formatNumericList(esvSearchSpace()),
+          "] AND r.domainID IN [",
+          formatNumericList(domainSearchSpace()),
+          "] RETURN m;"),
+        neo_con,type = 'graph')
+    }
+
     
     # deal with empty results
     if(paste0(class(filteredMetadata),collapse = ",") == 'neo,list'){ # test that returned item is a valid graph object, otherwise ignore empty result
