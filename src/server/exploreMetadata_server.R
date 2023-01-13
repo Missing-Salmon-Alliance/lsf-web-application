@@ -181,8 +181,8 @@ output$metadataExploreMap <- leaflet::renderLeaflet({
       , lat1 = -90
       , lng2 = 210
       , lat2 = 90 ) %>%
-    leaflet::addProviderTiles(leaflet::providers$Esri.OceanBasemap, options = leaflet::providerTileOptions(minZoom = 3, maxZoom =10)) %>%
-    leaflet::addProviderTiles(leaflet::providers$OpenStreetMap, options = leaflet::providerTileOptions(minZoom = 11, maxZoom = 19)) %>%
+    leaflet::addProviderTiles(leaflet::providers$Esri.OceanBasemap, options = leaflet::providerTileOptions(minZoom = 3, maxZoom =12)) %>%
+    leaflet::addProviderTiles(leaflet::providers$OpenStreetMap, options = leaflet::providerTileOptions(minZoom = 12, maxZoom = 19)) %>%
     
     leaflet::addMarkers(data = lsfMetadata(),
       label = ~metadataTitle,
@@ -250,12 +250,12 @@ output$metadataExploreMap <- leaflet::renderLeaflet({
       color = "purple", group = "NAFO Divisions", weight = 1,
       highlightOptions = leaflet::highlightOptions(color = "yellow", weight = 3,
         bringToFront = TRUE)) %>%
-    leaflet::addPolygons(data = migrationSF,
-      label = ~icesname,
-      layerId = paste0("mig_",migrationSF$fid),
-      color = "blue", group = "Proposed Outward Migration", weight = 1,
-      highlightOptions = leaflet::highlightOptions(color = "yellow", weight = 3,
-        bringToFront = TRUE)) %>%
+    # leaflet::addPolygons(data = migrationSF,
+    #   label = ~icesname,
+    #   layerId = paste0("mig_",migrationSF$fid),
+    #   color = "blue", group = "Proposed Outward Migration", weight = 1,
+    #   highlightOptions = leaflet::highlightOptions(color = "yellow", weight = 3,
+    #     bringToFront = TRUE)) %>%
     
     # leaflet::addPolygons(data = feedingSF,
     #             label = feedingSF$name,
@@ -268,7 +268,7 @@ output$metadataExploreMap <- leaflet::renderLeaflet({
       "ICES Ecoregions",
       "NAFO Divisions",
       #"ICES Stat Squares",
-      "Proposed Outward Migration",
+      #"Proposed Outward Migration",
       "Commonly Accepted Range",
       "NASCO Rivers DB"),
       options = leaflet::layersControlOptions(collapsed = TRUE)) %>%
@@ -276,7 +276,7 @@ output$metadataExploreMap <- leaflet::renderLeaflet({
       "NAFO Divisions",
       "ICES Index Rivers",
       #"ICES Stat Squares",
-      "Proposed Outward Migration",
+      #"Proposed Outward Migration",
       "Commonly Accepted Range",
       "NASCO Rivers DB")) %>%
     # Customise layer control title

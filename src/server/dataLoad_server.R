@@ -18,7 +18,7 @@ lsfVariableClasses(neo4r::call_neo4j("MATCH (esv:EssentialSalmonVariable) RETURN
 # 
 ICES_Ecoregions <<- loadFullWKBData("ices_ecoregions_simplified")
 nafoDivisionsSF <<- loadFullWKBData("nafo_divisions")
-migrationSF <<- loadFullWKBData("proposed_migration_routes")
+#migrationSF <<- loadFullWKBData("proposed_migration_routes")
 riversDBSF <<- loadFullWKBData('rivers_db')
 nascoRiversDBSF <<- riversDBSF[riversDBSF$nasco_rivers_db == TRUE,] # subset of rivers that were sourced from the original NASCO DB
 indexRiversSF <<- riversDBSF[riversDBSF$ices_index == TRUE,] # subset of rivers that are ICES index rivers
