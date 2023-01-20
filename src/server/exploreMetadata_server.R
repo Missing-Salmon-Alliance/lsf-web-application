@@ -336,8 +336,10 @@ observeEvent(input$metadataExploreMap_marker_click,{
       group = 'markerRectangle', color = "blue", weight = 1, stroke = TRUE)
   # select relevant row in data table
   DT::dataTableProxy('metadataExploreTable') %>%
+    # get row index and select that row
     DT::selectRows(which(domainExploreReactive()$id == index)) %>%
-    DT::selectPage(which(input$metadataExploreTable_rows_all == which(domainExploreReactive()$id == index)) %/% input$metadataExploreTable_state$length + 1)
+    # find row in pages and select that page, plus and minus 1 in this line deal with end of page cases
+    DT::selectPage((which(input$metadataExploreTable_rows_all == which(domainExploreReactive()$id == index)) - 1) %/% input$metadataExploreTable_state$length + 1)
 })
 
 # Observer for Search Map Click - Action: clear rectangle on background click
