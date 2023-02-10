@@ -286,7 +286,7 @@ observeEvent(input$submitEast | input$submitWest | input$submitNorth | input$sub
   }
   
   # show user coordinates on map as rectangle
-  leaflet::leafletProxy('submitMap') %>%
+  leaflet::leafletProxy('submitMap', session) %>%
     leaflet::clearGroup(group = 'userRectangle') %>%
     leaflet::addRectangles(input$submitWest,input$submitNorth,input$submitEast,input$submitSouth,group = 'userRectangle') %>%
     leaflet::fitBounds(input$submitWest,input$submitNorth,input$submitEast,input$submitSouth)
@@ -672,7 +672,7 @@ observeEvent(input$confirmSubmitNewDataSource, {
   updateUserInfo$user_info$submitted <- neo4r::call_neo4j(paste0("MATCH (p)-[:HAS_SUBMITTED]-(m) where id(p) = ",user_info()$user_info$id," RETURN m;"),neo_con,type = 'row')$m
   user_info(updateUserInfo)
   
-  # refresh the map
+  # refresh the search map
   lsfMetadata(neo4r::call_neo4j("MATCH (m:Metadata) RETURN m;",neo_con,type='graph')$nodes %>% neo4r::unnest_nodes('all'))
   lsfMetadata(sf::st_as_sf(lsfMetadata(), wkt = "metadataCoverageCentroid", crs = 4326, na.fail = FALSE))
   
@@ -685,6 +685,10 @@ observeEvent(input$confirmSubmitNewDataSource, {
   
   # show result
   showModal(submitSourceResultModal())
+  
+  # refresh the submit map
+  leaflet::leafletProxy('submitMap', session) %>%
+    leaflet::clearGroup(group = 'userRectangle')
   
 })
 

@@ -1,3 +1,20 @@
+# User statistics
+activeUsers = reactiveValues(count = 0)
+
+onSessionStart = isolate({
+  activeUsers$count = activeUsers$count + 1
+})
+
+onSessionEnded(function() {
+  isolate({
+    activeUsers$count = activeUsers$count - 1
+  })
+})
+
+output$activeUserOutput = renderText({
+  h1(paste0("There are ", activeUsers$count, " user(s) connected to this app"))
+})
+
 output$adminTabUI <- renderUI({
   req(user_info()) # only action if user_info has been created
   if (user_info()$result) { # if user logon is true:
@@ -16,7 +33,8 @@ output$adminTabUI <- renderUI({
                       checkboxInput('useradminPromoteOrg',label = "Promote Organisation as DSG Member?",value = FALSE),
                       checkboxInput('useradminAdmin',label = "Administrator?",value = FALSE)
                   ),
-                  actionButton('addNewUser',"Add New User", icon = icon('user-check'))
+                  actionButton('addNewUser',"Add New User", icon = icon('user-check')),
+                  textOutput('activeUserOutput')
                 ),
                 tabPanel(
                   id = 'useradmintabQC',
