@@ -11,9 +11,9 @@ onSessionEnded(function() {
   })
 })
 
-output$activeUserOutput = renderText({
-  h1(paste0("There are ", activeUsers$count, " user(s) connected to this app"))
-})
+output$activeUserOutput = renderText({activeUsers$count})
+#   h1(paste0("There are ", activeUsers$count, " user(s) connected to this app"))
+# })
 
 output$adminTabUI <- renderUI({
   req(user_info()) # only action if user_info has been created
@@ -34,7 +34,7 @@ output$adminTabUI <- renderUI({
                       checkboxInput('useradminAdmin',label = "Administrator?",value = FALSE)
                   ),
                   actionButton('addNewUser',"Add New User", icon = icon('user-check')),
-                  textOutput('activeUserOutput')
+                  verbatimTextOutput('activeUserOutput')
                 ),
                 tabPanel(
                   id = 'useradmintabQC',
