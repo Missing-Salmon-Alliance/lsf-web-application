@@ -61,8 +61,15 @@ result <-  tibble::as_tibble(result)
 #############
 # Gotchas: Check SalHub for duplicates and fix
 lsfMetadata[duplicated(lsfMetadata$metadataUUID),]
-# Check KNB for existing UUID's that are not on LSF, this should not happen so is probably a UUID typo/mistake
+# Check KNB for existing UUID's that are not on LSF, this could be a typo/mistake in the UUID OR a decommissioned data resource on the SalHub side
 onKNBbutnotLSF <- dplyr::setdiff(result$id,lsfMetadata$metadataUUID)
+# Check for decommissioned resource and set to archived on KNB CAREFUL! Leave commented out and don't run by accident
+# for(pid in onKNBbutnotLSF){
+#   archive(mn, pid)
+#   sysmeta <- getSystemMetadata(mn, pid)
+#   print(sysmeta@archived)
+# }
+
 # Create list of new entries
 onLSFbutnotKNB <- dplyr::setdiff(lsfMetadata$metadataUUID,result$id)
 newEntries <- lsfMetadata[!(lsfMetadata$metadataUUID %in% result$id),]
