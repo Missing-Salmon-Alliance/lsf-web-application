@@ -83,8 +83,7 @@ shinyBS::addPopover(session, id = 'sourceCreatorORCID',title = "ORCID URL",
 
 shinyBS::addPopover(session, id = 'embargoEnd',title = "Embargo End Date",
            content = "If the primary data being described is under an embargo please enter the expected end date or more information here.",
-           placement = 'top',
-           options = list(container = "body")
+           placement = 'top'
            
 )
 
@@ -95,12 +94,7 @@ shinyBS::addPopover(session, id = 'uploadDataFileUI',title = "File Drop",
                     
 )
 
-shinyBS::addPopover(session, id = 'temporalSlider',title = "Date Range",
-                    content = "Select a date range with the sliders, results on the map show all resources that cover this full date range (inclusive of selected years)",
-                    placement = 'top',
-                    options = list(container = "body")
-                    
-)
+
 
 
 shinyBS::addPopover(session, id = "researchProjectTheme",title = "Theme Detail",

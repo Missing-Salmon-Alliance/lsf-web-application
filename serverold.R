@@ -21,11 +21,11 @@ server <- function(input, output, session) {
   user_info(tibble::tibble(result = FALSE,admin = FALSE))
   
   # drop-down menu lists 
-  
-  lsfDomains <- reactiveVal(NULL)
-  lsfMetadata <- reactiveVal(NULL)
-  lsfHypotheses <- reactiveVal(NULL)
-  lsfVariableClasses <- reactiveVal(NULL)
+  lsfDomains <- reactiveVal(neo4r::call_neo4j("MATCH (d:Domain) RETURN d;",neo_con,type='graph')$nodes %>% neo4r::unnest_nodes('all') %>% dplyr::arrange(domainOrder))
+  lsfMetadata <- reactiveVal(sf::st_as_sf(neo4r::call_neo4j("MATCH (m:Metadata) RETURN m;",neo_con,type='graph')$nodes %>% neo4r::unnest_nodes('all'), wkt = "metadataCoverageCentroid", crs = 4326, na.fail = FALSE))
+  lsfHypotheses <- reactiveVal(neo4r::call_neo4j("MATCH (h:Hypothesis) RETURN h;",neo_con,type='graph')$nodes %>% neo4r::unnest_nodes('all'))
+  lsfVariableClasses <- reactiveVal(neo4r::call_neo4j("MATCH (esv:EssentialSalmonVariable) RETURN esv;",neo_con,type='graph')$nodes %>% neo4r::unnest_nodes('all') %>% dplyr::arrange(esvCategory,esvTitle))
+
   ############################
   # Reactive Values END
   ############################

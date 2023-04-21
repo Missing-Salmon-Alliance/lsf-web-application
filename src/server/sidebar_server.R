@@ -50,7 +50,7 @@ output$menu <- renderUI(
                 shinyjs::hidden(menuItem("New Member Registration",tabName = 'newMemberRegistration',icon = icon('user-plus',verify_fa = FALSE))),
                 menuItem("Submit Data Source", tabName = 'newsource', icon = icon('project-diagram',verify_fa = FALSE)),
                 menuItem("Search and Explore",tabName = 'searchlsf', icon = icon('search-location',verify_fa = FALSE)),
-                shinyjs::hidden(menuItem("Submit Research Project", tabName = 'newproject', icon = icon('project-diagram',verify_fa = FALSE)))
+                menuItem("Submit Research Project", tabName = 'newproject', icon = icon('project-diagram',verify_fa = FALSE))
     )
   }
 )

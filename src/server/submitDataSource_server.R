@@ -35,13 +35,16 @@ output$submitNewDataSourceSidebarUI <- renderUI({
 output$submitTabUI <- renderUI({
   req(user_info()) # only action if user_info has been created
   if (user_info()$result) { # if user logon is true:
-    fluidRow(
-      source("./src/ui/submitUI/submitDataSource_metadataFields_ui.R",local = TRUE)$value,
-      source("./src/ui/submitUI/submitDataSource_geoTemporal_ui.R",local = TRUE)$value,
-      source("./src/ui/submitUI/submitDataSource_domainsESV_ui.R",local = TRUE)$value,
-      # second submit button at the bottom of the page for user convenience
-      uiOutput('submitNewDataSourceBodyUI')
+    div(style = "font-size:80%;font-family: Georgia, serif;", #font-family: Garamond, serif;font-family: 'Times New Roman', Times, serif;
+      fluidRow(
+        source("./src/ui/submitUI/submitDataSource_metadataFields_ui.R",local = TRUE)$value,
+        source("./src/ui/submitUI/submitDataSource_geoTemporal_ui.R",local = TRUE)$value,
+        source("./src/ui/submitUI/submitDataSource_domainsESV_ui.R",local = TRUE)$value,
+        # second submit button at the bottom of the page for user convenience
+        uiOutput('submitNewDataSourceBodyUI')
+      )
     )
+
   }else{
     fluidPage(
       h1("Knowledge Submit Area"),

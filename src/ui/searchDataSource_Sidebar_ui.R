@@ -1,5 +1,5 @@
 conditionalPanel(
-  condition = "input.menu1 == 'searchlsf' && output.logonTrue",
+  condition = "input.menu1 == 'searchlsf'",# && output.logonTrue",
   column(
     width = 12,
     hr(),

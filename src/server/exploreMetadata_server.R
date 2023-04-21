@@ -1,6 +1,6 @@
 output$searchMapTabUI <- renderUI({
-  req(user_info()) # only action if user_info has been created
-  if (user_info()$result) { # if user logon is true:
+  #req(user_info()) # only action if user_info has been created
+  #if (user_info()$result) { # if user logon is true:
     div(
       column(
         width = 4,
@@ -41,12 +41,12 @@ output$searchMapTabUI <- renderUI({
           )
         )
       ), style = "font-size:80%") # reduce font size in table
-  }else{
-    fluidPage(
-      h1("Metadata Explore Area"),
-      h3("Please authenticate to access this area")
-    )
-  }
+  #}else{
+  #  fluidPage(
+  #    h1("Metadata Explore Area"),
+  #    h3("Please authenticate to access this area")
+  #  )
+  #}
 })
 
 domainExploreReactive <- reactiveVal()
@@ -151,7 +151,7 @@ output$metadataExploreTable <- DT::renderDT({
         # limit row width by truncating text in the title field
         render = htmlwidgets::JS("function(data, type, row, meta) {return type === 'display' && data.length > 90 ? '<span title=' + data + '>' + data.substr(0, 90) + '...</span>' : data;}"))
     ),
-    searching = T,
+    searching = F,
     lengthChange = FALSE,
     autoWidth = FALSE
   )
@@ -181,8 +181,8 @@ output$metadataExploreMap <- leaflet::renderLeaflet({
       , lat1 = -90
       , lng2 = 210
       , lat2 = 90 ) %>%
-    leaflet::addProviderTiles(leaflet::providers$Esri.OceanBasemap, options = leaflet::providerTileOptions(minZoom = 3, maxZoom =12)) %>%
-    leaflet::addProviderTiles(leaflet::providers$OpenStreetMap, options = leaflet::providerTileOptions(minZoom = 12, maxZoom = 19)) %>%
+    leaflet::addProviderTiles(leaflet::providers$Esri.OceanBasemap, options = leaflet::providerTileOptions(minZoom = 3, maxZoom =6)) %>%
+    leaflet::addProviderTiles(leaflet::providers$OpenStreetMap, options = leaflet::providerTileOptions(minZoom = 7, maxZoom = 19)) %>%
     
     leaflet::addMarkers(data = lsfMetadata(),
       label = ~metadataTitle,
@@ -214,14 +214,6 @@ output$metadataExploreMap <- leaflet::renderLeaflet({
       stroke = FALSE,
       fillOpacity = 1) %>%
     
-    # Demonstration - Add WMS Tiles
-    # leaflet::addWMSTiles(
-    #   "https://gis.ices.dk/gis/services/Mapping_layers/ICES_Statrec_mapto_Ecoregions/MapServer/WMSServer",
-    #   layers = "0",
-    #   group = "Ecoregions",
-    #   options = WMSTileOptions(format = "image/png", transparent = T)
-    # ) %>%
-    
     leaflet::addPolygons(data = ICES_Ecoregions,
       label = ~ecoregion,
       layerId = paste0("eco_",ICES_Ecoregions$objectid),
@@ -236,47 +228,23 @@ output$metadataExploreMap <- leaflet::renderLeaflet({
       highlightOptions = leaflet::highlightOptions(color = "purple", weight = 3,
         bringToFront = TRUE))  %>%
     
-    # 
-    # leaflet::addPolygons(data = icesStatEcoSF,
-    #             label = ~name,
-    #             layerId = paste0("sta_",icesStatEcoSF$id),
-    #             color = "blue", group = "ICES Stat Squares", weight = 1,
-    #             highlightOptions = leaflet::highlightOptions(color = "yellow", weight = 3,
-    #                                                 bringToFront = TRUE))  %>%
-    #  
     leaflet::addPolygons(data = nafoDivisionsSF,
       label = ~zone,
       layerId = paste0("div_",nafoDivisionsSF$ogc_fid),
       color = "purple", group = "NAFO Divisions", weight = 1,
       highlightOptions = leaflet::highlightOptions(color = "yellow", weight = 3,
         bringToFront = TRUE)) %>%
-    # leaflet::addPolygons(data = migrationSF,
-    #   label = ~icesname,
-    #   layerId = paste0("mig_",migrationSF$fid),
-    #   color = "blue", group = "Proposed Outward Migration", weight = 1,
-    #   highlightOptions = leaflet::highlightOptions(color = "yellow", weight = 3,
-    #     bringToFront = TRUE)) %>%
-    
-    # leaflet::addPolygons(data = feedingSF,
-    #             label = feedingSF$name,
-    #             color = "black", group = "Migration Routes", weight = 1,
-    #             highlightOptions = leaflet::highlightOptions(color = "yellow", weight = 3,
-    #                                                 bringToFront = TRUE)) %>%
     
     leaflet::addLayersControl(position = 'topleft',overlayGroups = c("Data Source",
       "ICES Index Rivers",
       "ICES Ecoregions",
       "NAFO Divisions",
-      #"ICES Stat Squares",
-      #"Proposed Outward Migration",
       "Commonly Accepted Range",
       "NASCO Rivers DB"),
       options = leaflet::layersControlOptions(collapsed = TRUE)) %>%
     leaflet::hideGroup(c("ICES Ecoregions",
       "NAFO Divisions",
       "ICES Index Rivers",
-      #"ICES Stat Squares",
-      #"Proposed Outward Migration",
       "Commonly Accepted Range",
       "NASCO Rivers DB")) %>%
     # Customise layer control title
