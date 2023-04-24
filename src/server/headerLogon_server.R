@@ -69,10 +69,6 @@ observeEvent(input$loginSubmit, {
     }
     removeModal()
     
-    # Load database information upon successful log on
-    
-    source("./src/server/dataLoad_server.R",local = TRUE)
-    
   }else{
     # logon fail, add red fail text to modal
     user_info(NULL)
@@ -90,6 +86,7 @@ observeEvent(input$logoutModal, {
   neo4r::call_neo4j(query = paste0("MATCH (p:Person) WHERE id(p) = ",user_info()$user_info$id," SET p.personBookmarks = '",formatNumericList(sessionUserBookmarks()),"';"),con = neo_con, type = 'row')
   # clear user information
   user_info(NULL)
+  user_info(tibble::tibble(result = FALSE,admin = FALSE))
   # clear bookmarks
   sessionUserBookmarks(c())
   # change logout button into login button
