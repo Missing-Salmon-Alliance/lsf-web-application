@@ -181,8 +181,8 @@ output$metadataExploreMap <- leaflet::renderLeaflet({
       , lat1 = -90
       , lng2 = 210
       , lat2 = 90 ) %>%
-    leaflet::addProviderTiles(leaflet::providers$Esri.OceanBasemap, options = leaflet::providerTileOptions(minZoom = 3, maxZoom =12)) %>%
-    leaflet::addProviderTiles(leaflet::providers$OpenStreetMap, options = leaflet::providerTileOptions(minZoom = 12, maxZoom = 19)) %>%
+    leaflet::addProviderTiles(leaflet::providers$Stamen.TonerLite, options = leaflet::providerTileOptions(minZoom = 3, maxZoom =12)) %>%
+    leaflet::addProviderTiles(leaflet::providers$OpenStreetMap, options = leaflet::providerTileOptions(minZoom = 13, maxZoom = 19)) %>%
     
     leaflet::addMarkers(data = lsfMetadata(),
       label = ~metadataTitle,
