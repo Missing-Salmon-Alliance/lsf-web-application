@@ -1,3 +1,6 @@
+#################################
+# New User Registration UI
+#################################
 tabItem(tabName = 'newMemberRegistration',
         h2("Data Sharing Group New Member Registration"),
         h4("By registering you are accepting the terms in the Data Sharing Memorandum of Agreement."),
@@ -25,3 +28,6 @@ tabItem(tabName = 'newMemberRegistration',
           status = 'warning',
           includeMarkdown("src/DataSharingMoA.Rmd")
         ))
+#################################
+# New User Registration UI
+#################################
