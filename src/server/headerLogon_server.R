@@ -69,6 +69,10 @@ observeEvent(input$loginSubmit, {
     }
     removeModal()
     
+    # Load database information upon successful log on
+    
+    source("./src/server/dataLoad_server.R",local = TRUE)
+    
   }else{
     # logon fail, add red fail text to modal
     user_info(NULL)
