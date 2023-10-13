@@ -12,7 +12,13 @@ conditionalPanel(
     p("You will be asked to abide by terms and guiding principles. To view and download a copy of these terms click here:"),
     a(href='MemorandumofAgreement.pdf',"Memorandum of Agreement",target="_blank"),
     hr(),
-    actionButton('introSideLogonButton',"Login",icon = icon("sign-in-alt"))
+    actionButton('introSideLogonButton',"Login",icon = icon("sign-in-alt")),
+    hr(),
+    tags$a(href = "https://missingsalmonalliance.org/",
+           tags$img(src = 'msa-logo.png', width = '80%'),
+           target = "_blank"
+           )
+    
   )
 )
 

@@ -1,56 +1,48 @@
 output$searchMapTabUI <- renderUI({
-  req(user_info()) # only action if user_info has been created
-  if (user_info()$result) { # if user logon is true:
-    div(
-      column(
-        width = 4,
-        DT::dataTableOutput('metadataExploreTable')
+  div(
+    column(
+      width = 4,
+      DT::dataTableOutput('metadataExploreTable')
+    ),
+    column(
+      8,
+      shinydashboard::box(
+        width = 12,
+        status = 'primary',
+        solidheader = F,
+        leaflet::leafletOutput('metadataExploreMap',height = '45vh')
       ),
-      column(
-        8,
-        shinydashboard::box(
-          width = 12,
-          status = 'primary',
-          solidheader = F,
-          leaflet::leafletOutput('metadataExploreMap',height = '45vh')
-        ),
-        shinydashboard::box(width = 12,
-          status = "warning",
-          solidHeader = F,
-          #height = "45vh",
-          column(
-            6,
-            h5(tags$b('Title:')),
-            textOutput('title'),
-            tags$i(textOutput('doi')),
-            h5(tags$b('Abstract:')),
-            textOutput('abstract')
-          ),
-          column(
-            6,
-            h5(tags$b('Access Protocol:')),
-            textOutput('accessProtocol'),
-            h5(tags$b('Organisation:')),
-            textOutput('organisation'),
-            h5(tags$b('URL:')),
-            uiOutput('url'),
-            h5(tags$b('Geography and Time:')),
-            textOutput('geographicDescription'),
-            textOutput('geographicExtents'),
-            textOutput('temporalRange')
-          )
-        )
-      ), style = "font-size:80%") # reduce font size in table
-  }else{
-    fluidPage(
-      h1("Metadata Explore Area"),
-      h3("Please authenticate to access this area")
-    )
-  }
+      shinydashboard::box(width = 12,
+                          status = "warning",
+                          solidHeader = F,
+                          #height = "45vh",
+                          column(
+                            6,
+                            h5(tags$b('Title:')),
+                            textOutput('title'),
+                            tags$i(textOutput('doi')),
+                            h5(tags$b('Abstract:')),
+                            textOutput('abstract')
+                          ),
+                          column(
+                            6,
+                            h5(tags$b('Access Protocol:')),
+                            textOutput('accessProtocol'),
+                            h5(tags$b('Organisation:')),
+                            textOutput('organisation'),
+                            h5(tags$b('URL:')),
+                            uiOutput('url'),
+                            h5(tags$b('Geography and Time:')),
+                            textOutput('geographicDescription'),
+                            textOutput('geographicExtents'),
+                            textOutput('temporalRange')
+                          )
+      )
+    ),
+    style = "font-size:80%") # reduce font size in table
 })
 
 domainExploreReactive <- reactiveVal()
-
 domainSearchSpace <- reactiveVal()
 esvSearchSpace <- reactiveVal()
 stockunitSearchSpace <- reactiveVal()
@@ -181,8 +173,7 @@ output$metadataExploreMap <- leaflet::renderLeaflet({
       , lat1 = -90
       , lng2 = 210
       , lat2 = 90 ) %>%
-    leaflet::addProviderTiles(leaflet::providers$Stamen.TonerLite, options = leaflet::providerTileOptions(minZoom = 3, maxZoom =12)) %>%
-    leaflet::addProviderTiles(leaflet::providers$OpenStreetMap, options = leaflet::providerTileOptions(minZoom = 13, maxZoom = 19)) %>%
+    leaflet::addProviderTiles(leaflet::providers$OpenStreetMap.Mapnik, options = leaflet::providerTileOptions(minZoom = 3, maxZoom = 19)) %>%
     
     leaflet::addMarkers(data = lsfMetadata(),
       label = ~metadataTitle,
@@ -205,7 +196,7 @@ output$metadataExploreMap <- leaflet::renderLeaflet({
         iconUrl = "https://img.icons8.com/cotton/64/000000/salmon--v1.png",
         #iconUrl = "https://shiny.missingsalmonalliance.org/SalHub/images/SalHub_marker_100x100.png",
         iconSize = c(35, 35))) %>%
-    
+
     leaflet::addCircleMarkers(data = nascoRiversDBSF,
       label = ~rivername,
       group = "NASCO Rivers DB",
@@ -222,19 +213,19 @@ output$metadataExploreMap <- leaflet::renderLeaflet({
     #   options = WMSTileOptions(format = "image/png", transparent = T)
     # ) %>%
     
-    leaflet::addPolygons(data = ICES_Ecoregions,
-      label = ~ecoregion,
-      layerId = paste0("eco_",ICES_Ecoregions$objectid),
-      color = "green", group = "ICES Ecoregions", weight = 1,
-      highlightOptions = leaflet::highlightOptions(color = "yellow", weight = 3,
-        bringToFront = TRUE))  %>%
-    
-    leaflet::addPolygons(data = salmosalarRange,
-      label = ~name,
-      layerId = paste0("range_",salmosalarRange$ogc_fid),
-      color = "pink", group = "Commonly Accepted Range", weight = 1,
-      highlightOptions = leaflet::highlightOptions(color = "purple", weight = 3,
-        bringToFront = TRUE))  %>%
+    # leaflet::addPolygons(data = ICES_Ecoregions,
+    #   label = ~ecoregion,
+    #   layerId = paste0("eco_",ICES_Ecoregions$objectid),
+    #   color = "green", group = "ICES Ecoregions", weight = 1,
+    #   highlightOptions = leaflet::highlightOptions(color = "yellow", weight = 3,
+    #     bringToFront = TRUE))  %>%
+    # 
+    # leaflet::addPolygons(data = salmosalarRange,
+    #   label = ~name,
+    #   layerId = paste0("range_",salmosalarRange$ogc_fid),
+    #   color = "pink", group = "Commonly Accepted Range", weight = 1,
+    #   highlightOptions = leaflet::highlightOptions(color = "purple", weight = 3,
+    #     bringToFront = TRUE))  %>%
     
     # 
     # leaflet::addPolygons(data = icesStatEcoSF,
@@ -244,12 +235,12 @@ output$metadataExploreMap <- leaflet::renderLeaflet({
     #             highlightOptions = leaflet::highlightOptions(color = "yellow", weight = 3,
     #                                                 bringToFront = TRUE))  %>%
     #  
-    leaflet::addPolygons(data = nafoDivisionsSF,
-      label = ~zone,
-      layerId = paste0("div_",nafoDivisionsSF$ogc_fid),
-      color = "purple", group = "NAFO Divisions", weight = 1,
-      highlightOptions = leaflet::highlightOptions(color = "yellow", weight = 3,
-        bringToFront = TRUE)) %>%
+    # leaflet::addPolygons(data = nafoDivisionsSF,
+    #   label = ~zone,
+    #   layerId = paste0("div_",nafoDivisionsSF$ogc_fid),
+    #   color = "purple", group = "NAFO Divisions", weight = 1,
+    #   highlightOptions = leaflet::highlightOptions(color = "yellow", weight = 3,
+    #     bringToFront = TRUE)) %>%
     # leaflet::addPolygons(data = migrationSF,
     #   label = ~icesname,
     #   layerId = paste0("mig_",migrationSF$fid),
@@ -265,20 +256,23 @@ output$metadataExploreMap <- leaflet::renderLeaflet({
     
     leaflet::addLayersControl(position = 'topleft',overlayGroups = c("Data Source",
       "ICES Index Rivers",
-      "ICES Ecoregions",
-      "NAFO Divisions",
+      #"ICES Ecoregions",
+      #"NAFO Divisions",
       #"ICES Stat Squares",
       #"Proposed Outward Migration",
-      "Commonly Accepted Range",
-      "NASCO Rivers DB"),
+      #"Commonly Accepted Range",
+      "NASCO Rivers DB"
+      ),
       options = leaflet::layersControlOptions(collapsed = TRUE)) %>%
-    leaflet::hideGroup(c("ICES Ecoregions",
-      "NAFO Divisions",
+    
+    leaflet::hideGroup(c(#"ICES Ecoregions",
+      #"NAFO Divisions",
       "ICES Index Rivers",
       #"ICES Stat Squares",
       #"Proposed Outward Migration",
-      "Commonly Accepted Range",
-      "NASCO Rivers DB")) %>%
+      #"Commonly Accepted Range",
+      "NASCO Rivers DB"
+      )) %>%
     # Customise layer control title
     htmlwidgets::onRender("
         function() {

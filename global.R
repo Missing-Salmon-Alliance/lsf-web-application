@@ -62,3 +62,24 @@ wLoadDB <- waiter::Waiter$new(id = 'metadataExploreMap',
               "),
   color = waiter::transparent(.7)
 )
+
+initDataLoad_Metadata <- waiter::Waiter$new(
+  html = HTML("<div class='container--box'><div class='boxxy'><div class='spinner spinner--3'></div></div></div><div><h4 style='color:black;'>One moment, we're just loading the SalHub Metadata Database...</h4></div>"),
+  color = waiter::transparent(.7)
+)
+initDataLoad_GIS_ICES <- waiter::Waiter$new(
+  html = HTML("<div class='container--box'><div class='boxxy'><div class='spinner spinner--3'></div></div></div><div><h4 style='color:black;'>One moment, we're just loading EcoRegion GIS Data from ICES...</h4></div>"),
+  color = waiter::transparent(.7)
+)
+initDataLoad_GIS_NAFO <- waiter::Waiter$new(
+  html = HTML("<div class='container--box'><div class='boxxy'><div class='spinner spinner--3'></div></div></div><div><h4 style='color:black;'>One moment, we're just loading Division GIS Data from NAFO...</h4></div>"),
+  color = waiter::transparent(.7)
+)
+initDataLoad_GIS_Rivers <- waiter::Waiter$new(
+  html = HTML("<div class='container--box'><div class='boxxy'><div class='spinner spinner--3'></div></div></div><div><h4 style='color:black;'>One moment, we're just loading River GIS Data from ICES and NASCO...</h4></div>"),
+  color = waiter::transparent(.7)
+)
+initDataLoad_GIS_LSF <- waiter::Waiter$new(
+  html = HTML("<div class='container--box'><div class='boxxy'><div class='spinner spinner--3'></div></div></div><div><h4 style='color:black;'>One moment, we're just loading final GIS Data... Almost Done! :)</h4></div>"),
+  color = waiter::transparent(.7)
+)

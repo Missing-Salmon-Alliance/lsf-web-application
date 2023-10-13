@@ -62,7 +62,7 @@ server <- function(input, output, session) {
   ############################
   
   source("./src/server/sidebar_server.R", local = TRUE)$value
-  updateTabItems(session, 'menu1', 'introduction') # this line ensures that the intro tab is selected on initial load, required after moving to renderUI sidebar items
+  updateTabItems(session, 'menu1', 'searchlsf') # this line ensures that the intro tab is selected on initial load, required after moving to renderUI sidebar items
   ############################
   # Sidebar items END
   ############################
@@ -98,30 +98,11 @@ server <- function(input, output, session) {
   ############################
   
   ############################
-  # DataSearch_server.R START
-  ############################
-  
-  #source("./src/server/geographicExplore_server_new.R", local = TRUE)$value
-  
-  ############################
-  # DataSearch_server.R END
-  ############################
-  
-  ############################
-  # hypothesisExplore_server.R START
-  ############################
-  
-  #source("./src/server/hypothesisExplore_server.R", local = TRUE)$value
-  
-  ############################
-  # hypothesisExplore_server.R END
-  ############################
-  
-  ############################
   # domainExplore_server.R START
   ############################
   
-  #source("./src/server/domainExplore_server_new.R", local = TRUE)$value
+  # Load database information
+  source("./src/server/dataLoad_server.R",local = TRUE)
   source("./src/server/exploreMetadata_server.R", local = TRUE)$value
   ############################
   # domainExplore_server.R END

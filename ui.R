@@ -65,6 +65,7 @@ ui <- dashboardPage(skin = "blue",
                       
                       # tabItems open
                       tabItems(
+                        
                         source("./src/ui/introductionTab_ui.R", local = TRUE)$value, # tabItem intro
                         
                         source("./src/ui/newUserRegistrationTab_ui.R", local = TRUE)$value, # HIDDEN TAB ITEM
@@ -73,23 +74,19 @@ ui <- dashboardPage(skin = "blue",
                         
                         source("./src/ui/searchDataSource_ui.R", local = TRUE)$value, # tabItem general search view
                         
-                        #source("./src/ui/hypothesisUI/hypothesisExplore_ui.R", local = TRUE)$value, #tabItem hypothesis explore
-                        
-                        #source("./src/ui/domainExploreUI/domainExplore_ui.R", local = TRUE)$value, # tabItem domain explore
-                        
                         source("./src/ui/researchInventoryUI/submitResearchActivity_ui.R",local = TRUE)$value, #tabItem submit research
                         
                         source("./src/ui/administratorArea_ui.R",local = TRUE)$value #tabItem Admin Area
                       ),
                       
                       shinyBS::bsPopover("test","test") # bit of a bodge, server defined popovers don't seem to work without this line
-                    ) # dashboardBody close
+                    ), # dashboardBody close
                     
                     # Some example code, footer and right hand sidebar
                     # footer = dashboardFooter(
                     #   left = "Missing Salmon Alliance",
                     #   right = "2021"
                     # )
-                    #controlbar = dashboardControlbar(collapsed = FALSE, skinSelector()) # RIGHT Hand Sidebar
+                    controlbar = dashboardControlbar(collapsed = T) # RIGHT Hand Sidebar
 ) # dashboardPage close
 

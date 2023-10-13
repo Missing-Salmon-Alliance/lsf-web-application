@@ -3,7 +3,7 @@
 ############################
 # tabItem domain explore ui
 tabItem( # tabItem
-  tabName = "domainExplore",
+  tabName = "searchlsf",
   uiOutput('domainExploreTabUI')
 ) # tabItem close
 ############################

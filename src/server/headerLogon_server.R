@@ -69,10 +69,6 @@ observeEvent(input$loginSubmit, {
     }
     removeModal()
     
-    # Load database information upon successful log on
-    
-    source("./src/server/dataLoad_server.R",local = TRUE)
-    
   }else{
     # logon fail, add red fail text to modal
     user_info(NULL)
@@ -80,7 +76,7 @@ observeEvent(input$loginSubmit, {
   }
   # send user back to introduction page regardless of login success
   # To fix a bug where conditional sidebar items fail to appear if user logs in whilst a non-intro tab is active
-  updateTabItems(session, 'menu1', 'introduction')
+  updateTabItems(session, 'menu1', 'searchlsf')
   
 })
 
@@ -108,7 +104,7 @@ observeEvent(input$logoutModal, {
                 
     )
   )
-  updateTabItems(session, 'menu1', 'introduction')
+  updateTabItems(session, 'menu1', 'searchlsf')
 })
 
 observeEvent(input$userInfoModal, {
