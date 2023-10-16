@@ -34,7 +34,7 @@ server <- function(input, output, session) {
   # Send user to search page if URL contains ?search (figure out how to auto-prompt logon too)
   # Send user to submit page if URL contains ?submit (figure out how to auto-prompt logon too)
   # Send user to research activity page is URL contains ?newproject
-  observe({
+  o <- observe({
     query <- parseQueryString(session$clientData$url_search)
     if (!is.null(query[['register']])) {
       updateTabItems(session, 'menu1', 'newMemberRegistration')
@@ -52,9 +52,12 @@ server <- function(input, output, session) {
         DT::selectRows(which(domainExploreReactive()$id == query[['doi']])) %>%
         # find row in pages and select that page, plus and minus 1 in this line deal with end of page cases
         DT::selectPage((which(input$metadataExploreTable_rows_all == which(domainExploreReactive()$id == query[['doi']])) - 1) %/% input$metadataExploreTable_state$length + 1)
+      
     }
-  },autoDestroy = T)
+    o$destroy()
+  })
   
+  o()
   ############################
   # header items
   ############################
