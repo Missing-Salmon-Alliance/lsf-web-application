@@ -53,7 +53,7 @@ server <- function(input, output, session) {
         # find row in pages and select that page, plus and minus 1 in this line deal with end of page cases
         DT::selectPage((which(input$metadataExploreTable_rows_all == which(domainExploreReactive()$id == query[['doi']])) - 1) %/% input$metadataExploreTable_state$length + 1)
     }
-  })
+  },autoDestroy = T)
   
   ############################
   # header items
