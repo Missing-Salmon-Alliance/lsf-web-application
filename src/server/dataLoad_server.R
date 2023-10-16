@@ -34,7 +34,7 @@ nascoRiversDBSF <<- riversDBSF[riversDBSF$nasco_rivers_db == TRUE,] # subset of 
 indexRiversSF <<- riversDBSF[riversDBSF$ices_index == TRUE,] # subset of rivers that are ICES index rivers
 initDataLoad_GIS_Rivers$hide()
 # 
-# initDataLoad_GIS_LSF$show()
-# salmosalarRange <<- loadFullWKBData('atlantic_salmon_range')
-# salmosalarExtents <<- sf::st_bbox(salmosalarRange)
-# initDataLoad_GIS_LSF$hide()
+initDataLoad_GIS_LSF$show()
+salmosalarRange <<- loadFullWKBData('atlantic_salmon_range')
+salmosalarExtents <<- sf::st_bbox(salmosalarRange)
+initDataLoad_GIS_LSF$hide()

@@ -239,8 +239,7 @@ observeEvent(input$monthsOfYearToggleAll,{
 # Geographic Detail Server
 output$submitMap <- leaflet::renderLeaflet({
   leaflet::leaflet(options = leaflet::leafletOptions(minZoom = 0,maxZoom = 19)) %>% # maxZoom set so that user can always see their rectangle in context of a coastline
-    leaflet::addProviderTiles(leaflet::providers$Esri.OceanBasemap, options = leaflet::providerTileOptions(minZoom = 0, maxZoom =10)) %>%
-    leaflet::addProviderTiles(leaflet::providers$OpenStreetMap, options = leaflet::providerTileOptions(minZoom = 11, maxZoom = 19)) %>%
+    leaflet::addProviderTiles(leaflet::providers$OpenStreetMap.Mapnik, options = leaflet::providerTileOptions(minZoom = 0, maxZoom = 19)) %>%
     leaflet::addRectangles(round(salmosalarExtents[['xmin']],digits = 4),
                            round(salmosalarExtents[['ymax']],digits = 4),
                            round(salmosalarExtents[['xmax']],digits = 4),
@@ -397,9 +396,7 @@ output$submitSourceConfirmESVDomainsDataframe <- shiny::renderTable(submitSource
 # Map to be rendered within confirmation modal
 output$submitSourceConfirmMap <- leaflet::renderLeaflet({
   leaflet::leaflet(options = leaflet::leafletOptions(maxZoom = 5)) %>% # maxZoom set so that user can always see their rectangle in context of a coastline
-    #leaflet::addPolygons(data = neContinentsSF, stroke = FALSE) %>%
-    #leaflet::addProviderTiles("Stamen.TerrainBackground") %>%
-    leaflet::addProviderTiles(leaflet::providers$Esri.OceanBasemap) %>%
+    leaflet::addProviderTiles(leaflet::providers$OpenStreetMap.Mapnik) %>%
     leaflet::addRectangles(input$submitWest,input$submitNorth,input$submitEast,input$submitSouth) %>%
     leaflet::fitBounds(input$submitWest,input$submitNorth,input$submitEast,input$submitSouth)
   })
