@@ -44,6 +44,14 @@ server <- function(input, output, session) {
       updateTabItems(session, 'menu1', 'newsource')
     }else if (!is.null(query[['newproject']])) {
       updateTabItems(session, 'menu1', 'newproject')
+    }else if (!is.null(query[['doi']])) {
+      updateTabItems(session, 'menu1', 'searchlsf')
+      # select relevant row in data table
+      DT::dataTableProxy('metadataExploreTable') %>%
+        # get row index and select that row
+        DT::selectRows(which(domainExploreReactive()$id == query[['doi']])) %>%
+        # find row in pages and select that page, plus and minus 1 in this line deal with end of page cases
+        DT::selectPage((which(input$metadataExploreTable_rows_all == which(domainExploreReactive()$id == query[['doi']])) - 1) %/% input$metadataExploreTable_state$length + 1)
     }
   })
   
