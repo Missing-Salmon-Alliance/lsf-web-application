@@ -10,6 +10,7 @@ server <- function(input, output, session) {
   sessionFile <- reactiveVal(NULL)
   sessionXML <- reactiveVal(NULL)
   sessionUserBookmarks <- reactiveVal(NULL)
+  sessionQuery <- reactiveVal(NULL)
   # Define reactive value for reactive filtering on search tabs
   metadataFilterReactive <- reactiveVal()
   hypothesisExploreReactive <- reactiveVal()
@@ -34,7 +35,7 @@ server <- function(input, output, session) {
   # Send user to search page if URL contains ?search (figure out how to auto-prompt logon too)
   # Send user to submit page if URL contains ?submit (figure out how to auto-prompt logon too)
   # Send user to research activity page is URL contains ?newproject
-  observeEvent(session$clientData$url_search,{
+  observe(session$clientData$url_search,{
     query <- parseQueryString(session$clientData$url_search)
     if (!is.null(query[['register']])) {
       updateTabItems(session, 'menu1', 'newMemberRegistration')
@@ -44,7 +45,12 @@ server <- function(input, output, session) {
       updateTabItems(session, 'menu1', 'newsource')
     }else if (!is.null(query[['newproject']])) {
       updateTabItems(session, 'menu1', 'newproject')
-    }else if (!is.null(query[['doi']])) {
+    }
+    sessionQuery(parseQueryString(session$clientData$url_search))
+  })
+  # observe special query that includes DOI and action ONCE
+  observeEvent(sessionQuery(),{
+    if(!is.null(query[['doi']])){
       updateTabItems(session, 'menu1', 'searchlsf')
       # select relevant row in data table
       DT::dataTableProxy('metadataExploreTable') %>%
@@ -53,7 +59,7 @@ server <- function(input, output, session) {
         # find row in pages and select that page, plus and minus 1 in this line deal with end of page cases
         DT::selectPage((which(input$metadataExploreTable_rows_all == which(domainExploreReactive()$id == query[['doi']])) - 1) %/% input$metadataExploreTable_state$length + 1)
     }
-  })
+  }, once = T)
   ############################
   # header items
   ############################
