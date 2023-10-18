@@ -25,7 +25,7 @@ observeEvent(input$newUserRegisterSubmit, {
     updateCheckboxInput(session, inputId = 'dataSharingAgreementAccept',value = FALSE)
     updateCheckboxInput(session, inputId = 'dataSharingAgreementAdvertiseOrganisation',value = FALSE)
     # send user back to intro tab
-    updateTabItems(session, 'menu1', 'searchlsf')
+    updateTabItems(session, 'menu1', 'introduction')
     
     # modal window to thank for new registration
     showModal(

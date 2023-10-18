@@ -68,15 +68,18 @@ observeEvent(input$loginSubmit, {
       sessionUserBookmarks(c())
     }
     removeModal()
+    # send user to search page
+    updateTabItems(session, 'menu1', 'searchlsf')
     
   }else{
     # logon fail, add red fail text to modal
     user_info(NULL)
     output$credentialsIncorrect <- renderUI(span(style="color:red", "username or password incorrect"))
+    # send user back to introduction page
+    updateTabItems(session, 'menu1', 'introduction')
   }
-  # send user back to introduction page regardless of login success
-  # To fix a bug where conditional sidebar items fail to appear if user logs in whilst a non-intro tab is active
-  updateTabItems(session, 'menu1', 'searchlsf')
+  
+  
   
 })
 
@@ -104,7 +107,7 @@ observeEvent(input$logoutModal, {
                 
     )
   )
-  updateTabItems(session, 'menu1', 'searchlsf')
+  updateTabItems(session, 'menu1', 'introduction')
 })
 
 observeEvent(input$userInfoModal, {
