@@ -320,14 +320,6 @@ redrawFilteredMarkers <- function(filteredTibble,session){
 # Observer for Search Map Click - Action: When user clicks a marker add the extents of the marker data source as rectangle to the map
 observeEvent(input$metadataExploreMap_marker_click,{
   index <- input$metadataExploreMap_marker_click[1]
-  # on marker click, clear existing rectangle and add new one from marker information
-  leaflet::leafletProxy('metadataExploreMap') %>%
-    leaflet::clearGroup(group = 'markerRectangle') %>%
-    leaflet::addRectangles(domainExploreReactive()[domainExploreReactive()$id == index,]$metadataCoverageWest,
-      domainExploreReactive()[domainExploreReactive()$id == index,]$metadataCoverageNorth,
-      domainExploreReactive()[domainExploreReactive()$id == index,]$metadataCoverageEast,
-      domainExploreReactive()[domainExploreReactive()$id == index,]$metadataCoverageSouth,
-      group = 'markerRectangle', color = "blue", weight = 1, stroke = TRUE)
   # select relevant row in data table
   DT::dataTableProxy('metadataExploreTable') %>%
     # get row index and select that row
@@ -351,7 +343,7 @@ observeEvent(input$metadataExploreTable_rows_selected,{
       domainExploreReactive()$metadataCoverageNorth[input$metadataExploreTable_rows_selected],
       domainExploreReactive()$metadataCoverageEast[input$metadataExploreTable_rows_selected],
       domainExploreReactive()$metadataCoverageSouth[input$metadataExploreTable_rows_selected],
-      group = 'markerRectangle') %>%
+      group = 'markerRectangle', color = "blue", weight = 1, stroke = TRUE) %>%
     leaflet::fitBounds(
       domainExploreReactive()$metadataCoverageWest[input$metadataExploreTable_rows_selected],
       domainExploreReactive()$metadataCoverageNorth[input$metadataExploreTable_rows_selected],
