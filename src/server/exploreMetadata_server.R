@@ -48,7 +48,7 @@ esvSearchSpace <- reactiveVal()
 stockunitSearchSpace <- reactiveVal()
 
 # Observe Filters - Action: Update search space and query database
-observeEvent(c(input$menu1,input$domainFilter,input$esvFilter1,input$esvFilter2,input$esvFilter3,input$stockunitFilter),{
+observeEvent(c(input$domainFilter,input$esvFilter1,input$esvFilter2,input$esvFilter3,input$stockunitFilter),{
   req(input$menu1)
   if(input$menu1 == 'searchlsf'){
     # Set up waiter
