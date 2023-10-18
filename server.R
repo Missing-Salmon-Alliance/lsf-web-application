@@ -60,6 +60,8 @@ server <- function(input, output, session) {
       # find row in pages and select that page, plus and minus 1 in this line deal with end of page cases
       page <- (which(input$metadataExploreTable_rows_all == row) - 1) %/% input$metadataExploreTable_state$length + 1
       DT::dataTableProxy('metadataExploreTable') %>% DT::selectRows(row) %>% DT::selectPage(page)
+    }else{ # if query$doi is null, simply destroy this observer
+      o$destroy()
     }
     # observe will continually run, triggered by any reactive update, so must be destroyed as soon as it has done its job
     if(!is.null(input$metadataExploreTable_rows_selected)){
