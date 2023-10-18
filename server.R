@@ -10,7 +10,7 @@ server <- function(input, output, session) {
   sessionFile <- reactiveVal(NULL)
   sessionXML <- reactiveVal(NULL)
   sessionUserBookmarks <- reactiveVal(NULL)
-  sessionQuery <- reactiveVal(NULL)
+  query_doi <- reactiveVal(353) # TESTING
   # Define reactive value for reactive filtering on search tabs
   metadataFilterReactive <- reactiveVal()
   hypothesisExploreReactive <- reactiveVal()
@@ -27,6 +27,7 @@ server <- function(input, output, session) {
   lsfMetadata <- reactiveVal(NULL)
   lsfHypotheses <- reactiveVal(NULL)
   lsfVariableClasses <- reactiveVal(NULL)
+  
   ############################
   # Reactive Values END
   ############################
@@ -35,32 +36,39 @@ server <- function(input, output, session) {
   # Send user to search page if URL contains ?search (figure out how to auto-prompt logon too)
   # Send user to submit page if URL contains ?submit (figure out how to auto-prompt logon too)
   # Send user to research activity page is URL contains ?newproject
+  # Send user to specific data resource if URL contains ?doi=##
   observe({
     query <- parseQueryString(session$clientData$url_search)
-    if (!is.null(query[['register']])) {
+    if (!is.null(query$register)) {
       updateTabItems(session, 'menu1', 'newMemberRegistration')
-    }else if (!is.null(query[['search']])) {
+    }else if (!is.null(query$search)) {
       updateTabItems(session, 'menu1', 'searchlsf')
-    }else if (!is.null(query[['submit']])) {
+    }else if (!is.null(query$submit)) {
       updateTabItems(session, 'menu1', 'newsource')
-    }else if (!is.null(query[['newproject']])) {
+    }else if (!is.null(query$newproject)) {
       updateTabItems(session, 'menu1', 'newproject')
     }
-    sessionQuery({parseQueryString(session$clientData$url_search)})
   })
   
-  # observe special query that includes DOI and action ONCE
-  observeEvent(sessionQuery(),{
-    if(!is.null(sessionQuery()[['doi']])){
+  o <- observe({
+    query <- parseQueryString(session$clientData$url_search)
+    if(!is.null(query$doi)){
       updateTabItems(session, 'menu1', 'searchlsf')
       # select relevant row in data table
-      DT::dataTableProxy('metadataExploreTable') %>%
-        # get row index and select that row
-        DT::selectRows(which(domainExploreReactive()$id == sessionQuery()[['doi']])) %>%
-        # find row in pages and select that page, plus and minus 1 in this line deal with end of page cases
-        DT::selectPage((which(input$metadataExploreTable_rows_all == which(domainExploreReactive()$id == sessionQuery()[['doi']])) - 1) %/% input$metadataExploreTable_state$length + 1)
+      # get row index and select that row
+      row <- which(domainExploreReactive()$id == query$doi)
+      # find row in pages and select that page, plus and minus 1 in this line deal with end of page cases
+      page <- (which(input$metadataExploreTable_rows_all == row) - 1) %/% input$metadataExploreTable_state$length + 1
+      DT::dataTableProxy('metadataExploreTable') %>% DT::selectRows(row) %>% DT::selectPage(page)
     }
-  }, once = T)
+    # observe will continually run, triggered by any reactive update, so must be destroyed as soon as it has done its job
+    if(!is.null(input$metadataExploreTable_rows_selected)){
+      if(input$metadataExploreTable_rows_selected == row){
+        o$destroy()
+      }
+    }
+  })
+  
   ############################
   # header items
   ############################
@@ -150,9 +158,5 @@ server <- function(input, output, session) {
   #popovers!
   
   source("./src/server/infoPopOvers_server.R", local = TRUE)$value
-  
-  session$allowReconnect("force")
-  options(shiny.launch.browser=FALSE)
 
-  
 }
