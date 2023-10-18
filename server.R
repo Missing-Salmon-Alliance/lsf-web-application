@@ -56,7 +56,7 @@ server <- function(input, output, session) {
       updateTabItems(session, 'menu1', 'searchlsf')
       # select relevant row in data table
       # get row index and select that row
-      row <- which(domainExploreReactive()$id == query$doi)
+      row <- which(domainExploreReactive()$metadataUUID == query$doi)
       # find row in pages and select that page, plus and minus 1 in this line deal with end of page cases
       page <- (which(input$metadataExploreTable_rows_all == row) - 1) %/% input$metadataExploreTable_state$length + 1
       DT::dataTableProxy('metadataExploreTable') %>% DT::selectRows(row) %>% DT::selectPage(page)
