@@ -14,9 +14,17 @@
 # Load databases
 initDataLoad_Metadata$show()
 lsfDomains(neo4r::call_neo4j("MATCH (d:Domain) RETURN d;",neo_con,type='graph')$nodes %>% neo4r::unnest_nodes('all') %>% dplyr::arrange(domainOrder))
-lsfMetadata(sf::st_as_sf(neo4r::call_neo4j("MATCH (m:Metadata) RETURN m;",neo_con,type='graph')$nodes %>% neo4r::unnest_nodes('all'), wkt = "metadataCoverageCentroid", crs = 4326, na.fail = FALSE))
 lsfHypotheses(neo4r::call_neo4j("MATCH (h:Hypothesis) RETURN h;",neo_con,type='graph')$nodes %>% neo4r::unnest_nodes('all'))
 lsfVariableClasses(neo4r::call_neo4j("MATCH (esv:EssentialSalmonVariable) RETURN esv;",neo_con,type='graph')$nodes %>% neo4r::unnest_nodes('all') %>% dplyr::arrange(esvCategory,esvTitle))
+if (lsf_cache$exists("lsf_metadata_cache")){
+  # if data is cached load into lsfMetadata object
+  lsfMetadata(lsf_metadata_cache)
+} else {
+  # If data is not in the cache, load it from the database
+  lsfMetadata(sf::st_as_sf(neo4r::call_neo4j("MATCH (m:Metadata) RETURN m;",neo_con,type='graph')$nodes %>% neo4r::unnest_nodes('all'), wkt = "metadataCoverageCentroid", crs = 4326, na.fail = FALSE))
+  # Cache the data
+  lsf_cache$set("lsf_metadata_cache", isolate({lsfMetadata()}))  # Cache data
+}
 initDataLoad_Metadata$hide()
 
 # initDataLoad_GIS_ICES$show()

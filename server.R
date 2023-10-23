@@ -28,6 +28,9 @@ server <- function(input, output, session) {
   lsfHypotheses <- reactiveVal(NULL)
   lsfVariableClasses <- reactiveVal(NULL)
   
+  # Initialize a cache
+  lsf_cache <- cachem::cache_mem(max_age = 360, max_n = 1, evict = 'fifo')
+  
   ############################
   # Reactive Values END
   ############################
