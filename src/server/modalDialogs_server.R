@@ -38,7 +38,7 @@ observeEvent(input$info_modal_explore_guidance,{
         tags$li("Explore the Map Layers to add context to some geographic extents")
       ),
       br(),
-      h5("Would you like to add to the Salmon Ecosystem Data Hub? Register ",actionLink('registerModal2',strong("HERE"))," and get ready to add to the Salmon Data Landscape!")
+      h5("Would you like to add to the Salmon Ecosystem Data Hub? Register ",actionLink('registerModal2',strong("HERE"))," and take part in improving visibility of the Salmon Data Landscape!")
     )
   )
 })
