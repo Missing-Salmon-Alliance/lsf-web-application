@@ -2,6 +2,7 @@ output$searchMapTabUI <- renderUI({
   div(
     column(
       width = 4,
+      # The Explore Table
       DT::dataTableOutput('metadataExploreTable')
     ),
     column(
@@ -10,8 +11,10 @@ output$searchMapTabUI <- renderUI({
         width = 12,
         status = 'primary',
         solidheader = F,
+        # The Explore Map
         leaflet::leafletOutput('metadataExploreMap',height = '45vh')
       ),
+      # The Explore Information Box
       shinydashboard::box(width = 12,
                           status = "warning",
                           solidHeader = F,
@@ -20,18 +23,19 @@ output$searchMapTabUI <- renderUI({
                             6,
                             h5(tags$b('Title:')),
                             textOutput('title'),
-                            tags$i(textOutput('doi')),
                             h5(tags$b('Abstract:')),
-                            textOutput('abstract')
+                            textOutput('abstract'),
+                            h5(tags$b('Access Protocol:')),
+                            textOutput('accessProtocol')
                           ),
                           column(
                             6,
-                            h5(tags$b('Access Protocol:')),
-                            textOutput('accessProtocol'),
                             h5(tags$b('Organisation:')),
                             textOutput('organisation'),
                             h5(tags$b('URL:')),
                             uiOutput('url'),
+                            h5(tags$b('SalHub DOI:')),
+                            tags$i(uiOutput('doi')),
                             h5(tags$b('Geography and Time:')),
                             textOutput('geographicDescription'),
                             textOutput('geographicExtents'),
@@ -390,9 +394,25 @@ observeEvent(input$Request, {
 # The section renders all the further information text from the selected data table row
 output$title <- renderText({domainExploreReactive()$metadataTitle[input$metadataExploreTable_rows_selected]})
 output$abstract <- renderText({domainExploreReactive()$metadataAbstract[input$metadataExploreTable_rows_selected]})
-output$doi <- renderText({paste0("doi: ",domainExploreReactive()$metadataUUID[input$metadataExploreTable_rows_selected],"/",domainExploreReactive()$id[input$metadataExploreTable_rows_selected])})
+# DOI is converted into a SALHUB URL
+output$doi <- renderUI({
+  HTML(paste0("<a href='https://shiny.missingsalmonalliance.org/SalHub/?doi=",
+              domainExploreReactive()$metadataUUID[input$metadataExploreTable_rows_selected],
+              "' target='_blank'>",
+              paste0(domainExploreReactive()$metadataUUID[input$metadataExploreTable_rows_selected],
+                     "/",
+                     domainExploreReactive()$id[input$metadataExploreTable_rows_selected]),
+              "</a>"))
+})
+
 output$organisation <- renderText({domainExploreReactive()$metadataOrganisation[input$metadataExploreTable_rows_selected]})
-output$url <- renderUI({HTML(paste0("<a href=",domainExploreReactive()$metadataAltURI[input$metadataExploreTable_rows_selected]," target='_blank'>",domainExploreReactive()$metadataAltURI[input$metadataExploreTable_rows_selected],"</a>"))})
+# URL is converted into a URL
+output$url <- renderUI({HTML(paste0("<a href=",
+                                    domainExploreReactive()$metadataAltURI[input$metadataExploreTable_rows_selected],
+                                    " target='_blank'>",
+                                    domainExploreReactive()$metadataAltURI[input$metadataExploreTable_rows_selected],
+                                    "</a>"))
+})
 output$accessProtocol <- renderText({domainExploreReactive()$metadataAccessProtocol[input$metadataExploreTable_rows_selected]})
 output$geographicDescription <- renderText({domainExploreReactive()$metadataGeographicDescription[input$metadataExploreTable_rows_selected]})
 output$geographicExtents <- renderText({

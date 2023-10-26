@@ -27,7 +27,7 @@ observeEvent(input$loginModal | input$introSideLogonButton, {
   showModal(
     modalDialog(title = "Login",
                 p("Please enter your email and password",
-                  actionLink('registerModal',strong("or register here"))),
+                  actionLink('registerModal1',strong("or register here"))),
                 uiOutput('credentialsIncorrect'),
                 textInput('username',"Email:"),
                 passwordInput('password',"Password:"),
@@ -40,7 +40,11 @@ observeEvent(input$loginModal | input$introSideLogonButton, {
 
 # observe new user registration click - action: send user to hidden tabItem containing registration details
 # TODO: change from saving as CSV to producing some kind of email to data admin inbox
-observeEvent(input$registerModal, {
+observeEvent(input$registerModal1, {
+  removeModal()
+  updateTabItems(session, 'menu1', 'newMemberRegistration')
+})
+observeEvent(input$registerModal2, {
   removeModal()
   updateTabItems(session, 'menu1', 'newMemberRegistration')
 })

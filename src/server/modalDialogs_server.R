@@ -18,6 +18,31 @@ observeEvent(input$submitDescript,{
   )
 })
 
+
+observeEvent(input$info_modal_explore_guidance,{
+  showModal(
+    modalDialog(
+      title = "Explore Data Resources Guide",
+      size = 'l',
+      h5("Using the table, map, and filters on the sidebar, browse the resources that have been registered in SalHub"),
+      br(),
+      tags$ul(
+        tags$li("Table rows are clickable and will centre the map on the selected resource and populate the information box"),
+        br(),
+        tags$li("Map objects are clickable and will auto-select the table row and populate the information box"),
+        br(),
+        tags$li("Filters will subset the Table and Map objects based on selections made in the drop-down menus"),
+        br(),
+        tags$li("Links to individual resources appear in the information box and can be shared for direct navigation"),
+        br(),
+        tags$li("Explore the Map Layers to add context to some geographic extents")
+      ),
+      br(),
+      h5("Would you like to add to the Salmon Ecosystem Data Hub? Register ",actionLink('registerModal2',strong("HERE"))," and get ready to add to the Salmon Data Landscape!")
+    )
+  )
+})
+
 observeEvent(input$esvFields,{
   showModal(
     modalDialog(
