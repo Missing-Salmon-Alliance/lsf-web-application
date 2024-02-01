@@ -57,14 +57,13 @@ if (lsf_cache$exists("lsfmetadatacache")){
 
 initDataLoad_Metadata$hide()
 
-# initDataLoad_GIS_ICES$show()
-# ICES_Ecoregions <<- loadFullWKBData("ices_ecoregions_simplified")
-# initDataLoad_GIS_ICES$hide()
+initDataLoad_GIS_ICES$show()
+ICES_Ecoregions <<- loadFullWKBData("ices_ecoregions_simplified")
+initDataLoad_GIS_ICES$hide()
 # 
-# initDataLoad_GIS_NAFO$show()
-# nafoDivisionsSF <<- loadFullWKBData("nafo_divisions")
-# initDataLoad_GIS_NAFO$hide()
-# 
+initDataLoad_GIS_NAFO$show()
+nafoDivisionsSF <<- loadFullWKBData("nafo_divisions")
+initDataLoad_GIS_NAFO$hide()
 # 
 initDataLoad_GIS_Rivers$show()
 riversDBSF <<- loadFullWKBData('rivers_db')

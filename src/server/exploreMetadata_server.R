@@ -275,19 +275,19 @@ output$metadataExploreMap <- leaflet::renderLeaflet({
     #   options = WMSTileOptions(format = "image/png", transparent = T)
     # ) %>%
     
-    # leaflet::addPolygons(data = ICES_Ecoregions,
-    #   label = ~ecoregion,
-    #   layerId = paste0("eco_",ICES_Ecoregions$objectid),
-    #   color = "green", group = "ICES Ecoregions", weight = 1,
-    #   highlightOptions = leaflet::highlightOptions(color = "yellow", weight = 3,
-    #     bringToFront = TRUE))  %>%
+    leaflet::addPolygons(data = ICES_Ecoregions,
+      label = ~ecoregion,
+      layerId = paste0("eco_",ICES_Ecoregions$objectid),
+      color = "green", group = "ICES Ecoregions", weight = 1,
+      highlightOptions = leaflet::highlightOptions(color = "yellow", weight = 3,
+        bringToFront = TRUE))  %>%
     # 
-    # leaflet::addPolygons(data = salmosalarRange,
-    #   label = ~name,
-    #   layerId = paste0("range_",salmosalarRange$ogc_fid),
-    #   color = "pink", group = "Commonly Accepted Range", weight = 1,
-    #   highlightOptions = leaflet::highlightOptions(color = "purple", weight = 3,
-    #     bringToFront = TRUE))  %>%
+    leaflet::addPolygons(data = salmosalarRange,
+      label = ~name,
+      layerId = paste0("range_",salmosalarRange$ogc_fid),
+      color = "pink", group = "Commonly Accepted Range", weight = 1,
+      highlightOptions = leaflet::highlightOptions(color = "purple", weight = 3,
+        bringToFront = TRUE))  %>%
     
     # 
     # leaflet::addPolygons(data = icesStatEcoSF,
@@ -297,12 +297,12 @@ output$metadataExploreMap <- leaflet::renderLeaflet({
     #             highlightOptions = leaflet::highlightOptions(color = "yellow", weight = 3,
     #                                                 bringToFront = TRUE))  %>%
     #  
-    # leaflet::addPolygons(data = nafoDivisionsSF,
-    #   label = ~zone,
-    #   layerId = paste0("div_",nafoDivisionsSF$ogc_fid),
-    #   color = "purple", group = "NAFO Divisions", weight = 1,
-    #   highlightOptions = leaflet::highlightOptions(color = "yellow", weight = 3,
-    #     bringToFront = TRUE)) %>%
+    leaflet::addPolygons(data = nafoDivisionsSF,
+      label = ~zone,
+      layerId = paste0("div_",nafoDivisionsSF$ogc_fid),
+      color = "purple", group = "NAFO Divisions", weight = 1,
+      highlightOptions = leaflet::highlightOptions(color = "yellow", weight = 3,
+        bringToFront = TRUE)) %>%
     # leaflet::addPolygons(data = migrationSF,
     #   label = ~icesname,
     #   layerId = paste0("mig_",migrationSF$fid),
@@ -318,21 +318,21 @@ output$metadataExploreMap <- leaflet::renderLeaflet({
     
     leaflet::addLayersControl(position = 'topleft',overlayGroups = c("Data Source",
       "ICES Index Rivers",
-      #"ICES Ecoregions",
-      #"NAFO Divisions",
+      "ICES Ecoregions",
+      "NAFO Divisions",
       #"ICES Stat Squares",
       #"Proposed Outward Migration",
-      #"Commonly Accepted Range",
+      "Commonly Accepted Range",
       "NASCO Rivers DB"
       ),
       options = leaflet::layersControlOptions(collapsed = TRUE)) %>%
     
-    leaflet::hideGroup(c(#"ICES Ecoregions",
-      #"NAFO Divisions",
+    leaflet::hideGroup(c("ICES Ecoregions",
+      "NAFO Divisions",
       "ICES Index Rivers",
       #"ICES Stat Squares",
       #"Proposed Outward Migration",
-      #"Commonly Accepted Range",
+      "Commonly Accepted Range",
       "NASCO Rivers DB"
       )) %>%
     # Customise layer control title
