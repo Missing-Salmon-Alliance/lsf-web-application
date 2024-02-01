@@ -58,6 +58,25 @@ output$menu <- renderUI(
 output$searchSidebarFilters <- renderUI({
   shiny::div(
     h4("Filters"),
+    splitLayout(
+        shiny::actionButton(
+          inputId = 'actionFilter',
+          label = "Apply",
+          icon = icon("filter", style = "color:black;"),
+          width = '80%'
+        ),
+        shiny::actionButton(
+          inputId = 'actionFilterReset',
+          label = "Reset",
+          icon = icon("arrows-rotate", style = "color:black;"),
+          width = '80%'
+        )
+    ),
+    textInput(
+      inputId = 'keywordFilter',
+      label = "Keyword Filter"
+    ),
+    bsTooltip("keywordFilter","Filter using keywords, delimit terms with a comma or semi-colon.", placement = "right"),
     shinyWidgets::pickerInput(
       inputId = 'domainFilter',
       label = "Life-Stage Domain",

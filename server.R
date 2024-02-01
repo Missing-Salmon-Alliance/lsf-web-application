@@ -35,6 +35,9 @@ server <- function(input, output, session) {
   # Reactive Values END
   ############################
   
+  ############################
+  # Routines to enable URL direction to specific places on the site or data sources
+  ############################
   # Send user to registration page if URL contains register query ?register
   # Send user to search page if URL contains ?search (figure out how to auto-prompt logon too)
   # Send user to submit page if URL contains ?submit (figure out how to auto-prompt logon too)

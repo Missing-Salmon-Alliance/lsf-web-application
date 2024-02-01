@@ -51,10 +51,57 @@ domainSearchSpace <- reactiveVal()
 esvSearchSpace <- reactiveVal()
 stockunitSearchSpace <- reactiveVal()
 
-# Observe Filters - Action: Update search space and query database
-observeEvent(c(input$domainFilter,input$esvFilter1,input$esvFilter2,input$esvFilter3,input$stockunitFilter),{
+# observe change in filters - Action: animate Apply button so that user knows to click it
+observeEvent(c(input$keywordFilter,input$domainFilter,input$esvFilter1,input$esvFilter2,input$esvFilter3,input$stockunitFilter),{
   req(input$menu1)
   if(input$menu1 == 'searchlsf'){
+    shinyjs::addClass(id = 'actionFilter', class = "glow")
+  }
+})
+
+# observe Reset filter button - Action: clear all filters and activate filter apply button  
+observeEvent(input$actionFilterReset,{
+  req(input$menu1)
+  if(input$menu1 == 'searchlsf'){
+    shiny::updateTextInput(
+      session = session,
+      inputId = 'keywordFilter',
+      value = ""
+    )
+    shinyWidgets::updatePickerInput(
+      session = session,
+      inputId = 'domainFilter',
+      selected = character(0)
+    )
+    shinyWidgets::updatePickerInput(
+      session = session,
+      inputId = 'esvFilter1',
+      selected = character(0)
+    )
+    shinyWidgets::updatePickerInput(
+      session = session,
+      inputId = 'esvFilter2',
+      selected = character(0)
+    )
+    shinyWidgets::updatePickerInput(
+      session = session,
+      inputId = 'esvFilter3',
+      selected = character(0)
+    )
+    shinyWidgets::updatePickerInput(
+      session = session,
+      inputId = 'stockunitFilter',
+      selected = character(0)
+    )
+  }
+  
+}, ignoreInit = T)
+
+# Observe Apply Filters - Action: Update search space and query database
+observeEvent(input$actionFilter,{
+  req(input$menu1)
+  if(input$menu1 == 'searchlsf'){
+    shinyjs::removeClass(id = 'actionFilter', class = "glow")
     # Set up waiter
     wLoadDB$show()
     leaflet::leafletProxy('metadataExploreMap') %>%
@@ -108,6 +155,18 @@ observeEvent(c(input$domainFilter,input$esvFilter1,input$esvFilter2,input$esvFil
       
       filteredMetadata <- filteredMetadata[filteredMetadata$z != "",]
       
+      # apply search text filter
+      if(input$keywordFilter != ""){
+        # split the keyword input by comma and semi-colon, then collapse into a single string with regex OR "|" between terms
+        # add (?i) to the start of the string to enable case insensitive searching in str_detect
+        keyword_filters <- paste0("(?i)",paste0(as.vector(stringr::str_split(input$keywordFilter,"[,;]",simplify = T)),collapse = "|"))
+        # apply filter to the tibble, only referencing the intended search space
+        filteredMetadata <- dplyr::filter_at(filteredMetadata,
+                                             vars(ends_with(c('Title','Abstract','Keywords'))),
+                                             any_vars(stringr::str_detect(.,keyword_filters))
+                                             )
+      }
+      
       if(nrow(filteredMetadata) > 0){
         domainExploreReactive(filteredMetadata)
       }else{
@@ -126,7 +185,6 @@ observeEvent(c(input$domainFilter,input$esvFilter1,input$esvFilter2,input$esvFil
     }
     wLoadDB$hide()
   }
-
   
 },ignoreNULL = FALSE, ignoreInit = FALSE)
 
@@ -147,7 +205,7 @@ output$metadataExploreTable <- DT::renderDT({
         # limit row width by truncating text in the title field
         render = htmlwidgets::JS("function(data, type, row, meta) {return type === 'display' && data.length > 90 ? '<span title=' + data + '>' + data.substr(0, 90) + '...</span>' : data;}"))
     ),
-    searching = T,
+    searching = F,
     lengthChange = FALSE,
     autoWidth = FALSE
   )

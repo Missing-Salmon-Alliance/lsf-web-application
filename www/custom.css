@@ -58,6 +58,24 @@ adjust popover size site wide
                       background-color: #cee5d5;
                       }
                       
+/* special glowing animation for filter button */
+@-webkit-keyframes glowing {
+    0% { background-color: #5aa7bc; box-shadow: 0 0 5px #cee5d5; }
+    50% { background-color: #469bfc; box-shadow: 0 0 20px #fffff7; }
+    100% { background-color: #5aa7bc; box-shadow: 0 0 5px #cee5d5; }
+}
+
+@keyframes glowing {
+    0% { background-color: #5aa7bc; box-shadow: 0 0 5px #cee5d5; }
+    50% { background-color: #469bfc; box-shadow: 0 0 20px #fffff7; }
+    100% { background-color: #5aa7bc; box-shadow: 0 0 5px #cee5d5; }
+}
+
+.glow {
+    -webkit-animation: glowing 1.3s infinite;
+    animation: glowing 1.3s infinite;
+}
+                      
 /* END of COLOUR SCHEME CSS */
 
 /*
