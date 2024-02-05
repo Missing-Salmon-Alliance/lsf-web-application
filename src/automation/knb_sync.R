@@ -22,6 +22,7 @@ library(xml2) # used for manipulating EML xml files
 source("./src/secrets.R",local = TRUE)
 
 neo_con <- neo4r::neo4j_api$new(url = paste("http://",NEO4J_HOST,":",NEO4J_PORT,sep = ""),
+                                db = NEO4J_DB,
                                 user = NEO4J_USER,
                                 password = NEO4J_PASSWD)
 

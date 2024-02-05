@@ -31,6 +31,7 @@ feedingSF <- loadFullWKBData("feeding_zones")
 ##############################
 # IMPORT METADATA FROM GRAPH
 neo_con <- neo4j_api$new(url = paste("http://",NEO4J_HOST,":",NEO4J_PORT,sep = ""),
+                         db = NEO4J_DB,
                          user = NEO4J_USER,
                          password = NEO4J_PASSWD) 
 LSFMetadata <- neo4r::call_neo4j("MATCH (m:Metadata) RETURN m,id(m) as id ORDER BY id;",neo_con,type = 'row')

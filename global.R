@@ -34,6 +34,7 @@ source("./src/general_copy.R",local = TRUE)
 ## Create NEO4J Connection object
 
 neo_con <- neo4r::neo4j_api$new(url = paste("http://",NEO4J_HOST,":",NEO4J_PORT,sep = ""),
+                                db = NEO4J_DB,
                                 user = NEO4J_USER,
                                 password = NEO4J_PASSWD)
 

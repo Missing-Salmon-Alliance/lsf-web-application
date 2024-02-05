@@ -126,7 +126,8 @@ adminCreateNewUser <- function(fullname,pw,email,affiliation,acceptDSA,promoteOR
 # save data to local csv function
 # https://shiny.rstudio.com/articles/persistent-data-storage.html
 saveData <- function(activity,person,theme,focus) {
-  conn <- neo4r::neo4j_api$new(url = paste0("http://",NEO4J_HOST,":",NEO4J_PORT),user = NEO4J_USER,password = NEO4J_PASSWD)
+  conn <- neo4r::neo4j_api$new(url = paste0("http://",NEO4J_HOST,":",NEO4J_PORT),
+                               db = NEO4J_DB,user = NEO4J_USER,password = NEO4J_PASSWD)
   # process user submitted data in to graph
   # create new Activity node and pass in properties
   newActivityQuery <- paste0("CREATE ",
@@ -172,7 +173,8 @@ saveData <- function(activity,person,theme,focus) {
 # https://shiny.rstudio.com/articles/persistent-data-storage.html
 loadData <- function() {
   
-  conn <- neo4r::neo4j_api$new(url = paste0("http://",NEO4J_HOST,":",NEO4J_PORT),user = NEO4J_USER,password = NEO4J_PASSWD)
+  conn <- neo4r::neo4j_api$new(url = paste0("http://",NEO4J_HOST,":",NEO4J_PORT),
+                               db = NEO4J_DB,user = NEO4J_USER,password = NEO4J_PASSWD)
   
   dataDF <- neo4r::call_neo4j("MATCH (a:Activity) RETURN a;",conn,type='row')$a
   
