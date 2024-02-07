@@ -3,8 +3,8 @@
 ######
 
 output$adminSidebarUI <- renderUI({
-  req(user_info()) # only action if user_info has been created
-  if (user_info()$result) { # if user logon is true:
+  req(user_info) # only action if user_info has been created
+  if (user_info$result) { # if user logon is true:
     column(
       width = 12,
       br(),
@@ -28,7 +28,7 @@ output$adminSidebarUI <- renderUI({
 
 
 output$menu <- renderUI(
-  if(!is.null(user_info()) && user_info()$admin){
+  if(!is.null(user_info) && user_info$result && user_info$admin){
     sidebarMenu(id="menu1",
                 
                 # Admin Menu items

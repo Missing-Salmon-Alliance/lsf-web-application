@@ -18,11 +18,11 @@ server <- function(input, output, session) {
   #KNB Token
   token_info <- reactiveVal(NULL)
   # logged on user information
-  user_info <- reactiveVal(NULL)
-  user_info(tibble::tibble(result = FALSE,admin = FALSE))
+  user_info <- reactiveValues(result = FALSE,admin = FALSE, user_info = NULL)
+  # trying to modify user_info object during user session other than logon/logoff has undesirable effects
+  # create reactiveVal objects to hold user information which may need to be updated during user session
   
-  # drop-down menu lists 
-  
+  # drop-down menu lists
   lsfDomains <- reactiveVal(NULL)
   lsfMetadata <- reactiveVal(NULL)
   lsfHypotheses <- reactiveVal(NULL)

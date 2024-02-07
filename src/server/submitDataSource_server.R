@@ -33,8 +33,8 @@ output$submitNewDataSourceSidebarUI <- renderUI({
 # render the main tab content only once the user has logged in
 # TODO: Due to dependency on user_info existing the else condition does not appear
 output$submitTabUI <- renderUI({
-  req(user_info()) # only action if user_info has been created
-  if (user_info()$result) { # if user logon is true:
+  req(user_info) # only action if user_info has been created
+  if (user_info$result) { # if user logon is true:
     fluidRow(
       source("./src/ui/submitUI/submitDataSource_metadataFields_ui.R",local = TRUE)$value,
       source("./src/ui/submitUI/submitDataSource_geoTemporal_ui.R",local = TRUE)$value,
@@ -76,11 +76,11 @@ resetAll <- function(){
   
   #reset Source Details Section
   updateTextAreaInput(session,inputId = 'sourceTitle',value = "")
-  updateTextInput(session,inputId = 'sourceCreator',value = user_info()$user_info$fullname)
-  updateTextInput(session,inputId = 'sourceOrganisation',value = user_info()$user_info$affiliation)
+  updateTextInput(session,inputId = 'sourceCreator',value = user_info$user_info$fullname)
+  updateTextInput(session,inputId = 'sourceOrganisation',value = user_info$user_info$affiliation)
   
   updateTextAreaInput(session,inputId = 'sourceAbstract',value = "")
-  updateTextInput(session,inputId = 'sourceCreatorEmail',value = user_info()$user_info$email)
+  updateTextInput(session,inputId = 'sourceCreatorEmail',value = user_info$user_info$email)
   updateTextInput(session,inputId = 'sourceURI',value = "") # KNB URL
   updateTextInput(session, inputId = 'sourceALTURI', value = "")
   
@@ -101,11 +101,11 @@ resetAll <- function(){
   updateActionButton(session, 'monthsOfYearToggleAll', label = "Select All")
   
   #reset Source Geography Section
-  updateTextAreaInput(session, inputId = 'sourceGeographicDescription',value = "")
-  updateNumericInput(session, inputId = 'submitNorth', value = 61)
-  updateNumericInput(session, inputId = 'submitEast', value = -14)
-  updateNumericInput(session, inputId = 'submitSouth', value = 60)
-  updateNumericInput(session, inputId = 'submitWest', value = -15)
+  updateTextAreaInput(session, inputId = 'sourceGeographicDescription',value = "Commonly accepted SALMO SALAR range.")
+  updateNumericInput(session, inputId = 'submitNorth', value = 80.8272)
+  updateNumericInput(session, inputId = 'submitEast', value = 60.9337)
+  updateNumericInput(session, inputId = 'submitSouth', value = 40.574)
+  updateNumericInput(session, inputId = 'submitWest', value = -74.7087)
   
 
   # clear session UUID to avoid potential reuse (shouldn't be possible but just in case)
@@ -539,9 +539,9 @@ observeEvent(input$confirmSubmitNewDataSource, {
     # Also creates a relationship to the logged on user
     # NOTE: Creates as many new metadata nodes as there are users with matching email!
     # Ensure Person matching is unique to the logged on user
-    # user_info() reactive value is created from the function checkUserCredentials which already verifies the user and contains unique id
-    # WHERE id(p) = ",user_info()$user_info$id,"
-    metadataNodeCreateQuery <- paste("MATCH (p:Person) WHERE id(p) = ",user_info()$user_info$id,
+    # user_info reactive value is created from the function checkUserCredentials which already verifies the user and contains unique id
+    # WHERE id(p) = ",user_info$user_info$id,"
+    metadataNodeCreateQuery <- paste("MATCH (p:Person) WHERE id(p) = ",user_info$user_info$id,
                                      " CREATE (p)-[:HAS_SUBMITTED{created:'",Sys.time(),
                                      "',lastModified:'",Sys.time(),
                                      "',status:'pendingQC'}]->(:Metadata{metadataTitle:'",sanitiseFreeTextInputs(input$sourceTitle),
@@ -636,7 +636,7 @@ observeEvent(input$confirmSubmitNewDataSource, {
   resultCreateMetadataNodeTransform <- resultCreateMetadataNodeTransform[,neo4rResultFields]
   
   # create user feedback table
-  userSubmitSourceFeedback(data.frame(date = Sys.time(),user = user_info()$user_info$email, Title = input$sourceTitle,File = filename,UUID = sessionUUID()))
+  userSubmitSourceFeedback(data.frame(date = Sys.time(),user = user_info$user_info$email, Title = input$sourceTitle,File = filename,UUID = sessionUUID()))
 
   logFileDataFrame <- dplyr::bind_cols(userSubmitSourceFeedback(),resultCreateMetadataNodeTransform)
   
@@ -696,8 +696,8 @@ observeEvent(input$confirmSubmitNewDataSource, {
 # DEBUGGING VIEW
 ################
 output$generalTesting <- reactive({
-  paste0("MATCH (p:Person) WHERE id(p) = ",user_info()$user_info$id," SET p.personBookmarks = '",formatNumericList(sessionUserBookmarks()),"';")
-  #paste0("MATCH (p:Person{personEmail:'",user_info()$user_info$email,"'}),(m:Metadata) WHERE id(m) IN [",formatNumericList(sessionUserBookmarks()),"] CREATE (p)-[:HAS_REQUESTED{created:'",Sys.time(),"',lastModified:'",Sys.time(),"',status:'pendingReview'}]->(m);")
+  paste0("MATCH (p:Person) WHERE id(p) = ",user_info$user_info$id," SET p.personBookmarks = '",formatNumericList(sessionUserBookmarks()),"';")
+  #paste0("MATCH (p:Person{personEmail:'",user_info$user_info$email,"'}),(m:Metadata) WHERE id(m) IN [",formatNumericList(sessionUserBookmarks()),"] CREATE (p)-[:HAS_REQUESTED{created:'",Sys.time(),"',lastModified:'",Sys.time(),"',status:'pendingReview'}]->(m);")
 })
 ### CREATE Queries to insert metadata nodes with relevant relationships
 ### At the moment just outputting as text to view/verify the resulting queries

@@ -1,6 +1,6 @@
 output$adminTabUI <- renderUI({
-  req(user_info()) # only action if user_info has been created
-  if (user_info()$result) { # if user logon is true:
+  req(user_info) # only action if user_info has been created
+  if (user_info$result) { # if user logon is true:
     tabsetPanel(id = "useradmin",
                 selected = "User Administration",
                 tabPanel(

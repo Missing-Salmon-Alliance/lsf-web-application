@@ -15,7 +15,7 @@ qcLogUpdate <- function(resultList,qcAreaVal){
   resultTransform <- resultTransform[,neo4rResultFields]
   
   # create QC base info, date,user,UUID of metadata node
-  qcLogBase <- data.frame(date = Sys.time(),user = user_info()$user_info$email,UUID = qcDatabaseMetadata()$m$metadataUUID,qcArea = qcAreaVal)
+  qcLogBase <- data.frame(date = Sys.time(),user = user_info$user_info$email,UUID = qcDatabaseMetadata()$m$metadataUUID,qcArea = qcAreaVal)
   # combine the columns into a single row
   logFileDataFrame <- dplyr::bind_cols(qcLogBase,resultTransform)
   # send log to AWS, append to existing file
@@ -256,7 +256,7 @@ observeEvent(input$qcConfirmComplete,{
 
 # observeEvent(input$qcUpdateMetadataFields, {
 # 
-#     metadataNodeCreateQuery <- paste("MATCH (p:Person{personEmail:'",user_info()$user_info$email,
+#     metadataNodeCreateQuery <- paste("MATCH (p:Person{personEmail:'",user_info$user_info$email,
 #                                      "'}) CREATE (p)-[:HAS_SUBMITTED{created:'",Sys.time(),
 #                                      "',lastModified:'",Sys.time(),
 #                                      "',status:'pendingQC'}]->(:Metadata{metadataTitle:'",sanitiseFreeTextInputs(input$sourceTitle),
@@ -346,7 +346,7 @@ observeEvent(input$qcConfirmComplete,{
 #   names(resultCreateMetadataNodeTransform) <- resultCreateMetadataNode$type
 #   
 #   # create user feedback table
-#   userSubmitSourceFeedback(data.frame(date = Sys.time(),user = user_info()$user_info$email, Title = input$sourceTitle,File = filename,UUID = sessionUUID()))
+#   userSubmitSourceFeedback(data.frame(date = Sys.time(),user = user_info$user_info$email, Title = input$sourceTitle,File = filename,UUID = sessionUUID()))
 # 
 #   logFileDataFrame <- dplyr::bind_cols(userSubmitSourceFeedback(),resultCreateMetadataNodeTransform)
 #   

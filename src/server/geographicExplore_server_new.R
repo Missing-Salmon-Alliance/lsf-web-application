@@ -9,8 +9,8 @@ output$searchFilterResetUI <- renderUI(actionButton('searchFilterReset',"Reset F
 ###########
 # MAP Tab Conditional UI
 output$searchMapTabUI <- renderUI({
-  req(user_info()) # only action if user_info has been created
-  if (user_info()$result) { # if user logon is true:
+  req(user_info) # only action if user_info has been created
+  if (user_info$result) { # if user logon is true:
     div(
     fluidRow(
       column(
@@ -90,11 +90,11 @@ observeEvent(input$bookmarks,{
 #   # write csv to temp area
 #   write_file(paste(paste(unique(sessionUserBookmarks()),collapse = ','),input$requestIntention,sep = ','),rc)
 #   # send csv object from temp area to S3
-#   aws.s3::put_object(file = rawConnectionValue(rc),bucket = "likelysuspects-datastore/userRequests",object = paste0("user_",user_info()$user_info$id,"_",as.character(Sys.time()),".txt"))
+#   aws.s3::put_object(file = rawConnectionValue(rc),bucket = "likelysuspects-datastore/userRequests",object = paste0("user_",user_info$user_info$id,"_",as.character(Sys.time()),".txt"))
 #   # close and remove temp area
 #   close(rc)
 #   # create requested source relationships in graph
-#   neo4r::call_neo4j(paste0("MATCH (p:Person{personEmail:'",user_info()$user_info$email,"'}),(m:Metadata) WHERE id(m) IN [",formatNumericList(sessionUserBookmarks()),"] CREATE (p)-[:HAS_REQUESTED{created:'",Sys.time(),"',lastModified:'",Sys.time(),"',status:'pendingReview'}]->(m)"),con = neo_con,type = 'row')
+#   neo4r::call_neo4j(paste0("MATCH (p:Person{personEmail:'",user_info$user_info$email,"'}),(m:Metadata) WHERE id(m) IN [",formatNumericList(sessionUserBookmarks()),"] CREATE (p)-[:HAS_REQUESTED{created:'",Sys.time(),"',lastModified:'",Sys.time(),"',status:'pendingReview'}]->(m)"),con = neo_con,type = 'row')
 #   # clear bookmarks
 #   sessionUserBookmarks(c())
 #   shiny::updateTextAreaInput(session, inputId = 'requestIntention', value = "")
@@ -483,13 +483,13 @@ output$addToBookmarksUI <- renderUI({
   click = input$searchTabMap_marker_click
   if(lsfMetadata()[lsfMetadata()$id == click[1],]$id %in% sessionUserBookmarks()){
     h4("This resource is in your bookmarks.")
-  }else if(lsfMetadata()[lsfMetadata()$id == click[1],]$id %in% neo4r::call_neo4j(paste0("MATCH (p:Person)-[r:HAS_REQUESTED]-(m:Metadata) WHERE id(p) = ",user_info()$user_info$id," RETURN id(m) as id;"),con = neo_con, type = 'row')$id$value){
+  }else if(lsfMetadata()[lsfMetadata()$id == click[1],]$id %in% neo4r::call_neo4j(paste0("MATCH (p:Person)-[r:HAS_REQUESTED]-(m:Metadata) WHERE id(p) = ",user_info$user_info$id," RETURN id(m) as id;"),con = neo_con, type = 'row')$id$value){
     box(
       headerBorder = F,
       status = 'warning',
       title = "You have requested this resource already.",
-      p("Request Date:",neo4r::call_neo4j(paste0("MATCH (p:Person)-[r:HAS_REQUESTED]-(m:Metadata) WHERE id(p) = ",user_info()$user_info$id," AND id(m) = ",lsfMetadata()[lsfMetadata()$id == click[1],]$id," RETURN r.created as date;"),con = neo_con, type = 'row')$date$value),
-      p("Request Status:",neo4r::call_neo4j(paste0("MATCH (p:Person)-[r:HAS_REQUESTED]-(m:Metadata) WHERE id(p) = ",user_info()$user_info$id," AND id(m) = ",lsfMetadata()[lsfMetadata()$id == click[1],]$id," RETURN r.status as status;"),con = neo_con, type = 'row')$status$value)
+      p("Request Date:",neo4r::call_neo4j(paste0("MATCH (p:Person)-[r:HAS_REQUESTED]-(m:Metadata) WHERE id(p) = ",user_info$user_info$id," AND id(m) = ",lsfMetadata()[lsfMetadata()$id == click[1],]$id," RETURN r.created as date;"),con = neo_con, type = 'row')$date$value),
+      p("Request Status:",neo4r::call_neo4j(paste0("MATCH (p:Person)-[r:HAS_REQUESTED]-(m:Metadata) WHERE id(p) = ",user_info$user_info$id," AND id(m) = ",lsfMetadata()[lsfMetadata()$id == click[1],]$id," RETURN r.status as status;"),con = neo_con, type = 'row')$status$value)
     )
   }else{
     actionButton('Request', "Add to Bookmarks")
@@ -505,7 +505,7 @@ observeEvent(input$Request, {
   sourceIDString <- paste0(lsfMetadata()[lsfMetadata()$id == click[1],]$id)
   sessionUserBookmarks(append(sessionUserBookmarks(),sourceIDString))
   # update database bookmark list
-  neo4r::call_neo4j(query = paste0("MATCH (p:Person) WHERE id(p) = ",user_info()$user_info$id," SET p.personBookmarks = '",formatNumericList(sessionUserBookmarks()),"';"),con = neo_con, type = 'row')
+  neo4r::call_neo4j(query = paste0("MATCH (p:Person) WHERE id(p) = ",user_info$user_info$id," SET p.personBookmarks = '",formatNumericList(sessionUserBookmarks()),"';"),con = neo_con, type = 'row')
 })
 
 output$title <- renderText({lsfMetadata()$metadataTitle[input$searchTabTable_rows_selected]})

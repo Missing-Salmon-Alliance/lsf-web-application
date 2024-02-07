@@ -4,7 +4,7 @@
 
 # reactive that triggers conditionalPanels throughout the site, hiding elements if user is not logged on
 output$logonTrue <- reactive({
-  user_info()$result
+  user_info$result
 })
 # required options to ensure reactive is triggered even though it is not attached to a UI element
 outputOptions(output, 'logonTrue', suspendWhenHidden = FALSE)
@@ -14,9 +14,9 @@ outputOptions(output, 'logonTrue', suspendWhenHidden = FALSE)
 #https://rstudio.github.io/shinydashboard/appearance.html
 # Create an indication who the current logged in user is
 output$userpanel <- renderUI({
-  req(user_info()) # only action if user_info has been created
-  if (user_info()$result) { # if user logon is true:
-  actionLink('userInfoModal',label = str_to_title(user_info()$user_info$fullname),icon = icon('id-card'),style='padding:5px; font-size:120%; color:white;float:right;')
+  req(user_info) # only action if user_info has been created
+  if (user_info$result) { # if user logon is true:
+  actionLink('userInfoModal',label = str_to_title(user_info$user_info$fullname),icon = icon('id-card'),style='padding:5px; font-size:120%; color:white;float:right;')
   }
 })
 
@@ -55,45 +55,52 @@ observeEvent(input$registerModal2, {
 observeEvent(input$loginSubmit, {
   
   logonResult <- checkUserCredentials(input$username,input$password)
-  user_info(logonResult)
+  # pass results to user_info reactiveValues object
+  user_info$result <- logonResult$result
+  user_info$admin <- logonResult$admin
+  user_info$user_info <- logonResult$user_info
   
-  if(user_info()$result){
+  if(user_info$result){
     # logon success
     shinyjs::hideElement('loginModal')
     shinyjs::showElement('logoutModal')
     shinyjs::disable('introSideLogonButton')
     # Autofill some fields in the checkout page
-    updateTextInput(session, 'requestName', value = user_info()$user_info$fullname)
-    updateTextInput(session, 'requestOrganisation', value = user_info()$user_info$affiliation)
+    updateTextInput(session, 'requestName', value = user_info$user_info$fullname)
+    updateTextInput(session, 'requestOrganisation', value = user_info$user_info$affiliation)
     # Pull in users saved bookmarks and populate bookmarks list
-    if(user_info()$user_info$bookmarks != ""){
-      sessionUserBookmarks(stringr::str_split(user_info()$user_info$bookmarks,",",simplify = T)[1,])
+    if(user_info$user_info$bookmarks != ""){
+      sessionUserBookmarks(stringr::str_split(user_info$user_info$bookmarks,",",simplify = T)[1,])
     }else{
       sessionUserBookmarks(c())
     }
+    # populate requested and submitted object for tables
+    userRequestedReactive(user_info$user_info$requested[,c('metadataTitle','metadataAbstract')])
+    userSubmittedReactive(user_info$user_info$submitted[,c('metadataTitle','metadataAbstract')])
+    
     removeModal()
     # send user to search page
     updateTabItems(session, 'menu1', 'searchlsf')
     
   }else{
     # logon fail, add red fail text to modal
-    user_info(NULL)
+    user_info$result <- FALSE
+    user_info$admin <- FALSE
+    user_info$user_info <- NULL
     output$credentialsIncorrect <- renderUI(span(style="color:red", "username or password incorrect"))
     # send user back to introduction page
     updateTabItems(session, 'menu1', 'introduction')
   }
-  
-  
-  
 })
 
 # observe logout button click - action: show thank you message, log user out and return to intro screen
 observeEvent(input$logoutModal, {
   # Capture users bookmarks so it can be retained for next time they log in
-  neo4r::call_neo4j(query = paste0("MATCH (p:Person) WHERE id(p) = ",user_info()$user_info$id," SET p.personBookmarks = '",formatNumericList(sessionUserBookmarks()),"';"),con = neo_con, type = 'row')
+  neo4r::call_neo4j(query = paste0("MATCH (p:Person) WHERE id(p) = ",user_info$user_info$id," SET p.personBookmarks = '",formatNumericList(sessionUserBookmarks()),"';"),con = neo_con, type = 'row')
   # clear user information
-  user_info(NULL)
-  user_info(tibble::tibble(result = FALSE,admin = FALSE))
+  user_info$result <- FALSE
+  user_info$admin <- FALSE
+  user_info$user_info <- NULL
   # clear bookmarks
   sessionUserBookmarks(c())
   # change logout button into login button
@@ -118,9 +125,9 @@ observeEvent(input$userInfoModal, {
   showModal(
     modalDialog(title = "Account Information", size = 'l',
                 h4("Your details:"),
-                p(strong("Name: "),user_info()$user_info$fullname),
-                p(strong("Affiliation: "),user_info()$user_info$affiliation),
-                p(strong("Email: "),user_info()$user_info$email),
+                p(strong("Name: "),user_info$user_info$fullname),
+                p(strong("Affiliation: "),user_info$user_info$affiliation),
+                p(strong("Email: "),user_info$user_info$email),
                 p("If any of the above details are incorrect please contact ",a(href="mailto: data.admin@missingsalmonalliance.org","the Data Administrator.")),
                 hr(),
                 tabsetPanel(
@@ -135,15 +142,15 @@ observeEvent(input$userInfoModal, {
 })
 
 output$requestHistory <- DT::renderDT({
-  req(user_info())
-  user_info()$user_info$requested[,c('metadataTitle','metadataAbstract')]
+  req(user_info$user_info)
+  userRequestedReactive()
   #TODO: include request status e.g. fulfilled and created/lastModified dates
   
 })
 
 output$submitHistory <- DT::renderDT({
-  req(user_info())
-  user_info()$user_info$submitted[,c('metadataTitle','metadataAbstract')]
+  req(user_info$user_info)
+  userSubmittedReactive()
   #TODO: include submission status e.g. QC pending and created/lastModified dates
   
 })
@@ -174,7 +181,7 @@ observeEvent(input$clearRows,{
     idToBeRemoved <- lsfMetadata()[lsfMetadata()$id %in% sessionUserBookmarks(),]$id[rowToBeRemoved]
     sessionUserBookmarks(sessionUserBookmarks()[sessionUserBookmarks() != idToBeRemoved])
     # update database bookmarks
-    neo4r::call_neo4j(query = paste0("MATCH (p:Person) WHERE id(p) = ",user_info()$user_info$id," SET p.personBookmarks = '",formatNumericList(sessionUserBookmarks()),"';"),con = neo_con, type = 'row')
+    neo4r::call_neo4j(query = paste0("MATCH (p:Person) WHERE id(p) = ",user_info$user_info$id," SET p.personBookmarks = '",formatNumericList(sessionUserBookmarks()),"';"),con = neo_con, type = 'row')
   }
 })
 
@@ -182,14 +189,14 @@ observeEvent(input$clearRows,{
 observeEvent(input$clearBookmarks, {
   sessionUserBookmarks(c())
   # update database bookmarks
-  neo4r::call_neo4j(query = paste0("MATCH (p:Person) WHERE id(p) = ",user_info()$user_info$id," SET p.personBookmarks = '",formatNumericList(sessionUserBookmarks()),"';"),con = neo_con, type = 'row')
+  neo4r::call_neo4j(query = paste0("MATCH (p:Person) WHERE id(p) = ",user_info$user_info$id," SET p.personBookmarks = '",formatNumericList(sessionUserBookmarks()),"';"),con = neo_con, type = 'row')
 })
 
 # Render UI which includes both an action link, and a count of the Bookmark Length. 
 
 output$bookmarkUI <- renderUI({
-  req(user_info())
-  if (user_info()$result) {
+  req(user_info)
+  if (user_info$result) {
     dynamicLabel <- paste("Bookmarks:",length(unique(sessionUserBookmarks())))
     actionLink(inputId = "bookmarks", label = dynamicLabel ,icon = icon("bookmark"),style='padding:5px; font-size:120%; color:white;float:right;')
   }
@@ -212,8 +219,8 @@ observeEvent(input$bookmarks,{
                   h4("Request Bookmarked Data - Under Development"),
                   p("When you fill out and submit this form the data manager will attempt to arrange access to the requested data. Note that not all sources have guaranteed availability."),
                   br(),
-                  textInput('requestName', "Name:", value = user_info()$user_info$fullname),
-                  textInput('requestOrganisation', "Organisation:", value = user_info()$user_info$affiliation),
+                  textInput('requestName', "Name:", value = user_info$user_info$fullname),
+                  textInput('requestOrganisation', "Organisation:", value = user_info$user_info$affiliation),
                   #selectInput("requestPosition", "Position/Occupation:", choices = c("Researcher","Database Manager","Government Official", "Conservationist", "Student", "Lecturer", "Other")),
                   #selectInput("requestDataUse", "What will the data be used for?", choices = c("Independent Research", "Conservation", "Guidance to Managers", "Other")),
                   #textInput("requestOther","Please describe what is meant, if you selected other"),

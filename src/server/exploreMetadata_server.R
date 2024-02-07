@@ -424,13 +424,13 @@ output$addToBookmarksUI <- renderUI({
   click = input$metadataExploreMap_marker_click
   if(domainExploreReactive()[domainExploreReactive()$id == click[1],]$id %in% sessionUserBookmarks()){
     h4("This resource is in your bookmarks.")
-  }else if(domainExploreReactive()[domainExploreReactive()$id == click[1],]$id %in% neo4r::call_neo4j(paste0("MATCH (p:Person)-[r:HAS_REQUESTED]-(m:Metadata) WHERE id(p) = ",user_info()$user_info$id," RETURN id(m) as id;"),con = neo_con, type = 'row')$id$value){
+  }else if(domainExploreReactive()[domainExploreReactive()$id == click[1],]$id %in% neo4r::call_neo4j(paste0("MATCH (p:Person)-[r:HAS_REQUESTED]-(m:Metadata) WHERE id(p) = ",user_info$user_info$id," RETURN id(m) as id;"),con = neo_con, type = 'row')$id$value){
     box(
       headerBorder = F,
       status = 'warning',
       title = "You have requested this resource already.",
-      p("Request Date:",neo4r::call_neo4j(paste0("MATCH (p:Person)-[r:HAS_REQUESTED]-(m:Metadata) WHERE id(p) = ",user_info()$user_info$id," AND id(m) = ",domainExploreReactive()[domainExploreReactive()$id == click[1],]$id," RETURN r.created as date;"),con = neo_con, type = 'row')$date$value),
-      p("Request Status:",neo4r::call_neo4j(paste0("MATCH (p:Person)-[r:HAS_REQUESTED]-(m:Metadata) WHERE id(p) = ",user_info()$user_info$id," AND id(m) = ",domainExploreReactive()[domainExploreReactive()$id == click[1],]$id," RETURN r.status as status;"),con = neo_con, type = 'row')$status$value)
+      p("Request Date:",neo4r::call_neo4j(paste0("MATCH (p:Person)-[r:HAS_REQUESTED]-(m:Metadata) WHERE id(p) = ",user_info$user_info$id," AND id(m) = ",domainExploreReactive()[domainExploreReactive()$id == click[1],]$id," RETURN r.created as date;"),con = neo_con, type = 'row')$date$value),
+      p("Request Status:",neo4r::call_neo4j(paste0("MATCH (p:Person)-[r:HAS_REQUESTED]-(m:Metadata) WHERE id(p) = ",user_info$user_info$id," AND id(m) = ",domainExploreReactive()[domainExploreReactive()$id == click[1],]$id," RETURN r.status as status;"),con = neo_con, type = 'row')$status$value)
     )
   }else{
     actionButton('Request', "Add to Bookmarks")
@@ -446,7 +446,7 @@ observeEvent(input$Request, {
   sourceIDString <- paste0(domainExploreReactive()[domainExploreReactive()$id == click[1],]$id)
   sessionUserBookmarks(append(sessionUserBookmarks(),sourceIDString))
   # update database bookmark list
-  neo4r::call_neo4j(query = paste0("MATCH (p:Person) WHERE id(p) = ",user_info()$user_info$id," SET p.personBookmarks = '",formatNumericList(sessionUserBookmarks()),"';"),con = neo_con, type = 'row')
+  neo4r::call_neo4j(query = paste0("MATCH (p:Person) WHERE id(p) = ",user_info$user_info$id," SET p.personBookmarks = '",formatNumericList(sessionUserBookmarks()),"';"),con = neo_con, type = 'row')
 })
 
 # The section renders all the further information text from the selected data table row

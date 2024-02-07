@@ -4,8 +4,8 @@
 
 
 output$hypothesisExploreTabUI <- renderUI({
-  req(user_info()) # only action if user_info has been created
-  if (user_info()$result) { # if user logon is true:
+  req(user_info) # only action if user_info has been created
+  if (user_info$result) { # if user logon is true:
     fluidPage(
       h4("Explore available data resources based on addressing a specific hypothesis."),
       p("To advance international efforts to uncover the reasons for downward trends in

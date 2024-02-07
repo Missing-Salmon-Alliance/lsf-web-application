@@ -1,6 +1,6 @@
 output$domainExploreTabUI <- renderUI({
-  req(user_info()) # only action if user_info has been created
-  if (user_info()$result) { # if user logon is true:
+  req(user_info) # only action if user_info has been created
+  if (user_info$result) { # if user logon is true:
     div(
     fluidPage(
       h4("Explore available data resources based on salmon life-stage domains."),
