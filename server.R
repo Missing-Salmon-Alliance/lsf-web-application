@@ -9,7 +9,6 @@ server <- function(input, output, session) {
   sessionUUID <- reactiveVal(NULL)
   sessionFile <- reactiveVal(NULL)
   sessionXML <- reactiveVal(NULL)
-  sessionUserBookmarks <- reactiveVal(NULL)
   query_doi <- reactiveVal(353) # TESTING
   # Define reactive value for reactive filtering on search tabs
   metadataFilterReactive <- reactiveVal()
@@ -21,6 +20,9 @@ server <- function(input, output, session) {
   user_info <- reactiveValues(result = FALSE,admin = FALSE, user_info = NULL)
   # trying to modify user_info object during user session other than logon/logoff has undesirable effects
   # create reactiveVal objects to hold user information which may need to be updated during user session
+  userRequestedReactive <- reactiveVal(NULL)
+  userSubmittedReactive <- reactiveVal(NULL)
+  sessionUserBookmarks <- reactiveVal(NULL)
   
   # drop-down menu lists
   lsfDomains <- reactiveVal(NULL)

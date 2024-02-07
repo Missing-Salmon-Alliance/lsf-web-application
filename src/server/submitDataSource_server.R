@@ -664,10 +664,8 @@ observeEvent(input$confirmSubmitNewDataSource, {
   #Close confirm modal
   removeModal()
   
-  # TODO: This is a bodgy way to update user submitted, but it works
-  updateUserInfo <- user_info()
-  updateUserInfo$user_info$submitted <- neo4r::call_neo4j(paste0("MATCH (p)-[:HAS_SUBMITTED]-(m) where id(p) = ",user_info()$user_info$id," RETURN m;"),neo_con,type = 'row')$m
-  user_info(updateUserInfo)
+  # update user submitted list
+  userSubmittedReactive(neo4r::call_neo4j(paste0("MATCH (p)-[:HAS_SUBMITTED]-(m) where id(p) = ",user_info$user_info$id," RETURN m;"),neo_con,type = 'row')$m[,c('metadataTitle','metadataAbstract')])
   
   # refresh the search map
   lsfMetadata(neo4r::call_neo4j("MATCH (m:Metadata) RETURN m;",neo_con,type='graph')$nodes %>% neo4r::unnest_nodes('all'))
