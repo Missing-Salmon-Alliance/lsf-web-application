@@ -229,13 +229,13 @@ output$downloadSearchResults <- downloadHandler(
 # TODO: improve visual information in markers, colour index rivers or use river icon, check out the IYS icons
 
 output$metadataExploreMap <- leaflet::renderLeaflet({ 
-  leaflet::leaflet (options = leaflet::leafletOptions(minZoom = 3,maxZoom = 19))%>%
+  leaflet::leaflet (options = leaflet::leafletOptions(minZoom = 1,maxZoom = 19))%>%
     leaflet::setView(lng = -20,lat = 50,zoom = 3) %>% 
     leaflet::setMaxBounds( lng1 = -180
       , lat1 = -90
       , lng2 = 210
       , lat2 = 90 ) %>%
-    leaflet::addProviderTiles(leaflet::providers$OpenStreetMap.Mapnik, options = leaflet::providerTileOptions(minZoom = 3, maxZoom = 19)) %>%
+    leaflet::addProviderTiles(leaflet::providers$OpenStreetMap.Mapnik, options = leaflet::providerTileOptions(minZoom = 1, maxZoom = 19)) %>%
     
     leaflet::addMarkers(data = lsfMetadata(),
       label = ~metadataTitle,
