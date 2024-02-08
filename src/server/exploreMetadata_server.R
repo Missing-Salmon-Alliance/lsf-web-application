@@ -99,17 +99,18 @@ observeEvent(input$actionFilterReset,{
 }, ignoreInit = T)
 
 
-output$filterString <- renderText(paste0(input$domainFilter,
+output$filterString <- renderText(
+  paste("Domain is in:",paste0(input$domainFilter,collapse = ","),
        "AND",
-       input$esvFilter1,
+       "Salmon Trait is in:",paste0(input$esvFilter1,collapse = ","),
        "AND",
-       input$esvFilter2,
+       "Biological Processes is in:",paste0(input$esvFilter2,collapse = ","),
        "AND",
-       input$esvFilter3,
+       "Physical Environment is in:",paste0(input$esvFilter3,collapse = ","),
        "AND",
-       input$stockunitFilter,
+       "Stock Unit is in:",paste0(input$stockunitFilter,collapse = ","),
        "AND CONTAINS",
-       input$keywordFilter, collapse = ","))
+       input$keywordFilter))
 
 
 # Observe Apply Filters - Action: Update search space and query database
