@@ -59,6 +59,7 @@ adjust popover size site wide
                       }
                       
 /* special glowing animation for filter button */
+/*https://www.w3schools.com/howto/howto_css_glowing_text.asp*/
 @-webkit-keyframes glowing {
     0% { background-color: #5aa7bc; box-shadow: 0 0 5px #cee5d5; }
     50% { background-color: #469bfc; box-shadow: 0 0 20px #fffff7; }
