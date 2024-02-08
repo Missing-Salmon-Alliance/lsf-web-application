@@ -1,5 +1,6 @@
 output$searchMapTabUI <- renderUI({
   div(
+    textOutput('filterString'),
     column(
       width = 4,
       # The Explore Table
@@ -96,6 +97,20 @@ observeEvent(input$actionFilterReset,{
   }
   
 }, ignoreInit = T)
+
+
+output$filterString <- renderText(paste0(input$domainFilter,
+       "AND",
+       input$esvFilter1,
+       "AND",
+       input$esvFilter2,
+       "AND",
+       input$esvFilter3,
+       "AND",
+       input$stockunitFilter,
+       "AND CONTAINS",
+       input$keywordFilter, collapse = ","))
+
 
 # Observe Apply Filters - Action: Update search space and query database
 observeEvent(input$actionFilter,{
