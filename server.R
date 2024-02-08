@@ -12,10 +12,7 @@ server <- function(input, output, session) {
   query_doi <- reactiveVal(353) # TESTING
   # Define reactive value for reactive filtering on search tabs
   metadataFilterReactive <- reactiveVal()
-  hypothesisExploreReactive <- reactiveVal()
   
-  #KNB Token
-  token_info <- reactiveVal(NULL)
   # logged on user information
   user_info <- reactiveValues(result = FALSE,admin = FALSE, user_info = NULL)
   # trying to modify user_info object during user session other than logon/logoff has undesirable effects
@@ -130,14 +127,14 @@ server <- function(input, output, session) {
   ############################
   
   ############################
-  # domainExplore_server.R START
+  # exploreMetadata_server.R START
   ############################
   
   # Load database information
   source("./src/server/dataLoad_server.R",local = TRUE)
   source("./src/server/exploreMetadata_server.R", local = TRUE)$value
   ############################
-  # domainExplore_server.R END
+  # exploreMetadata_server.R END
   ############################
   
   ############################
